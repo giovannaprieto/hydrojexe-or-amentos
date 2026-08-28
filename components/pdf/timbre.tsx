@@ -18,6 +18,7 @@ export const paginaBase = {
   fontFamily: "Times-Roman",
   color: "#1a1a1a",
   lineHeight: 1.4,
+  textAlign: "justify",
 } as const;
 
 export type TimbreAssets = {

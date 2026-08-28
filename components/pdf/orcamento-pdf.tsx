@@ -25,7 +25,7 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
-  par: { marginBottom: 3 },
+  par: { marginBottom: 3, textIndent: 18 },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
   centroTitulo: {
     fontFamily: "Times-Bold",
@@ -54,7 +54,13 @@ const s = StyleSheet.create({
     borderBottom: `0.5 solid ${C_LINE}`,
     textAlign: "center",
   },
-  assinatura: { fontFamily: "Times-Bold", marginTop: 18 },
+  assinatura: {
+    fontFamily: "Times-Bold",
+    textDecoration: "underline",
+    textAlign: "left",
+    textIndent: 0,
+    marginTop: 18,
+  },
   notaVermelha: {
     color: C_RED,
     fontSize: 8.5,
@@ -130,17 +136,21 @@ function Paragrafos({ texto }: { texto: string }) {
   const linhas = (texto ?? "").split("\n");
   return (
     <>
-      {linhas.map((l, i) =>
-        l.trim() === "" ? (
-          <Text key={i} style={{ marginBottom: 3 }}>
-            {" "}
-          </Text>
-        ) : (
-          <Text key={i} style={s.par}>
+      {linhas.map((l, i) => {
+        if (l.trim() === "") {
+          return (
+            <Text key={i} style={{ marginBottom: 3 }}>
+              {" "}
+            </Text>
+          );
+        }
+        const negrito = l.trimStart().startsWith("Análise técnica:");
+        return (
+          <Text key={i} style={negrito ? [s.par, s.bold] : s.par}>
             {l}
           </Text>
-        ),
-      )}
+        );
+      })}
     </>
   );
 }
@@ -296,7 +306,7 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
         </Text>
         <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
         <Text style={s.assinatura}>
-          HYDROJEXE INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA
         </Text>
       </Page>
     </Document>

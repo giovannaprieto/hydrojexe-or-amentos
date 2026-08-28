@@ -31,7 +31,7 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
-  par: { marginBottom: 3 },
+  par: { marginBottom: 3, textIndent: 18 },
   opcaoTitulo: {
     fontFamily: "Times-Bold",
     textAlign: "center",
@@ -58,7 +58,13 @@ const s = StyleSheet.create({
   },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
   gerVermelho: { color: C_RED, fontFamily: "Times-Bold", marginTop: 8 },
-  assinatura: { fontFamily: "Times-Bold", marginTop: 18 },
+  assinatura: {
+    fontFamily: "Times-Bold",
+    textDecoration: "underline",
+    textAlign: "left",
+    textIndent: 0,
+    marginTop: 18,
+  },
 });
 
 const brl = (n: number) =>
@@ -173,7 +179,7 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
         {administradora ? <Text>Administradora: {administradora}</Text> : null}
 
         <Text style={s.ref}>Ref.: {INDIVIDUALIZACAO_GAS.ref}</Text>
-        <Text style={{ marginBottom: 4 }}>{analiseTecnica}</Text>
+        <Text style={[s.par, s.bold, { marginBottom: 4 }]}>{analiseTecnica}</Text>
 
         {secoes.map((sec, i) => (
           <Secao key={i} n={i + 1} titulo={sec.titulo}>
@@ -245,7 +251,7 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
         </Text>
         <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
         <Text style={s.assinatura}>
-          HYDROJEXE INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA
         </Text>
       </Page>
     </Document>

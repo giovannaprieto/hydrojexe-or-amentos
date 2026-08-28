@@ -30,7 +30,7 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
-  par: { marginBottom: 3 },
+  par: { marginBottom: 3, textIndent: 18 },
   opcaoTitulo: {
     fontFamily: "Times-Bold",
     textAlign: "center",
@@ -57,7 +57,13 @@ const s = StyleSheet.create({
   },
   nota: { color: C_RED, fontSize: 8.5, marginTop: 6 },
   disposicoes: { marginTop: 10 },
-  assinatura: { fontFamily: "Times-Bold", marginTop: 18 },
+  assinatura: {
+    fontFamily: "Times-Bold",
+    textDecoration: "underline",
+    textAlign: "left",
+    textIndent: 0,
+    marginTop: 18,
+  },
 });
 
 const brl = (n: number) =>
@@ -199,7 +205,7 @@ export function TssLightPdf(props: TssLightPdfProps) {
         </Text>
         <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
         <Text style={s.assinatura}>
-          HYDROJEXE INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA
         </Text>
       </Page>
     </Document>

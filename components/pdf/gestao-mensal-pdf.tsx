@@ -25,7 +25,7 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
-  par: { marginBottom: 3 },
+  par: { marginBottom: 3, textIndent: 18 },
   tabela: {
     borderTop: `0.5 solid ${C_LINE}`,
     borderLeft: `0.5 solid ${C_LINE}`,
@@ -47,7 +47,13 @@ const s = StyleSheet.create({
     textAlign: "center",
   },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
-  assinatura: { fontFamily: "Times-Bold", marginTop: 18 },
+  assinatura: {
+    fontFamily: "Times-Bold",
+    textDecoration: "underline",
+    textAlign: "left",
+    textIndent: 0,
+    marginTop: 18,
+  },
 });
 
 const brl = (n: number) =>
@@ -88,15 +94,31 @@ export type GestaoMensalPdfProps = {
   valorTotalMensal: number;
 };
 
-function Paragrafos({ texto }: { texto: string }) {
+function Paragrafos({
+  texto,
+  bold,
+}: {
+  texto: string;
+  bold?: boolean;
+}) {
   const linhas = (texto ?? "").split("\n");
   return (
     <>
-      {linhas.map((l, i) => (
-        <Text key={i} style={l.trim() === "" ? { marginBottom: 3 } : s.par}>
-          {l.trim() === "" ? " " : l}
-        </Text>
-      ))}
+      {linhas.map((l, i) => {
+        if (l.trim() === "") {
+          return (
+            <Text key={i} style={{ marginBottom: 3 }}>
+              {" "}
+            </Text>
+          );
+        }
+        const negrito = bold || l.trimStart().startsWith("Análise técnica:");
+        return (
+          <Text key={i} style={negrito ? [s.par, s.bold] : s.par}>
+            {l}
+          </Text>
+        );
+      })}
     </>
   );
 }
@@ -202,9 +224,9 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
           <View style={s.secaoBar}>
             <Text style={s.secaoTitulo}>DEMONSTRATIVOS INDIVIDUAIS</Text>
           </View>
-          <Paragrafos texto={demonstrativos} />
+          <Paragrafos texto={demonstrativos} bold />
           <Image src={assets.foto} style={[s.fotoSecao, { width: 260 }]} />
-          <Text style={{ marginTop: 4 }}>
+          <Text style={[s.par, s.bold, { marginTop: 4 }]}>
             Estes demonstrativos individuais são encaminhados via e-mail através
             do nosso sistema diretamente aos condôminos para conferência mensal.
           </Text>
@@ -221,7 +243,7 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
         </Text>
         <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
         <Text style={s.assinatura}>
-          HYDROJEXE INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA
         </Text>
       </Page>
     </Document>
