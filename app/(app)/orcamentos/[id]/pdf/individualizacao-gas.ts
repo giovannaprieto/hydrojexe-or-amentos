@@ -1,5 +1,3 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { createElement } from "react";
 
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -11,15 +9,11 @@ import {
   secoesEfetivas,
   type TssOpcao,
 } from "@/lib/modelos-proposta";
+import { assetDataUri } from "@/lib/pdf-assets";
 import type { OrcGestaoCondominio } from "@/app/(app)/orcamentos/[id]/pdf/gestao";
 import type { createClient } from "@/lib/supabase/server";
 
 type DbClient = Awaited<ReturnType<typeof createClient>>;
-
-async function assetDataUri(nome: string): Promise<string> {
-  const buf = await readFile(join(process.cwd(), "assets", nome));
-  return `data:image/png;base64,${buf.toString("base64")}`;
-}
 
 function parseOpcoes(raw: unknown): TssOpcao[] {
   if (!Array.isArray(raw)) return [];

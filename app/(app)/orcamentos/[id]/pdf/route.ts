@@ -1,5 +1,3 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { createElement } from "react";
 
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -19,9 +17,10 @@ import { requireUsuario } from "@/lib/auth";
 import { dataPorExtenso } from "@/lib/data-extenso";
 import { isGestaoMensal } from "@/lib/modelos-proposta";
 import { round2 } from "@/lib/orcamento-calc";
+import { assetDataUri } from "@/lib/pdf-assets";
 import {
   precosCongeladosPorForma,
-  precosVigentes,
+  precosVigentesPorForma,
 } from "@/lib/orcamento-precos";
 import { textoParcelamento } from "@/lib/pagamento";
 import { createClient } from "@/lib/supabase/server";
@@ -35,10 +34,6 @@ const PRAZO_PADRAO =
 const brl = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-async function assetDataUri(nome: string): Promise<string> {
-  const buf = await readFile(join(process.cwd(), "assets", nome));
-  return `data:image/png;base64,${buf.toString("base64")}`;
-}
 
 function descricaoPontos(
   itens: { item_id: string; quantidade: number }[],
@@ -172,14 +167,21 @@ export async function GET(
 
   const todasFormas = formas ?? [];
   const formasProprias = todasFormas.filter((f) => !f.usa_preco_de_forma_id);
-  const congPorForma = await precosCongeladosPorForma(supabase, id);
+  const [congPorForma, vigPorForma] = await Promise.all([
+    precosCongeladosPorForma(supabase, id),
+    precosVigentesPorForma(
+      supabase,
+      formasProprias.map((f) => f.id),
+      itemIds,
+      orc.data_orcamento,
+    ),
+  ]);
 
   // preço unitário por (forma própria -> item): congelado > vigente na data > 0
   const precoPorForma = new Map<string, Map<string, number>>();
   for (const f of formasProprias) {
     const cong = congPorForma.get(f.id) ?? new Map();
-    const faltam = itemIds.filter((x) => !cong.has(x));
-    const vig = await precosVigentes(supabase, f.id, faltam, orc.data_orcamento);
+    const vig = vigPorForma.get(f.id) ?? new Map();
     const mapa = new Map<string, number>();
     for (const itemId of itemIds) {
       mapa.set(itemId, cong.get(itemId)?.valor ?? vig.get(itemId)?.valor ?? 0);

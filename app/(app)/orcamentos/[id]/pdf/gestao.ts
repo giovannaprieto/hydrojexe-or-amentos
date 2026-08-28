@@ -1,5 +1,3 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { createElement } from "react";
 
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -7,17 +5,10 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { GestaoMensalPdf } from "@/components/pdf/gestao-mensal-pdf";
 import { dataPorExtenso } from "@/lib/data-extenso";
 import { MODELOS_GESTAO, secoesEfetivas } from "@/lib/modelos-proposta";
+import { assetDataUri } from "@/lib/pdf-assets";
 import type { createClient } from "@/lib/supabase/server";
 
 type DbClient = Awaited<ReturnType<typeof createClient>>;
-
-async function assetDataUri(nome: string): Promise<string> {
-  const buf = await readFile(join(process.cwd(), "assets", nome));
-  const mime = nome.endsWith(".jpg") || nome.endsWith(".jpeg")
-    ? "image/jpeg"
-    : "image/png";
-  return `data:${mime};base64,${buf.toString("base64")}`;
-}
 
 export type OrcGestaoCondominio = {
   nome: string;

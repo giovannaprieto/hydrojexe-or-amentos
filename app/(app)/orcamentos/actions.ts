@@ -16,7 +16,7 @@ import { calcularOrcamento, type TipoInput } from "@/lib/orcamento-calc";
 import { VALORES_TIPO_PROPOSTA } from "@/lib/orcamento-tipos";
 import {
   precosCongeladosPorForma,
-  precosVigentes,
+  precosVigentesPorForma,
 } from "@/lib/orcamento-precos";
 import { createClient } from "@/lib/supabase/server";
 
@@ -301,7 +301,15 @@ export async function salvarOrcamento(
   if (tssItem && orc.incluir_tss) alvo.add(tssItem.id);
   const alvoIds = [...alvo];
 
-  const congPorForma = await precosCongeladosPorForma(supabase, id);
+  const [congPorForma, vigPorForma] = await Promise.all([
+    precosCongeladosPorForma(supabase, id),
+    precosVigentesPorForma(
+      supabase,
+      formasProprias.map((f) => f.id),
+      alvoIds,
+      orc.data_orcamento,
+    ),
+  ]);
 
   // preço unitário por (forma -> item) + linhas para congelar
   const precoPorForma = new Map<string, Record<string, number>>();
@@ -316,8 +324,7 @@ export async function salvarOrcamento(
 
   for (const f of formasProprias) {
     const cong = congPorForma.get(f.id) ?? new Map();
-    const faltam = alvoIds.filter((x) => !cong.has(x));
-    const vig = await precosVigentes(supabase, f.id, faltam, orc.data_orcamento);
+    const vig = vigPorForma.get(f.id) ?? new Map();
 
     const precoUnit: Record<string, number> = {};
     for (const itemId of alvoIds) {
