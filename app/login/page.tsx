@@ -1,6 +1,6 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { IconGota } from "@/components/icons";
 import { LoginForm } from "@/components/login-form";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,12 +26,16 @@ export default async function LoginPage() {
           className="pointer-events-none absolute -bottom-32 -left-20 size-96 rounded-full bg-brand-400/10 blur-3xl"
         />
 
-        <div className="relative flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-xl bg-brand-500 text-white">
-            <IconGota className="size-6" />
-          </span>
-          <span className="text-xl font-semibold tracking-tight text-white">
-            Hydro<span className="text-brand-200">jexe</span>
+        <div className="relative">
+          <span className="inline-grid place-items-center rounded-xl bg-white px-5 py-4 shadow-sm">
+            <Image
+              src="/logo-hydrojexe.png"
+              alt="Hydrojexe"
+              width={530}
+              height={312}
+              priority
+              className="h-16 w-auto"
+            />
           </span>
         </div>
 
@@ -53,13 +57,15 @@ export default async function LoginPage() {
       {/* Formulário ------------------------------------------------------------ */}
       <section className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <span className="grid size-10 place-items-center rounded-xl bg-brand-500 text-white">
-              <IconGota className="size-5" />
-            </span>
-            <span className="text-lg font-semibold tracking-tight text-navy-900">
-              Hydro<span className="text-brand-500">jexe</span>
-            </span>
+          <div className="mb-8 lg:hidden">
+            <Image
+              src="/logo-hydrojexe.png"
+              alt="Hydrojexe"
+              width={530}
+              height={312}
+              priority
+              className="h-14 w-auto"
+            />
           </div>
 
           <h1 className="hj-page-title">Entrar</h1>

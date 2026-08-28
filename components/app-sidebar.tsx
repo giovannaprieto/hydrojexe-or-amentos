@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -9,7 +10,6 @@ import {
   IconClose,
   IconDashboard,
   IconFormas,
-  IconGota,
   IconLogout,
   IconMenu,
   IconOrcamento,
@@ -108,7 +108,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
           aberto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between gap-2 px-5 py-5">
+        <div className="flex items-start gap-2 px-5 py-5">
           <Marca />
           <button
             type="button"
@@ -163,20 +163,41 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
 }
 
 function Marca({ compacta }: { compacta?: boolean }) {
-  return (
-    <Link href="/" className="flex items-center gap-2.5">
-      <span className="grid size-9 place-items-center rounded-lg bg-brand-500 text-white shadow-sm">
-        <IconGota className="size-5" />
-      </span>
-      <span className="flex flex-col leading-none">
-        <span className="text-[1.05rem] font-semibold tracking-tight text-white">
-          Hydro<span className="text-brand-200">jexe</span>
+  if (compacta) {
+    return (
+      <Link href="/" aria-label="Hydrojexe — início">
+        <span className="grid place-items-center rounded-lg bg-white px-3 py-1.5 shadow-sm">
+          <Image
+            src="/logo-hydrojexe.png"
+            alt="Hydrojexe"
+            width={530}
+            height={312}
+            priority
+            className="h-9 w-auto"
+          />
         </span>
-        {compacta ? null : (
-          <span className="mt-1 text-[0.68rem] font-medium tracking-widest text-navy-300 uppercase">
-            Orçamentos
-          </span>
-        )}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href="/"
+      className="flex flex-1 flex-col gap-2"
+      aria-label="Hydrojexe — início"
+    >
+      <span className="grid place-items-center rounded-xl bg-white px-5 py-4 shadow-sm">
+        <Image
+          src="/logo-hydrojexe.png"
+          alt="Hydrojexe"
+          width={530}
+          height={312}
+          priority
+          className="h-20 w-auto"
+        />
+      </span>
+      <span className="text-center text-[0.68rem] font-medium tracking-[0.2em] text-navy-300 uppercase">
+        Orçamentos
       </span>
     </Link>
   );
