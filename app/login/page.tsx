@@ -14,9 +14,23 @@ export default async function LoginPage() {
   if (user) redirect("/");
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center bg-navy-950 px-6 py-16">
-      <div className="w-full max-w-sm">
-        {/* Marca ----------------------------------------------------------- */}
+    <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-navy-950 px-6 py-16">
+      {/* Fundo — gradientes ------------------------------------------------- */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-navy-950 via-navy-900 to-navy-800"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 -right-24 size-[30rem] rounded-full bg-brand-500/20 blur-[130px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -left-28 size-[26rem] rounded-full bg-brand-400/10 blur-[130px]"
+      />
+
+      {/* Conteúdo --------------------------------------------------------------- */}
+      <div className="relative w-full max-w-sm">
         <div className="flex flex-col items-center text-center">
           <span className="inline-grid place-items-center rounded-2xl bg-white px-7 py-6 shadow-lg">
             <Image
@@ -37,7 +51,6 @@ export default async function LoginPage() {
           </p>
         </div>
 
-        {/* Acesso -------------------------------------------------------------- */}
         <div className="mt-10 rounded-2xl bg-white p-7 shadow-xl">
           <LoginForm />
         </div>

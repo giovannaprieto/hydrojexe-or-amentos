@@ -11,7 +11,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-full lg:pl-72">
       <AppSidebar usuario={usuario} />
-      <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 lg:py-10">
+      <main className="hj-app-main mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 lg:py-10">
         {children}
       </main>
     </div>

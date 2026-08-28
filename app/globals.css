@@ -59,10 +59,10 @@
   color-scheme: light;
 }
 
-/* Modo escuro: fundo do sistema escuro, cartões permanecem claros para
-   preservar a legibilidade de todo o conteúdo interno sem retrabalho. */
+/* Modo escuro — fundo do sistema e superfícies (cartões, tabelas, campos).
+   A barra lateral segue azul-marinho nos dois temas. */
 .dark {
-  --background: #111823;
+  --background: #0e141d;
   --foreground: #e8edf3;
   color-scheme: dark;
 }
@@ -74,17 +74,51 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Elementos que ficam direto sobre o fundo do sistema (fora dos cartões) --- */
-.dark .hj-page-title,
-.dark .hj-section-title {
-  color: var(--foreground);
+/* Só remapeamos a escala neutra (ink) e o texto de títulos dentro da área
+   de conteúdo — assim as centenas de utilitários existentes acompanham o
+   tema sem edição arquivo a arquivo. */
+.dark .hj-app-main {
+  --color-ink-50: #171e28;
+  --color-ink-100: #1e2632;
+  --color-ink-200: #2a3340;
+  --color-ink-300: #3a4553;
+  --color-ink-400: #8a94a3;
+  --color-ink-500: #9aa5b4;
+  --color-ink-600: #b6c0cb;
+  --color-ink-700: #d0d7e0;
+  --color-ink-800: #e4e9ef;
+  --color-ink-900: #f2f5f8;
+  --color-navy-800: #e7edf3;
+  --color-navy-900: #f3f6fa;
 }
-.dark .hj-muted,
-.dark .hj-label {
-  color: #93a1b2;
+
+/* Superfícies que fixam branco literal precisam de override explícito. */
+.dark .hj-app-main .hj-card,
+.dark .hj-app-main .hj-control,
+.dark .hj-app-main .hj-btn-secondary,
+.dark .hj-app-main .hj-btn-danger,
+.dark .hj-app-main .bg-white {
+  background-color: #161d27;
 }
-.dark .hj-card {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+.dark .hj-app-main .hj-btn-secondary:hover {
+  background-color: #1f2833;
+}
+.dark .hj-app-main .hj-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+/* Botão primário: azul da marca (o navy vira texto claro no modo escuro). */
+.dark .hj-app-main .hj-btn-primary {
+  background-color: var(--color-brand-600);
+}
+.dark .hj-app-main .hj-btn-primary:hover {
+  background-color: var(--color-brand-500);
+}
+/* Painéis de destaque azul-marinho continuam escuros. */
+.dark .hj-app-main .bg-navy-900 {
+  background-color: #10243c;
+}
+.dark .hj-app-main .bg-navy-800 {
+  background-color: #163150;
 }
 
 /* Barra de rolagem discreta ------------------------------------------------ */
