@@ -8,6 +8,7 @@ import {
 } from "@/app/(app)/condominios/actions";
 import { IconCheck, IconPlus } from "@/components/icons";
 import {
+  Checkbox,
   Field,
   FormError,
   FormSuccess,
@@ -62,6 +63,17 @@ export function CondominioForm({ inicial }: { inicial?: Condominio }) {
                 defaultValue={inicial?.administradora ?? ""}
               />
             </Field>
+          </div>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <Checkbox
+              name="agua_preparado"
+              label="Prédio preparado para individualização de água"
+              defaultChecked={inicial?.agua_preparado ?? false}
+            />
+            <span className="hj-hint">
+              Preparado = tubulações já individualizadas em shafts. Muda a
+              “Análise técnica” do PDF de individualização de água.
+            </span>
           </div>
         </div>
       </Card>

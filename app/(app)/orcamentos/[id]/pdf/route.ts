@@ -75,7 +75,7 @@ export async function GET(
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, tipo_proposta, incluir_tss, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora), templates_texto(sec_individualizacao_agua, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
+      "id, numero, data_orcamento, tipo_proposta, incluir_tss, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
     )
     .eq("id", id)
     .single();
@@ -269,8 +269,23 @@ export async function GET(
     cidade: string | null;
     uf: string | null;
     administradora: string | null;
+    agua_preparado: boolean | null;
   } | null;
   const tpl = orc.templates_texto as Record<string, string | null> | null;
+
+  // {analise_tecnica} na seção 1 -> texto de "preparado" ou "não preparado"
+  const analiseAgua = cond?.agua_preparado
+    ? tpl?.sec_analise_agua_preparado
+    : tpl?.sec_analise_agua_nao_preparado;
+  let individualizacaoTexto = tpl?.sec_individualizacao_agua ?? "";
+  if (individualizacaoTexto.includes("{analise_tecnica}")) {
+    individualizacaoTexto = individualizacaoTexto.replace(
+      /\{analise_tecnica\}/g,
+      analiseAgua ?? "",
+    );
+  } else if (analiseAgua) {
+    individualizacaoTexto = `${analiseAgua}\n\n${individualizacaoTexto}`;
+  }
 
   // {hidrometros} na seção INTERVENÇÃO -> "<qtd> hidrômetros de <bitola>"
   const totalHidrometros = tipos.reduce((acc, t) => {
@@ -325,7 +340,7 @@ export async function GET(
         fotoGerenciamento: aFotoGer,
       },
       textos: {
-        individualizacao: tpl?.sec_individualizacao_agua ?? "",
+        individualizacao: individualizacaoTexto,
         objetivo: tpl?.sec_objetivo ?? "",
         procedimento: tpl?.sec_procedimento_tecnico ?? "",
         intervencao: intervencaoTexto,

@@ -43,6 +43,8 @@ export async function salvarTemplateTexto(
     .from("templates_texto")
     .update({
       sec_individualizacao_agua: val("sec_individualizacao_agua"),
+      sec_analise_agua_preparado: val("sec_analise_agua_preparado"),
+      sec_analise_agua_nao_preparado: val("sec_analise_agua_nao_preparado"),
       sec_objetivo: val("sec_objetivo"),
       sec_procedimento_tecnico: val("sec_procedimento_tecnico"),
       sec_intervencao: val("sec_intervencao"),

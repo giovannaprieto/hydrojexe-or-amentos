@@ -29,6 +29,7 @@ export type Database = {
           created_at: string
           updated_at: string
           administradora: string | null
+          agua_preparado: boolean
         }
         Insert: {
           id?: string
@@ -45,6 +46,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           administradora?: string | null
+          agua_preparado?: boolean
         }
         Update: {
           id?: string
@@ -61,6 +63,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           administradora?: string | null
+          agua_preparado?: boolean
         }
         Relationships: [
         ]
@@ -514,6 +517,8 @@ export type Database = {
           nome: string
           is_padrao: boolean
           sec_individualizacao_agua: string | null
+          sec_analise_agua_preparado: string | null
+          sec_analise_agua_nao_preparado: string | null
           sec_objetivo: string | null
           sec_procedimento_tecnico: string | null
           sec_intervencao: string | null
@@ -529,6 +534,8 @@ export type Database = {
           nome: string
           is_padrao?: boolean
           sec_individualizacao_agua?: string | null
+          sec_analise_agua_preparado?: string | null
+          sec_analise_agua_nao_preparado?: string | null
           sec_objetivo?: string | null
           sec_procedimento_tecnico?: string | null
           sec_intervencao?: string | null
@@ -544,6 +551,8 @@ export type Database = {
           nome?: string
           is_padrao?: boolean
           sec_individualizacao_agua?: string | null
+          sec_analise_agua_preparado?: string | null
+          sec_analise_agua_nao_preparado?: string | null
           sec_objetivo?: string | null
           sec_procedimento_tecnico?: string | null
           sec_intervencao?: string | null

@@ -1,5 +1,5 @@
 export const TIPOS_PROPOSTA = [
-  { valor: "completa", rotulo: "Individualização completa" },
+  { valor: "completa", rotulo: "Individualização de água" },
   { valor: "gestao_mensal_agua", rotulo: "Gestão mensal — água" },
   { valor: "gestao_mensal_gas", rotulo: "Gestão mensal — gás" },
   { valor: "tss_light", rotulo: "TSS Light" },

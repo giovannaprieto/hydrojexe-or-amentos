@@ -15,6 +15,8 @@ import { emptyFormState } from "@/lib/forms";
 
 export type TemplateTextoInicial = {
   sec_individualizacao_agua: string | null;
+  sec_analise_agua_preparado: string | null;
+  sec_analise_agua_nao_preparado: string | null;
   sec_objetivo: string | null;
   sec_procedimento_tecnico: string | null;
   sec_intervencao: string | null;
@@ -23,8 +25,25 @@ export type TemplateTextoInicial = {
   sec_garantia: string | null;
 };
 
-const CAMPOS: { nome: keyof TemplateTextoInicial; rotulo: string }[] = [
-  { nome: "sec_individualizacao_agua", rotulo: "1. Individualização de água" },
+const CAMPOS: {
+  nome: keyof TemplateTextoInicial;
+  rotulo: string;
+  hint?: string;
+}[] = [
+  {
+    nome: "sec_individualizacao_agua",
+    rotulo: "1. Individualização de água",
+    hint: "Use o marcador {analise_tecnica} onde a análise técnica deve entrar.",
+  },
+  {
+    nome: "sec_analise_agua_preparado",
+    rotulo: "1a. Análise técnica — prédio preparado",
+    hint: "Substitui {analise_tecnica} quando o condomínio está marcado como preparado.",
+  },
+  {
+    nome: "sec_analise_agua_nao_preparado",
+    rotulo: "1b. Análise técnica — prédio não preparado",
+  },
   { nome: "sec_objetivo", rotulo: "2. Objetivo da proposta" },
   { nome: "sec_procedimento_tecnico", rotulo: "3. Procedimento técnico" },
   { nome: "sec_intervencao", rotulo: "4. Intervenção" },
@@ -56,8 +75,9 @@ export function TemplateTextoForm({
               <Textarea
                 name={c.nome}
                 defaultValue={inicial[c.nome] ?? ""}
-                rows={5}
+                rows={c.nome.startsWith("sec_analise_agua") ? 3 : 5}
               />
+              {c.hint ? <span className="hj-hint">{c.hint}</span> : null}
             </label>
           ))}
         </div>

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireUsuario } from "@/lib/auth";
 import {
+  booleano,
   mensagemErroBanco,
   texto,
   textoOuNulo,
@@ -26,6 +27,7 @@ function parse(formData: FormData) {
     contato_email: textoOuNulo(formData, "contato_email"),
     contato_telefone: textoOuNulo(formData, "contato_telefone"),
     observacoes: textoOuNulo(formData, "observacoes"),
+    agua_preparado: booleano(formData, "agua_preparado"),
   };
 }
 
