@@ -679,6 +679,10 @@ export async function salvarIndividualizacaoGas(
   if (!parsed.ok) return { ok: false, error: parsed.error };
   const opcoes = parsed.opcoes;
 
+  const medidorGasRaw = texto(formData, "medidor_gas");
+  const medidor_gas =
+    medidorGasRaw === "gas_2_5" ? "gas_2_5" : "gas_1_6";
+
   const totalMedidores = qtdApartamentos * pontosPorApartamento;
   const aVista = opcoes.find((o) => o.parcelas <= 1);
   const snapshot = aVista?.valor ?? opcoes[0].valor;
@@ -701,6 +705,7 @@ export async function salvarIndividualizacaoGas(
     .update({
       qtd_equipamentos: totalMedidores,
       tss_opcoes: opcoes,
+      medidor_gas,
       total_unidades: qtdApartamentos,
       valor_tss: 0,
       valor_total: snapshot,

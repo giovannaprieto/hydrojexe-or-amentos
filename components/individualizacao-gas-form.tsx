@@ -8,6 +8,7 @@ import {
   Field,
   FormError,
   FormSuccess,
+  Select,
   SubmitButton,
   TextInput,
 } from "@/components/ui";
@@ -15,6 +16,7 @@ import { Card } from "@/components/ui-layout";
 import { formatBRL } from "@/lib/format";
 import { emptyFormState } from "@/lib/forms";
 import { textoFormaParcelas } from "@/lib/modelos-proposta";
+import { MEDIDORES_GAS } from "@/lib/orcamento-especificacoes";
 
 type Linha = { valor: string; parcelas: string };
 
@@ -23,6 +25,7 @@ export type IndividualizacaoGasInicial = {
   qtd_apartamentos: number;
   pontos_por_apartamento: number;
   valor_gerenciamento: number;
+  medidor_gas: string | null;
   opcoes: { valor: number; parcelas: number }[];
 };
 
@@ -109,6 +112,23 @@ export function IndividualizacaoGasForm({
             onChange={(e) => setGer(e.target.value)}
           />
         </Field>
+        <div className="sm:col-span-3">
+          <Field
+            label="Medidor de gás"
+            hint="Define a vazão nominal citada no Procedimento executivo do PDF."
+          >
+            <Select
+              name="medidor_gas"
+              defaultValue={inicial.medidor_gas ?? "gas_1_6"}
+            >
+              {MEDIDORES_GAS.map((m) => (
+                <option key={m.valor} value={m.valor}>
+                  {m.rotulo}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
         </div>
       </Card>
 

@@ -180,7 +180,7 @@ export const INDIVIDUALIZACAO_GAS = {
     {
       titulo: "PROCEDIMENTO EXECUTIVO",
       corpo:
-        "Medidor de gás tipo diafragma com vazão nominal de G 1.6 m³/h, com saída de pulso indutivo, deslocamento positivo em uma unidade de medição interna com duas câmaras. O equipamento possui vida útil prolongada e segura, alta resistência a intempéries e baixo nível de ruído. O medidor possui homologação INMETRO no Brasil, estando em conformidade com a Portaria Nº 089 do INMETRO. Projetado sob o conceito de modularidade com acoplagem direta, gasômetro/rádio, sem o uso de cabos de conexão (Reed Switch).\n" +
+        "Medidor de gás tipo diafragma com vazão nominal de {vazao_gas}, com saída de pulso indutivo, deslocamento positivo em uma unidade de medição interna com duas câmaras. O equipamento possui vida útil prolongada e segura, alta resistência a intempéries e baixo nível de ruído. O medidor possui homologação INMETRO no Brasil, estando em conformidade com a Portaria Nº 089 do INMETRO. Projetado sob o conceito de modularidade com acoplagem direta, gasômetro/rádio, sem o uso de cabos de conexão (Reed Switch).\n" +
         "\n" +
         "Outras informações:\n" +
         "• Modularidade com rede de transmissão sem fio da Techem;\n" +

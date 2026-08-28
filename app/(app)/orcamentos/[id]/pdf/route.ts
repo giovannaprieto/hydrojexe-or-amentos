@@ -17,6 +17,7 @@ import { requireUsuario } from "@/lib/auth";
 import { dataPorExtenso } from "@/lib/data-extenso";
 import { isGestaoMensal } from "@/lib/modelos-proposta";
 import { round2 } from "@/lib/orcamento-calc";
+import { fraseHidrometros } from "@/lib/orcamento-especificacoes";
 import { assetDataUri } from "@/lib/pdf-assets";
 import {
   precosCongeladosPorForma,
@@ -74,7 +75,7 @@ export async function GET(
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, tipo_proposta, incluir_tss, parcelas_custom, qtd_equipamentos, tss_opcoes, prazo, condominios(nome, endereco, cidade, uf, administradora), templates_texto(sec_individualizacao_agua, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
+      "id, numero, data_orcamento, tipo_proposta, incluir_tss, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora), templates_texto(sec_individualizacao_agua, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
     )
     .eq("id", id)
     .single();
@@ -104,6 +105,7 @@ export async function GET(
       data_orcamento: orc.data_orcamento,
       prazo: orc.prazo,
       tss_opcoes: orc.tss_opcoes,
+      medidor_gas: orc.medidor_gas,
       condominios: orc.condominios as OrcGestaoCondominio,
     });
   }
@@ -270,6 +272,26 @@ export async function GET(
   } | null;
   const tpl = orc.templates_texto as Record<string, string | null> | null;
 
+  // {hidrometros} na seção INTERVENÇÃO -> "<qtd> hidrômetros de <bitola>"
+  const totalHidrometros = tipos.reduce((acc, t) => {
+    const pontos = t.itens.reduce(
+      (a, ci) => (pontoIds.has(ci.item_id) ? a + ci.quantidade : a),
+      0,
+    );
+    return acc + t.unidades * pontos;
+  }, 0);
+  const slugsNaComposicao = new Set<string>();
+  for (const t of tipos) {
+    for (const ci of t.itens) {
+      const it = catalogo.find((x) => x.id === ci.item_id);
+      if (it) slugsNaComposicao.add(it.slug);
+    }
+  }
+  const intervencaoTexto = (tpl?.sec_intervencao ?? "").replace(
+    /\{hidrometros\}/g,
+    fraseHidrometros(totalHidrometros, slugsNaComposicao),
+  );
+
   const enderecoLinha = [
     cond?.endereco,
     cond?.cidade && cond?.uf ? `${cond.cidade}/${cond.uf}` : cond?.cidade,
@@ -306,7 +328,7 @@ export async function GET(
         individualizacao: tpl?.sec_individualizacao_agua ?? "",
         objetivo: tpl?.sec_objetivo ?? "",
         procedimento: tpl?.sec_procedimento_tecnico ?? "",
-        intervencao: tpl?.sec_intervencao ?? "",
+        intervencao: intervencaoTexto,
         tramites: tpl?.sec_tramites_administrativos ?? "",
         gerenciamento: tpl?.sec_gerenciamento_mensal ?? "",
         prazo: orc.prazo?.trim() || PRAZO_PADRAO,

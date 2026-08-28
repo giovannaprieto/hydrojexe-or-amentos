@@ -369,6 +369,7 @@ export type Database = {
           tipo_proposta: string
           qtd_equipamentos: number | null
           tss_opcoes: Json
+          medidor_gas: string | null
         }
         Insert: {
           id?: string
@@ -392,6 +393,7 @@ export type Database = {
           tipo_proposta?: string
           qtd_equipamentos?: number | null
           tss_opcoes: Json
+          medidor_gas?: string | null
         }
         Update: {
           id?: string
@@ -415,6 +417,7 @@ export type Database = {
           tipo_proposta?: string
           qtd_equipamentos?: number | null
           tss_opcoes?: Json
+          medidor_gas?: string | null
         }
         Relationships: [
         {

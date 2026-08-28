@@ -9,6 +9,7 @@ import {
   secoesEfetivas,
   type TssOpcao,
 } from "@/lib/modelos-proposta";
+import { vazaoGas } from "@/lib/orcamento-especificacoes";
 import { assetDataUri } from "@/lib/pdf-assets";
 import type { OrcGestaoCondominio } from "@/app/(app)/orcamentos/[id]/pdf/gestao";
 import type { createClient } from "@/lib/supabase/server";
@@ -34,6 +35,7 @@ type OrcIndivGas = {
   data_orcamento: string;
   prazo: string | null;
   tss_opcoes: unknown;
+  medidor_gas: string | null;
   condominios: OrcGestaoCondominio;
 };
 
@@ -104,7 +106,12 @@ export async function gerarPdfIndividualizacaoGas(
       administradora: cond?.administradora ?? null,
       analiseTecnica:
         override?.intro?.trim() || INDIVIDUALIZACAO_GAS.analiseTecnicaPadrao,
-      secoes: secoesEfetivas("individualizacao_gas", override?.secoes),
+      secoes: secoesEfetivas("individualizacao_gas", override?.secoes).map(
+        (s) => ({
+          ...s,
+          corpo: s.corpo.replace(/\{vazao_gas\}/g, vazaoGas(orc.medidor_gas)),
+        }),
+      ),
       prazo: orc.prazo?.trim() || INDIVIDUALIZACAO_GAS.prazoPadrao,
       pontosPorApartamento,
       totalMedidores,
