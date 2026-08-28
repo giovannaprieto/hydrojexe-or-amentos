@@ -5,6 +5,10 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { IndividualizacaoGasPdf } from "@/components/pdf/individualizacao-gas-pdf";
 import { dataPorExtenso } from "@/lib/data-extenso";
 import {
+  filtrarPorFormasVisiveis,
+  parseFormasVisiveis,
+} from "@/lib/formas-pagamento";
+import {
   INDIVIDUALIZACAO_GAS,
   secoesEfetivas,
   type TssOpcao,
@@ -30,12 +34,25 @@ function parseOpcoes(raw: unknown): TssOpcao[] {
     .slice(0, 4);
 }
 
+function parseParcelasCustom(raw: unknown): number[] {
+  if (!Array.isArray(raw)) return [];
+  return [
+    ...new Set(
+      raw
+        .map((n) => Math.trunc(Number(n)))
+        .filter((n) => Number.isFinite(n) && n >= 2),
+    ),
+  ].sort((a, b) => a - b);
+}
+
 type OrcIndivGas = {
   numero: string;
   data_orcamento: string;
   prazo: string | null;
   tss_opcoes: unknown;
   medidor_gas: string | null;
+  formas_pagamento_visiveis: unknown;
+  parcelas_custom: unknown;
   condominios: OrcGestaoCondominio;
 };
 
@@ -44,10 +61,31 @@ export async function gerarPdfIndividualizacaoGas(
   id: string,
   orc: OrcIndivGas,
 ): Promise<Response> {
-  const opcoes = parseOpcoes(orc.tss_opcoes);
-  if (opcoes.length === 0) {
+  const congeladas = parseOpcoes(orc.tss_opcoes);
+  if (congeladas.length === 0) {
     return new Response(
       "Preencha as opções de investimento antes de gerar o PDF.",
+      { status: 400 },
+    );
+  }
+
+  const base12 =
+    congeladas.find((o) => o.parcelas === 12)?.valor ??
+    congeladas[congeladas.length - 1]?.valor ??
+    0;
+  const opcoes = [
+    ...filtrarPorFormasVisiveis(
+      congeladas,
+      parseFormasVisiveis(orc.formas_pagamento_visiveis),
+    ),
+    ...parseParcelasCustom(orc.parcelas_custom).map((n) => ({
+      valor: base12,
+      parcelas: n,
+    })),
+  ];
+  if (opcoes.length === 0) {
+    return new Response(
+      "Selecione ao menos uma forma de pagamento no cabeçalho do orçamento.",
       { status: 400 },
     );
   }

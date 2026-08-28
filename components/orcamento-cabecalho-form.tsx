@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { atualizarCabecalho } from "@/app/(app)/orcamentos/actions";
+import { FormasPagamentoVisiveis } from "@/components/formas-pagamento-visiveis";
 import { IconCheck } from "@/components/icons";
 import { ParcelasCustom } from "@/components/parcelas-custom";
 import {
@@ -29,6 +30,7 @@ export type CabecalhoInicial = {
   status: string;
   tipo_proposta: string;
   incluir_tss: boolean;
+  formas_pagamento_visiveis: number[];
   parcelas_custom: number[];
   prazo: string | null;
   observacoes: string | null;
@@ -131,6 +133,10 @@ export function OrcamentoCabecalhoForm({
             name="incluir_tss"
             label="Incluir TSS (rateio por unidade)"
             defaultChecked={inicial.incluir_tss}
+          />
+
+          <FormasPagamentoVisiveis
+            inicial={inicial.formas_pagamento_visiveis}
           />
 
           <ParcelasCustom

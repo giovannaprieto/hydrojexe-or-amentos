@@ -20,6 +20,7 @@ import {
   StatusBadge,
 } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
+import { parseFormasVisiveis } from "@/lib/formas-pagamento";
 import { MODELOS_GESTAO, isGestaoMensal } from "@/lib/modelos-proposta";
 import { rotuloTipoProposta } from "@/lib/orcamento-tipos";
 import { formatBRL, formatDateBR } from "@/lib/format";
@@ -46,7 +47,7 @@ export default async function OrcamentoPage({
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, condominios(nome)",
+      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, condominios(nome)",
     )
     .eq("id", id)
     .single();
@@ -267,6 +268,9 @@ export default async function OrcamentoPage({
             status: orc.status,
             tipo_proposta: orc.tipo_proposta,
             incluir_tss: orc.incluir_tss,
+            formas_pagamento_visiveis: parseFormasVisiveis(
+              orc.formas_pagamento_visiveis,
+            ),
             parcelas_custom: orc.parcelas_custom ?? [],
             prazo: orc.prazo,
             observacoes: orc.observacoes,

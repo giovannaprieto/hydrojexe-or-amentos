@@ -11,6 +11,7 @@ import {
   textoOuNulo,
   type FormState,
 } from "@/lib/forms";
+import { FORMAS_PAGAMENTO_BASE } from "@/lib/formas-pagamento";
 import { diffCampos, registrarHistorico } from "@/lib/historico";
 import { calcularOrcamento, type TipoInput } from "@/lib/orcamento-calc";
 import { VALORES_TIPO_PROPOSTA } from "@/lib/orcamento-tipos";
@@ -47,6 +48,14 @@ function parseParcelasCustom(formData: FormData): number[] {
   } catch {
     return [];
   }
+}
+
+function parseFormasVisiveis(formData: FormData): number[] {
+  const base = FORMAS_PAGAMENTO_BASE as readonly number[];
+  const marcadas = new Set(
+    formData.getAll("formas_visiveis").map((v) => Math.trunc(Number(v))),
+  );
+  return base.filter((n) => marcadas.has(n));
 }
 
 // ---------------------------------------------------------------------------
@@ -137,7 +146,7 @@ export async function atualizarCabecalho(
   const { data: atual } = await supabase
     .from("orcamentos")
     .select(
-      "numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, parcelas_custom, prazo, observacoes",
+      "numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, prazo, observacoes",
     )
     .eq("id", id)
     .single();
@@ -162,6 +171,16 @@ export async function atualizarCabecalho(
     return { ok: false, error: "Tipo de proposta inválido." };
   }
 
+  const formas_pagamento_visiveis = parseFormasVisiveis(formData);
+  const parcelas_custom = parseParcelasCustom(formData);
+  if (formas_pagamento_visiveis.length === 0 && parcelas_custom.length === 0) {
+    return {
+      ok: false,
+      error:
+        "Selecione ao menos uma forma de pagamento (ou adicione uma forma extra).",
+    };
+  }
+
   const novos = {
     numero,
     data_orcamento,
@@ -169,7 +188,8 @@ export async function atualizarCabecalho(
     status,
     tipo_proposta,
     incluir_tss: booleano(formData, "incluir_tss"),
-    parcelas_custom: parseParcelasCustom(formData),
+    formas_pagamento_visiveis,
+    parcelas_custom,
     prazo: textoOuNulo(formData, "prazo"),
     observacoes: textoOuNulo(formData, "observacoes"),
   };

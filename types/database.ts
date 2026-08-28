@@ -369,6 +369,7 @@ export type Database = {
           updated_at: string
           incluir_tss: boolean
           parcelas_custom: number[]
+          formas_pagamento_visiveis: number[]
           tipo_proposta: string
           qtd_equipamentos: number | null
           tss_opcoes: Json
@@ -393,6 +394,7 @@ export type Database = {
           updated_at?: string
           incluir_tss?: boolean
           parcelas_custom: number[]
+          formas_pagamento_visiveis?: number[]
           tipo_proposta?: string
           qtd_equipamentos?: number | null
           tss_opcoes: Json
@@ -417,6 +419,7 @@ export type Database = {
           updated_at?: string
           incluir_tss?: boolean
           parcelas_custom?: number[]
+          formas_pagamento_visiveis?: number[]
           tipo_proposta?: string
           qtd_equipamentos?: number | null
           tss_opcoes?: Json

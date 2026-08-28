@@ -15,6 +15,7 @@ import { gerarPdfTssLight } from "@/app/(app)/orcamentos/[id]/pdf/tss";
 import { gerarPdfIndividualizacaoGas } from "@/app/(app)/orcamentos/[id]/pdf/individualizacao-gas";
 import { requireUsuario } from "@/lib/auth";
 import { dataPorExtenso } from "@/lib/data-extenso";
+import { parseFormasVisiveis } from "@/lib/formas-pagamento";
 import { isGestaoMensal } from "@/lib/modelos-proposta";
 import { round2 } from "@/lib/orcamento-calc";
 import { fraseHidrometros } from "@/lib/orcamento-especificacoes";
@@ -75,7 +76,7 @@ export async function GET(
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, tipo_proposta, incluir_tss, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
+      "id, numero, data_orcamento, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
     )
     .eq("id", id)
     .single();
@@ -96,6 +97,8 @@ export async function GET(
       prazo: orc.prazo,
       qtd_equipamentos: orc.qtd_equipamentos,
       tss_opcoes: orc.tss_opcoes,
+      formas_pagamento_visiveis: orc.formas_pagamento_visiveis,
+      parcelas_custom: orc.parcelas_custom,
       condominios: orc.condominios as OrcGestaoCondominio,
     });
   }
@@ -106,6 +109,8 @@ export async function GET(
       prazo: orc.prazo,
       tss_opcoes: orc.tss_opcoes,
       medidor_gas: orc.medidor_gas,
+      formas_pagamento_visiveis: orc.formas_pagamento_visiveis,
+      parcelas_custom: orc.parcelas_custom,
       condominios: orc.condominios as OrcGestaoCondominio,
     });
   }
@@ -195,18 +200,22 @@ export async function GET(
   const precos12x =
     (forma12x && precoPorForma.get(forma12x.id)) ?? new Map<string, number>();
 
-  // formas exibidas no PDF: as 4 próprias + as extras (parcelas_custom), que usam os preços de 12x
+  // formas exibidas no PDF: as próprias MARCADAS no cabeçalho + as extras
+  // (parcelas_custom), que usam os preços de 12x
+  const visiveis = parseFormasVisiveis(orc.formas_pagamento_visiveis);
   type FormaRender = {
     nome: string;
     numParcelas: number;
     precos: Map<string, number>;
   };
   const formasRender: FormaRender[] = [
-    ...formasProprias.map((f) => ({
-      nome: f.nome,
-      numParcelas: f.num_parcelas,
-      precos: precoPorForma.get(f.id) ?? new Map<string, number>(),
-    })),
+    ...formasProprias
+      .filter((f) => visiveis.includes(f.num_parcelas))
+      .map((f) => ({
+        nome: f.nome,
+        numParcelas: f.num_parcelas,
+        precos: precoPorForma.get(f.id) ?? new Map<string, number>(),
+      })),
     ...(orc.parcelas_custom ?? []).map((n) => ({
       nome: `${n}x`,
       numParcelas: n,
