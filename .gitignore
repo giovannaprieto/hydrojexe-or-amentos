@@ -45,3 +45,8 @@ next-env.d.ts
 credenciais*.txt
 _saida_*.pdf
 _pdfs-demo/
+
+# capturas e perfil temporario do chrome (scripts de screenshot)
+_telas/
+.chrome-shot/
+_shot.mjs
