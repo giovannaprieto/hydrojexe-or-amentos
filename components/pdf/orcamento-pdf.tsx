@@ -27,21 +27,22 @@ const s = StyleSheet.create({
   },
   secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
   par: { marginBottom: 3, textIndent: 18 },
-  fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
+  fotoSecao: { marginTop: 5, marginBottom: 5, alignSelf: "center" },
   fotosLinha: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 14,
-    marginTop: 8,
-    marginBottom: 2,
+    marginTop: 5,
+    marginBottom: 3,
   },
   legendaFoto: {
     fontFamily: "Times-Bold",
     fontSize: 9,
+    lineHeight: 1.3,
     textAlign: "center",
     textIndent: 0,
-    marginTop: 2,
-    marginBottom: 6,
+    marginTop: 5,
+    marginBottom: 8,
   },
   centroTitulo: {
     fontFamily: "Times-Bold",
@@ -191,16 +192,13 @@ function Secao({
   n,
   titulo,
   children,
-  quebravel,
 }: {
   n: number;
   titulo: string;
   children: React.ReactNode;
-  /** deixa o conteúdo quebrar entre páginas (seções longas, ex.: retrofit) */
-  quebravel?: boolean;
 }) {
   return (
-    <View wrap={!!quebravel}>
+    <View>
       <View style={s.secaoBar} wrap={false} minPresenceAhead={60}>
         <Text style={s.secaoTitulo}>
           {n}. {titulo}
@@ -287,7 +285,7 @@ function ConteudoIntervencao({
           );
         }
         if (p.trim() === "") return null;
-        return <Paragrafos key={i} texto={p} />;
+        return <Paragrafos key={i} texto={p.trim()} />;
       })}
 
       {/* sem marcadores (preparado / modelo genérico) -> foto padrão do medidor */}
@@ -388,7 +386,7 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
         >
           <Paragrafos texto={textos.procedimento} />
         </Secao>
-        <Secao n={4} titulo="INTERVENÇÃO" quebravel>
+        <Secao n={4} titulo="INTERVENÇÃO">
           <ConteudoIntervencao texto={textos.intervencao} assets={assets} />
         </Secao>
         <Secao n={5} titulo="TRÂMITES ADMINISTRATIVOS FINAIS">
