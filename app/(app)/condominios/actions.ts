@@ -28,6 +28,7 @@ function parse(formData: FormData) {
     contato_telefone: textoOuNulo(formData, "contato_telefone"),
     observacoes: textoOuNulo(formData, "observacoes"),
     agua_preparado: booleano(formData, "agua_preparado"),
+    parcelamento_especial: booleano(formData, "parcelamento_especial"),
   };
 }
 

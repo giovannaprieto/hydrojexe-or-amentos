@@ -20,7 +20,10 @@ import {
   StatusBadge,
 } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
-import { parseFormasVisiveis } from "@/lib/formas-pagamento";
+import {
+  parcelasOrigemPreco,
+  parseFormasVisiveis,
+} from "@/lib/formas-pagamento";
 import { MODELOS_GESTAO, isGestaoMensal } from "@/lib/modelos-proposta";
 import { rotuloTipoProposta } from "@/lib/orcamento-tipos";
 import { formatBRL, formatDateBR } from "@/lib/format";
@@ -47,7 +50,7 @@ export default async function OrcamentoPage({
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, condominios(nome)",
+      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, condominios(nome, parcelamento_especial)",
     )
     .eq("id", id)
     .single();
@@ -151,6 +154,24 @@ export default async function OrcamentoPage({
   const precoUnitPorFormaBuilder: Record<string, Record<string, number>> = {
     ...precoUnitPorForma,
   };
+  // parcelamento especial: cada faixa >= 9x usa a coluna de preço de uma abaixo
+  const parcelamentoEspecial = !!(
+    orc.condominios as { parcelamento_especial?: boolean | null } | null
+  )?.parcelamento_especial;
+  if (parcelamentoEspecial) {
+    const idPorParcelas = new Map(
+      formasProprias.map((f) => [f.num_parcelas, f.id]),
+    );
+    for (const f of formasProprias) {
+      const origem = parcelasOrigemPreco(f.num_parcelas, true);
+      if (origem !== f.num_parcelas) {
+        const origemId = idPorParcelas.get(origem);
+        if (origemId) {
+          precoUnitPorFormaBuilder[f.id] = precoUnitPorForma[origemId] ?? {};
+        }
+      }
+    }
+  }
   for (const n of orc.parcelas_custom ?? []) {
     precoUnitPorFormaBuilder[`custom-${n}`] = forma12x
       ? (precoUnitPorForma[forma12x.id] ?? {})

@@ -75,6 +75,17 @@ export function CondominioForm({ inicial }: { inicial?: Condominio }) {
               “Análise técnica” do PDF de individualização de água.
             </span>
           </div>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <Checkbox
+              name="parcelamento_especial"
+              label="Parcelamento especial"
+              defaultChecked={inicial?.parcelamento_especial ?? false}
+            />
+            <span className="hj-hint">
+              No PDF deste condomínio: 9x usa o preço de 6x, 12x usa o de 9x e
+              24x usa o de 12x. À vista e 6x não mudam.
+            </span>
+          </div>
         </div>
       </Card>
 

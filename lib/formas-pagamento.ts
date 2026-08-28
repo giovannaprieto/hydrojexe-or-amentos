@@ -25,6 +25,23 @@ export function parseFormasVisiveis(raw: unknown): number[] {
 }
 
 /**
+ * Parcelamento especial (por condomínio): cada faixa >= 9x usa o preço da faixa
+ * uma abaixo. À vista e 6x não mudam. 24x já usa 12x pelo mecanismo de formas
+ * extras, então não precisa entrar aqui.
+ */
+const SHIFT_PARCELAMENTO_ESPECIAL: Record<number, number> = { 9: 6, 12: 9 };
+
+/** Nº de parcelas cuja COLUNA DE PREÇO deve ser usada para `numParcelas`. */
+export function parcelasOrigemPreco(
+  numParcelas: number,
+  especial: boolean,
+): number {
+  return especial
+    ? (SHIFT_PARCELAMENTO_ESPECIAL[numParcelas] ?? numParcelas)
+    : numParcelas;
+}
+
+/**
  * Filtra opções que carregam `parcelas` pela seleção de formas visíveis.
  * "à vista" cobre parcelas <= 1.
  */

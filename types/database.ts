@@ -30,6 +30,7 @@ export type Database = {
           updated_at: string
           administradora: string | null
           agua_preparado: boolean
+          parcelamento_especial: boolean
         }
         Insert: {
           id?: string
@@ -47,6 +48,7 @@ export type Database = {
           updated_at?: string
           administradora?: string | null
           agua_preparado?: boolean
+          parcelamento_especial?: boolean
         }
         Update: {
           id?: string
@@ -64,6 +66,7 @@ export type Database = {
           updated_at?: string
           administradora?: string | null
           agua_preparado?: boolean
+          parcelamento_especial?: boolean
         }
         Relationships: [
         ]
