@@ -193,33 +193,26 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
           )}
         </Text>
 
-        {secoes.map((sec, i) =>
-          i === nUlt - 1 ? (
-            <View key={i} wrap={false}>
-              <View style={s.secaoBar}>
-                <Text style={s.secaoTitulo}>
-                  {i + 1}. {sec.titulo}
+        {secoes.map((sec, i) => (
+          <Secao key={i} n={i + 1} titulo={sec.titulo}>
+            <Paragrafos texto={sec.corpo} />
+            {i === nUlt - 1 ? (
+              <>
+                <Image
+                  src={assets.fotoMedidor}
+                  style={[s.fotoSecao, { width: 150 }]}
+                />
+                <Text style={s.par}>
+                  a) A quantidade de medidores será de {doisDig(totalMedidores)}
+                  {ext} unidades.
                 </Text>
-              </View>
-              <Paragrafos texto={sec.corpo} />
-              <Image
-                src={assets.fotoMedidor}
-                style={[s.fotoSecao, { width: 150 }]}
-              />
-              <Text style={s.par}>
-                a) A quantidade de medidores será de {doisDig(totalMedidores)}
-                {ext} unidades.
-              </Text>
-              <Text style={s.par}>
-                b) Execução de teste de estanqueidade em todo o sistema.
-              </Text>
-            </View>
-          ) : (
-            <Secao key={i} n={i + 1} titulo={sec.titulo}>
-              <Paragrafos texto={sec.corpo} />
-            </Secao>
-          ),
-        )}
+                <Text style={s.par}>
+                  b) Execução de teste de estanqueidade em todo o sistema.
+                </Text>
+              </>
+            ) : null}
+          </Secao>
+        ))}
 
         <Secao n={nUlt + 1} titulo="PRAZO PARA IMPLANTAÇÃO">
           <Paragrafos texto={prazo} />
