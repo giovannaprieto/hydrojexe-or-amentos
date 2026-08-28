@@ -28,7 +28,7 @@ export function PageHeader({
       {voltar ? (
         <Link
           href={voltar.href}
-          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-500 transition-colors hover:text-brand-600"
+          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-500 transition-colors hover:text-brand-600 dark:text-ink-400 dark:hover:text-brand-400"
         >
           <IconArrowLeft />
           {voltar.rotulo}

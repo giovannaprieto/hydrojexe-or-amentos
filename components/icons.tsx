@@ -120,6 +120,19 @@ export const IconRefresh = (p: IconProps) => (
   </Base>
 );
 
+export const IconSun = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+  </Base>
+);
+
+export const IconMoon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+  </Base>
+);
+
 export const IconLogout = (p: IconProps) => (
   <Base {...p}>
     <path d="M14 4h3.5A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5H14" />

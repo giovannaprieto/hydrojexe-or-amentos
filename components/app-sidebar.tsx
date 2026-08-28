@@ -18,6 +18,7 @@ import {
   IconTextos,
   IconUsuarios,
 } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { UsuarioAtual } from "@/lib/auth";
 
 type Item = {
@@ -145,6 +146,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
                 {usuario.perfil}
               </p>
             </div>
+            <ThemeToggle />
             <form action="/logout" method="post">
               <button
                 type="submit"
