@@ -182,19 +182,20 @@ export default async function OrcamentoPage({
 
   const condominioNome = (orc.condominios as { nome: string } | null)?.nome;
 
-  const opcoesTss: { valor: number; parcelas: number }[] = Array.isArray(
-    orc.tss_opcoes,
-  )
-    ? (orc.tss_opcoes as unknown[])
-        .map((x) => {
-          const o = x as { valor?: unknown; parcelas?: unknown };
-          return {
-            valor: Number(o.valor) || 0,
-            parcelas: Math.trunc(Number(o.parcelas) || 0),
-          };
-        })
-        .filter((o) => o.valor > 0)
-    : [];
+  // preço vigente do item "TSS", por forma — p/ o preview automático do
+  // formulário de TSS Light (valor por equipamento)
+  const precoTssPorForma: {
+    nome: string;
+    num_parcelas: number;
+    valorUnit: number;
+  }[] =
+    orc.tipo_proposta === "tss_light" && tssItem
+      ? formasProprias.map((f) => ({
+          nome: f.nome,
+          num_parcelas: f.num_parcelas,
+          valorUnit: vigPorForma.get(f.id)?.get(tssItem.id)?.valor ?? 0,
+        }))
+      : [];
 
   // preços vigentes dos medidores de gás, por forma — p/ o preview automático
   // do formulário de individualização de gás
@@ -351,8 +352,8 @@ export default async function OrcamentoPage({
             inicial={{
               id: orc.id,
               qtd_equipamentos: orc.qtd_equipamentos ?? 1,
-              opcoes: opcoesTss,
             }}
+            precoTss={precoTssPorForma}
           />
         </section>
       ) : orc.tipo_proposta === "individualizacao_gas" ? (

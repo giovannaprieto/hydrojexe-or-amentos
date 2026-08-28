@@ -538,7 +538,7 @@ export async function salvarTssLight(
 
   const { data: orc } = await supabase
     .from("orcamentos")
-    .select("id, tipo_proposta, valor_total")
+    .select("id, tipo_proposta, data_orcamento, valor_total")
     .eq("id", id)
     .single();
   if (!orc) return { ok: false, error: "Orçamento não encontrado." };
@@ -551,35 +551,46 @@ export async function salvarTssLight(
     return { ok: false, error: "Informe a quantidade de equipamentos." };
   }
 
-  let brutas: unknown;
-  try {
-    brutas = JSON.parse(texto(formData, "opcoes"));
-  } catch {
-    return { ok: false, error: "Não foi possível ler as opções." };
+  // opções de investimento = as formas próprias, com o preço vigente do item
+  // "TSS" (por forma) como valor por equipamento. Congela em tss_opcoes.
+  const [{ data: itemTss }, { data: formasTss }] = await Promise.all([
+    supabase
+      .from("itens_precificaveis")
+      .select("id")
+      .eq("slug", "tss")
+      .maybeSingle(),
+    supabase
+      .from("formas_pagamento")
+      .select("id, num_parcelas, ordem")
+      .eq("ativo", true)
+      .is("usa_preco_de_forma_id", null)
+      .order("ordem"),
+  ]);
+  if (!itemTss) {
+    return { ok: false, error: 'Item "TSS" não encontrado na tabela de preços.' };
   }
-  if (!Array.isArray(brutas) || brutas.length === 0) {
-    return { ok: false, error: "Adicione ao menos uma opção de investimento." };
-  }
-  if (brutas.length > 4) {
-    return { ok: false, error: "No máximo 4 opções." };
-  }
-
-  const opcoes: { valor: number; parcelas: number }[] = [];
-  for (const raw of brutas) {
-    const o = raw as { valor?: unknown; parcelas?: unknown };
-    const valor = Number(String(o.valor ?? "").toString().replace(",", "."));
-    const parcelas = Math.trunc(Number(o.parcelas ?? 0)) || 0;
-    if (!Number.isFinite(valor) || valor <= 0) {
-      return { ok: false, error: "Cada opção precisa de um valor maior que zero." };
-    }
-    if (parcelas < 0 || parcelas > 120) {
-      return { ok: false, error: "Número de parcelas inválido." };
-    }
-    opcoes.push({ valor: Math.round(valor * 100) / 100, parcelas });
+  const formas = formasTss ?? [];
+  const vigTss = await precosVigentesPorForma(
+    supabase,
+    formas.map((f) => f.id),
+    [itemTss.id],
+    orc.data_orcamento,
+  );
+  const opcoes = formas.map((f) => ({
+    valor:
+      Math.round((vigTss.get(f.id)?.get(itemTss.id)?.valor ?? 0) * 100) / 100,
+    parcelas: f.num_parcelas,
+  }));
+  if (opcoes.every((o) => o.valor <= 0)) {
+    return {
+      ok: false,
+      error:
+        "Sem preço vigente para o item TSS na tabela. Cadastre os preços primeiro.",
+    };
   }
 
   const aVista = opcoes.find((o) => o.parcelas <= 1);
-  const snapshot = aVista?.valor ?? opcoes[0].valor;
+  const snapshot = aVista?.valor ?? opcoes[0]?.valor ?? 0;
 
   const { error } = await supabase
     .from("orcamentos")
