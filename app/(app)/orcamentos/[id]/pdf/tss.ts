@@ -67,10 +67,11 @@ export async function gerarPdfTssLight(
     .filter(Boolean)
     .join(" - ");
 
-  const [header, footer, watermark] = await Promise.all([
+  const [header, footer, watermark, techem] = await Promise.all([
     assetDataUri("timbre-header.png"),
     assetDataUri("timbre-footer.png"),
     assetDataUri("timbre-watermark.png"),
+    assetDataUri("logo-techem.png"),
   ]);
 
   const buffer = await renderToBuffer(
@@ -85,7 +86,7 @@ export async function gerarPdfTssLight(
       secoes,
       qtdEquipamentos,
       opcoes,
-      assets: { header, footer, watermark },
+      assets: { header, footer, watermark, techem },
     }) as Parameters<typeof renderToBuffer>[0],
   );
 

@@ -314,13 +314,14 @@ export async function GET(
     .filter(Boolean)
     .join(" - ");
 
-  const [aHeader, aFooter, aWatermark, aFotoInterv, aFotoGer] =
+  const [aHeader, aFooter, aWatermark, aFotoInterv, aFotoGer, aTechem] =
     await Promise.all([
       assetDataUri("timbre-header.png"),
       assetDataUri("timbre-footer.png"),
       assetDataUri("timbre-watermark.png"),
       assetDataUri("foto-intervencao.png"),
       assetDataUri("foto-gerenciamento.png"),
+      assetDataUri("logo-techem.png"),
     ]);
 
   const buffer = await renderToBuffer(
@@ -338,6 +339,7 @@ export async function GET(
         watermark: aWatermark,
         fotoIntervencao: aFotoInterv,
         fotoGerenciamento: aFotoGer,
+        techem: aTechem,
       },
       textos: {
         individualizacao: individualizacaoTexto,

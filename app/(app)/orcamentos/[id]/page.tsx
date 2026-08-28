@@ -63,13 +63,13 @@ export default async function OrcamentoPage({
     supabase.from("condominios").select("id, nome").order("nome"),
     supabase
       .from("formas_pagamento")
-      .select("id, nome, slug, ordem, ativo, usa_preco_de_forma_id")
+      .select("id, nome, slug, num_parcelas, ordem, ativo, usa_preco_de_forma_id")
       .eq("ativo", true)
       .is("usa_preco_de_forma_id", null)
       .order("ordem"),
     supabase
       .from("itens_precificaveis")
-      .select("id, nome, unidade, is_tss, ativo, ordem")
+      .select("id, nome, slug, unidade, is_tss, ativo, ordem")
       .eq("ativo", true)
       .order("ordem")
       .order("nome"),
@@ -195,6 +195,30 @@ export default async function OrcamentoPage({
         })
         .filter((o) => o.valor > 0)
     : [];
+
+  // preços vigentes dos medidores de gás, por forma — p/ o preview automático
+  // do formulário de individualização de gás
+  const precoPorMedidorGas: Record<
+    string,
+    { nome: string; num_parcelas: number; valorUnit: number }[]
+  > =
+    orc.tipo_proposta === "individualizacao_gas"
+      ? Object.fromEntries(
+          ["gas_1_6", "gas_2_5"].map((slug) => {
+            const it = catalogo.find((i) => i.slug === slug);
+            return [
+              slug,
+              it
+                ? formasProprias.map((f) => ({
+                    nome: f.nome,
+                    num_parcelas: f.num_parcelas,
+                    valorUnit: vigPorForma.get(f.id)?.get(it.id)?.valor ?? 0,
+                  }))
+                : [],
+            ];
+          }),
+        )
+      : {};
 
   const podeGerarPdf =
     orc.tipo_proposta === "completa" ||
@@ -341,8 +365,8 @@ export default async function OrcamentoPage({
               pontos_por_apartamento: gm?.pontos_por_apartamento ?? 1,
               valor_gerenciamento: gm?.valor_por_hidrometro ?? 0,
               medidor_gas: orc.medidor_gas,
-              opcoes: opcoesTss,
             }}
+            precoPorMedidor={precoPorMedidorGas}
           />
         </section>
       ) : (

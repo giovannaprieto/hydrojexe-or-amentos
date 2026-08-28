@@ -612,37 +612,10 @@ export async function salvarTssLight(
 }
 
 // ---------------------------------------------------------------------------
-// Individualização de gás — pontos por apartamento + até 4 opções + gerenciamento
+// Individualização de gás — qtd de apartamentos + medidor + gerenciamento.
+// As 4 opções de investimento são calculadas pela tabela de preços (como a
+// individualização de água) e congeladas em orcamentos.tss_opcoes.
 // ---------------------------------------------------------------------------
-function parseOpcoesInvest(
-  raw: string,
-): { ok: true; opcoes: { valor: number; parcelas: number }[] } | { ok: false; error: string } {
-  let brutas: unknown;
-  try {
-    brutas = JSON.parse(raw);
-  } catch {
-    return { ok: false, error: "Não foi possível ler as opções." };
-  }
-  if (!Array.isArray(brutas) || brutas.length === 0) {
-    return { ok: false, error: "Adicione ao menos uma opção de investimento." };
-  }
-  if (brutas.length > 4) return { ok: false, error: "No máximo 4 opções." };
-  const opcoes: { valor: number; parcelas: number }[] = [];
-  for (const r of brutas) {
-    const o = r as { valor?: unknown; parcelas?: unknown };
-    const valor = Number(String(o.valor ?? "").replace(",", "."));
-    const parcelas = Math.trunc(Number(o.parcelas ?? 0)) || 0;
-    if (!Number.isFinite(valor) || valor <= 0) {
-      return { ok: false, error: "Cada opção precisa de um valor maior que zero." };
-    }
-    if (parcelas < 0 || parcelas > 120) {
-      return { ok: false, error: "Número de parcelas inválido." };
-    }
-    opcoes.push({ valor: Math.round(valor * 100) / 100, parcelas });
-  }
-  return { ok: true, opcoes };
-}
-
 export async function salvarIndividualizacaoGas(
   _prev: FormState,
   formData: FormData,
@@ -655,7 +628,7 @@ export async function salvarIndividualizacaoGas(
 
   const { data: orc } = await supabase
     .from("orcamentos")
-    .select("id, tipo_proposta, valor_total")
+    .select("id, tipo_proposta, data_orcamento, valor_total")
     .eq("id", id)
     .single();
   if (!orc) return { ok: false, error: "Orçamento não encontrado." };
@@ -675,17 +648,53 @@ export async function salvarIndividualizacaoGas(
     return { ok: false, error: "Pontos por apartamento inválido." };
   }
 
-  const parsed = parseOpcoesInvest(texto(formData, "opcoes"));
-  if (!parsed.ok) return { ok: false, error: parsed.error };
-  const opcoes = parsed.opcoes;
-
   const medidorGasRaw = texto(formData, "medidor_gas");
   const medidor_gas =
     medidorGasRaw === "gas_2_5" ? "gas_2_5" : "gas_1_6";
 
+  // opções de investimento = as 4 formas próprias, com o preço vigente do
+  // medidor de gás (por forma) × pontos por apartamento. Congela em tss_opcoes.
+  const [{ data: itemGas }, { data: formasGas }] = await Promise.all([
+    supabase
+      .from("itens_precificaveis")
+      .select("id")
+      .eq("slug", medidor_gas)
+      .maybeSingle(),
+    supabase
+      .from("formas_pagamento")
+      .select("id, num_parcelas, ordem")
+      .eq("ativo", true)
+      .is("usa_preco_de_forma_id", null)
+      .order("ordem"),
+  ]);
+  if (!itemGas) {
+    return { ok: false, error: "Item do medidor de gás não encontrado." };
+  }
+  const formas = formasGas ?? [];
+  const vigGas = await precosVigentesPorForma(
+    supabase,
+    formas.map((f) => f.id),
+    [itemGas.id],
+    orc.data_orcamento,
+  );
+  const opcoes = formas.map((f) => {
+    const unit = vigGas.get(f.id)?.get(itemGas.id)?.valor ?? 0;
+    return {
+      valor: Math.round(unit * pontosPorApartamento * 100) / 100,
+      parcelas: f.num_parcelas,
+    };
+  });
+  if (opcoes.every((o) => o.valor <= 0)) {
+    return {
+      ok: false,
+      error:
+        "Sem preço vigente para este medidor de gás na tabela. Cadastre os preços primeiro.",
+    };
+  }
+
   const totalMedidores = qtdApartamentos * pontosPorApartamento;
   const aVista = opcoes.find((o) => o.parcelas <= 1);
-  const snapshot = aVista?.valor ?? opcoes[0].valor;
+  const snapshot = aVista?.valor ?? opcoes[0]?.valor ?? 0;
 
   const { error: gmErr } = await supabase
     .from("gerenciamento_mensal")
