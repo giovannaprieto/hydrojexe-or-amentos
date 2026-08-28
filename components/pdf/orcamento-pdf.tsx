@@ -61,13 +61,6 @@ const s = StyleSheet.create({
     textIndent: 0,
     marginTop: 18,
   },
-  parceria: {
-    fontSize: 8,
-    color: CORES.mut,
-    textIndent: 0,
-    marginTop: 16,
-  },
-  techem: { width: 92, marginTop: 4 },
   notaVermelha: {
     color: C_RED,
     fontSize: 8.5,
@@ -327,8 +320,6 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
           <Text style={s.assinatura}>
             HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
           </Text>
-          <Text style={s.parceria}>Tecnologia de medição:</Text>
-          <Image src={assets.techem} style={s.techem} />
         </View>
       </Page>
     </Document>

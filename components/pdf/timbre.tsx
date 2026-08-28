@@ -25,6 +25,8 @@ export type TimbreAssets = {
   header: string; // faixa HydroJEXE (sem Techem) — recorte
   footer: string; // faixa azul do rodapé (largura total)
   watermark: string; // gota azul clara ao fundo
+  /** logo Techem — quando presente, fixa no canto superior direito */
+  techem?: string;
 };
 
 const s = StyleSheet.create({
@@ -38,9 +40,17 @@ const s = StyleSheet.create({
     overflow: "hidden",
   },
   headerImg: { width: 345 },
+  techem: { position: "absolute", top: 40, right: 48, width: 120 },
   numeroTopo: {
     position: "absolute",
     top: 44,
+    right: 48,
+    fontSize: 8,
+    color: CORES.mut,
+  },
+  numeroTopoComTechem: {
+    position: "absolute",
+    top: 92,
     right: 48,
     fontSize: 8,
     color: CORES.mut,
@@ -62,7 +72,13 @@ export function Timbre({
       <View style={s.headerClip} fixed>
         <Image src={assets.header} style={s.headerImg} />
       </View>
-      <Text style={s.numeroTopo} fixed>
+      {assets.techem ? (
+        <Image src={assets.techem} style={s.techem} fixed />
+      ) : null}
+      <Text
+        style={assets.techem ? s.numeroTopoComTechem : s.numeroTopo}
+        fixed
+      >
         Orçamento nº {numero}.
       </Text>
       <Image src={assets.footer} style={s.footerImg} fixed />

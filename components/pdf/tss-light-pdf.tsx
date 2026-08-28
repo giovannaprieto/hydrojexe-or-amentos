@@ -1,12 +1,4 @@
-/* eslint-disable jsx-a11y/alt-text -- <Image> aqui é do @react-pdf, não é <img> HTML */
-import {
-  Document,
-  Image,
-  Page,
-  StyleSheet,
-  Text,
-  View,
-} from "@react-pdf/renderer";
+import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
 import { CORES, paginaBase, Timbre } from "@/components/pdf/timbre";
 import {
@@ -72,8 +64,6 @@ const s = StyleSheet.create({
     textIndent: 0,
     marginTop: 18,
   },
-  parceria: { fontSize: 8, color: CORES.mut, textIndent: 0, marginTop: 16 },
-  techem: { width: 92, marginTop: 4 },
 });
 
 const brl = (n: number) =>
@@ -219,8 +209,6 @@ export function TssLightPdf(props: TssLightPdfProps) {
           <Text style={s.assinatura}>
             HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
           </Text>
-          <Text style={s.parceria}>Tecnologia de medição:</Text>
-          <Image src={assets.techem} style={s.techem} />
         </View>
       </Page>
     </Document>
