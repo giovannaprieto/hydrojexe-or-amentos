@@ -199,14 +199,16 @@ export function TssLightPdf(props: TssLightPdfProps) {
           <Paragrafos texto={TSS_LIGHT.disposicoes} />
         </View>
 
-        <Text style={{ marginTop: 14 }}>
-          Ficamos à disposição para esclarecer todas as dúvidas que possam
-          surgir.
-        </Text>
-        <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
-        <Text style={s.assinatura}>
-          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
-        </Text>
+        <View wrap={false}>
+          <Text style={{ marginTop: 14 }}>
+            Ficamos à disposição para esclarecer todas as dúvidas que possam
+            surgir.
+          </Text>
+          <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
+          <Text style={s.assinatura}>
+            HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          </Text>
+        </View>
       </Page>
     </Document>
   );

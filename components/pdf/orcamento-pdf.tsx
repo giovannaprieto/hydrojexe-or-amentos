@@ -309,15 +309,17 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
           <Paragrafos texto={textos.garantia} />
         </Secao>
 
-        <Text style={{ marginTop: 14 }}>
-          Ficamos à disposição para esclarecer todas as dúvidas que possam
-          surgir, assim como realizar uma apresentação coletiva em reunião
-          condominial.
-        </Text>
-        <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
-        <Text style={s.assinatura}>
-          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
-        </Text>
+        <View wrap={false}>
+          <Text style={{ marginTop: 14 }}>
+            Ficamos à disposição para esclarecer todas as dúvidas que possam
+            surgir, assim como realizar uma apresentação coletiva em reunião
+            condominial.
+          </Text>
+          <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
+          <Text style={s.assinatura}>
+            HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          </Text>
+        </View>
       </Page>
     </Document>
   );

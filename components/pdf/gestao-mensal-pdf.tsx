@@ -204,7 +204,12 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
           </Secao>
         ))}
 
-        <Secao n={secoes.length + 1} titulo="INVESTIMENTO">
+        <View wrap={false}>
+          <View style={s.secaoBar}>
+            <Text style={s.secaoTitulo}>
+              {secoes.length + 1}. INVESTIMENTO
+            </Text>
+          </View>
           <Paragrafos texto={investIntro} />
           <View style={s.tabela}>
             <View style={s.linha}>
@@ -222,7 +227,7 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
               <Text style={s.celVal}>{brl(valorTotalMensal)}</Text>
             </View>
           </View>
-        </Secao>
+        </View>
 
         <View wrap={false}>
           <View style={s.secaoBar}>
@@ -240,15 +245,17 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
           <Paragrafos texto={outrasDisposicoes} />
         </Secao>
 
-        <Text style={{ marginTop: 14 }}>
-          Ficamos à disposição para esclarecer todas as dúvidas que possam
-          surgir, assim como realizar uma apresentação coletiva em reunião
-          condominial.
-        </Text>
-        <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
-        <Text style={s.assinatura}>
-          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
-        </Text>
+        <View wrap={false}>
+          <Text style={{ marginTop: 14 }}>
+            Ficamos à disposição para esclarecer todas as dúvidas que possam
+            surgir, assim como realizar uma apresentação coletiva em reunião
+            condominial.
+          </Text>
+          <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
+          <Text style={s.assinatura}>
+            HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
+          </Text>
+        </View>
       </Page>
     </Document>
   );
