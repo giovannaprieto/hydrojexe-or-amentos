@@ -31,6 +31,7 @@ export type Database = {
           administradora: string | null
           agua_preparado: boolean
           parcelamento_especial: boolean
+          qtd_unidades: number | null
         }
         Insert: {
           id?: string
@@ -49,6 +50,7 @@ export type Database = {
           administradora?: string | null
           agua_preparado?: boolean
           parcelamento_especial?: boolean
+          qtd_unidades?: number | null
         }
         Update: {
           id?: string
@@ -67,6 +69,38 @@ export type Database = {
           administradora?: string | null
           agua_preparado?: boolean
           parcelamento_especial?: boolean
+          qtd_unidades?: number | null
+        }
+        Relationships: [
+        ]
+      }
+      orcamento_snapshots: {
+        Row: {
+          id: string
+          orcamento_id: string
+          status: string
+          valor_total: number | null
+          dados: Json
+          criado_por: string | null
+          criado_em: string
+        }
+        Insert: {
+          id?: string
+          orcamento_id: string
+          status: string
+          valor_total?: number | null
+          dados: Json
+          criado_por?: string | null
+          criado_em?: string
+        }
+        Update: {
+          id?: string
+          orcamento_id?: string
+          status?: string
+          valor_total?: number | null
+          dados?: Json
+          criado_por?: string | null
+          criado_em?: string
         }
         Relationships: [
         ]

@@ -120,6 +120,22 @@ export const IconRefresh = (p: IconProps) => (
   </Base>
 );
 
+export const IconCalculadora = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="4" y="3" width="16" height="18" rx="2" />
+    <path d="M8 7h8" />
+    <path d="M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15v3M8 18h4" />
+  </Base>
+);
+
+export const IconRelatorio = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M5 3h9l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+    <path d="M14 3v5h5" />
+    <path d="M8 13v4M12 11v6M16 15v2" />
+  </Base>
+);
+
 export const IconSun = (p: IconProps) => (
   <Base {...p}>
     <circle cx="12" cy="12" r="4" />

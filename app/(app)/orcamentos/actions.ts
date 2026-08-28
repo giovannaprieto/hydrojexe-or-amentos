@@ -13,7 +13,11 @@ import {
 } from "@/lib/forms";
 import { parseFormasVisiveis } from "@/lib/formas-pagamento";
 import { diffCampos, registrarHistorico } from "@/lib/historico";
-import { calcularOrcamento, type TipoInput } from "@/lib/orcamento-calc";
+import {
+  calcGestaoMensal,
+  calcularOrcamento,
+  type TipoInput,
+} from "@/lib/orcamento-calc";
 import { VALORES_TIPO_PROPOSTA } from "@/lib/orcamento-tipos";
 import {
   precosCongeladosPorForma,
@@ -54,6 +58,53 @@ function formasVisiveisDoForm(formData: FormData): number[] {
   return parseFormasVisiveis(
     formData.getAll("formas_visiveis").map((v) => Number(v)),
   );
+}
+
+/**
+ * Grava uma "foto" completa do orçamento em orcamento_snapshots.
+ * Chamada quando o status passa para 'enviado' ou 'aprovado'.
+ * Nunca lança — o snapshot é acessório.
+ */
+async function gravarSnapshotOrcamento(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  id: string,
+  status: string,
+  usuarioId: string,
+): Promise<void> {
+  try {
+    const [orc, gm, tipos, congelados] = await Promise.all([
+      supabase.from("orcamentos").select("*").eq("id", id).single(),
+      supabase
+        .from("gerenciamento_mensal")
+        .select("*")
+        .eq("orcamento_id", id)
+        .maybeSingle(),
+      supabase
+        .from("tipos_apartamento")
+        .select("*, tipo_apartamento_itens(*)")
+        .eq("orcamento_id", id)
+        .order("ordem"),
+      supabase
+        .from("orcamento_valores_congelados")
+        .select("*")
+        .eq("orcamento_id", id),
+    ]);
+
+    await supabase.from("orcamento_snapshots").insert({
+      orcamento_id: id,
+      status,
+      valor_total: orc.data?.valor_total ?? null,
+      dados: {
+        orcamento: orc.data ?? null,
+        gerenciamento_mensal: gm.data ?? null,
+        tipos: tipos.data ?? [],
+        congelados: congelados.data ?? [],
+      },
+      criado_por: usuarioId,
+    });
+  } catch {
+    // silencioso
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -217,6 +268,14 @@ export async function atualizarCabecalho(
         : `Dados gerais atualizados (${dif.campos.join(", ")})`,
       alterado_por: usuario.id,
     });
+  }
+
+  // foto do orçamento ao entrar em "enviado"/"aprovado" (não substitui as anteriores)
+  if (
+    status !== atual.status &&
+    (status === "enviado" || status === "aprovado")
+  ) {
+    await gravarSnapshotOrcamento(supabase, id, status, usuario.id);
   }
 
   revalidatePath(`/orcamentos/${id}`);
@@ -481,8 +540,11 @@ export async function salvarGestaoMensal(
     return { ok: false, error: "Informe o valor mensal por apartamento." };
   }
 
-  const totalPontos = qtdApartamentos * pontosPorApartamento;
-  const valorTotalMensal = Math.round(totalPontos * valorPorApartamento * 100) / 100;
+  const { totalPontos, valorTotalMensal } = calcGestaoMensal({
+    qtdApartamentos,
+    pontosPorApartamento,
+    valorPorApartamento,
+  });
 
   const { error: gmErr } = await supabase
     .from("gerenciamento_mensal")

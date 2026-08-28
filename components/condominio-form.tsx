@@ -50,6 +50,17 @@ export function CondominioForm({ inicial }: { inicial?: Condominio }) {
           <Field label="CNPJ">
             <TextInput name="cnpj" defaultValue={inicial?.cnpj ?? ""} />
           </Field>
+          <Field label="Qtd. de unidades">
+            <TextInput
+              type="number"
+              min="1"
+              step="1"
+              name="qtd_unidades"
+              defaultValue={
+                inicial?.qtd_unidades != null ? String(inicial.qtd_unidades) : ""
+              }
+            />
+          </Field>
           <Field label="Síndico">
             <TextInput
               name="sindico_nome"

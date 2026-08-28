@@ -18,6 +18,7 @@ import {
   LinkButton,
   PageHeader,
   StatusBadge,
+  TableWrap,
 } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import {
@@ -63,6 +64,7 @@ export default async function OrcamentoPage({
     { data: tiposRaw },
     { data: gm },
     { data: historico },
+    { data: snapshots },
   ] = await Promise.all([
     supabase.from("condominios").select("id, nome").order("nome"),
     supabase
@@ -98,6 +100,11 @@ export default async function OrcamentoPage({
       )
       .eq("orcamento_id", id)
       .order("alterado_em", { ascending: false }),
+    supabase
+      .from("orcamento_snapshots")
+      .select("id, status, valor_total, criado_em, usuarios!criado_por(nome)")
+      .eq("orcamento_id", id)
+      .order("criado_em", { ascending: false }),
   ]);
 
   const catalogo = itens ?? [];
@@ -416,6 +423,49 @@ export default async function OrcamentoPage({
           </Alert>
         </section>
       )}
+
+      {(snapshots ?? []).length > 0 ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="hj-section-title">Versões registradas</h2>
+          <Card plano>
+            <TableWrap>
+              <thead>
+                <tr>
+                  <th>Quando</th>
+                  <th>Marco</th>
+                  <th>Responsável</th>
+                  <th className="text-right">Total à vista</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(snapshots ?? []).map((s) => (
+                  <tr key={s.id}>
+                    <td className="text-ink-600">
+                      {new Date(s.criado_em).toLocaleString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td>
+                      <StatusBadge status={s.status} />
+                    </td>
+                    <td className="text-ink-600">
+                      {(s.usuarios as unknown as { nome: string } | null)
+                        ?.nome ?? "—"}
+                    </td>
+                    <td className="text-right font-medium tabular-nums">
+                      {formatBRL(s.valor_total)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </TableWrap>
+          </Card>
+        </section>
+      ) : null}
 
       <section className="flex flex-col gap-3">
         <h2 className="hj-section-title">Histórico de alterações</h2>

@@ -5,7 +5,8 @@ import type { Json } from "@/types/database";
 export type AcaoHistorico = "criar" | "atualizar" | "excluir";
 
 export type EntradaHistorico = {
-  orcamento_id: string;
+  /** null quando a mudança é numa tabela global (ex.: condomínio, preços) */
+  orcamento_id: string | null;
   entidade: string;
   entidade_id?: string | null;
   acao: AcaoHistorico;

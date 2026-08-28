@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import {
   IconBuilding,
+  IconCalculadora,
   IconClose,
   IconDashboard,
   IconFormas,
@@ -14,6 +15,7 @@ import {
   IconMenu,
   IconOrcamento,
   IconPrecos,
+  IconRelatorio,
   IconServicos,
   IconTextos,
   IconUsuarios,
@@ -33,6 +35,8 @@ const PRINCIPAL: Item[] = [
   { href: "/", rotulo: "Dashboard", Icone: IconDashboard },
   { href: "/orcamentos", rotulo: "Orçamentos", Icone: IconOrcamento, prefixo: true },
   { href: "/condominios", rotulo: "Condomínios", Icone: IconBuilding, prefixo: true },
+  { href: "/calculadora", rotulo: "Calculadora", Icone: IconCalculadora },
+  { href: "/relatorios", rotulo: "Relatórios", Icone: IconRelatorio },
 ];
 
 const ADMIN: Item[] = [

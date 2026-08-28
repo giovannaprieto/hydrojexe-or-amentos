@@ -58,6 +58,57 @@ export function round2(n: number): number {
   return Math.round((n + Number.EPSILON) * 100) / 100;
 }
 
+// ---------------------------------------------------------------------------
+// Fórmulas dos tipos "simples" (gestão mensal, TSS Light, individualização de
+// gás). São as MESMAS contas das server actions de salvamento — extraídas para
+// que a Calculadora não duplique lógica de cálculo.
+// ---------------------------------------------------------------------------
+
+/** Gestão mensal (água/gás): total mensal = qtd pontos × valor por ponto. */
+export function calcGestaoMensal(input: {
+  qtdApartamentos: number;
+  pontosPorApartamento: number;
+  valorPorApartamento: number;
+}): { totalPontos: number; valorTotalMensal: number } {
+  const totalPontos =
+    Math.trunc(input.qtdApartamentos || 0) *
+    (Math.trunc(input.pontosPorApartamento || 0) || 1);
+  return {
+    totalPontos,
+    valorTotalMensal: round2(totalPontos * (Number(input.valorPorApartamento) || 0)),
+  };
+}
+
+export type OpcaoValor = { valor: number; parcelas: number };
+
+/**
+ * TSS Light: uma opção por forma de pagamento; valor = preço unitário do item
+ * "TSS" naquela forma (não multiplica por pontos).
+ */
+export function calcTssLightOpcoes(
+  formas: { num_parcelas: number; precoUnit: number }[],
+): OpcaoValor[] {
+  return formas.map((f) => ({
+    valor: round2(Number(f.precoUnit) || 0),
+    parcelas: f.num_parcelas,
+  }));
+}
+
+/**
+ * Individualização de gás: uma opção por forma; valor = preço unitário do
+ * medidor naquela forma × pontos (medidores) por apartamento.
+ */
+export function calcIndividualizacaoGasOpcoes(
+  formas: { num_parcelas: number; precoUnit: number }[],
+  pontosPorApartamento: number,
+): OpcaoValor[] {
+  const pontos = Math.trunc(pontosPorApartamento || 0) || 1;
+  return formas.map((f) => ({
+    valor: round2((Number(f.precoUnit) || 0) * pontos),
+    parcelas: f.num_parcelas,
+  }));
+}
+
 export function calcularOrcamento(input: CalcInput): CalcResultado {
   const pontos = new Set(input.itensPonto);
   const tss = new Set(input.itensTss);
