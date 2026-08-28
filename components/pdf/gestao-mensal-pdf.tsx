@@ -94,13 +94,7 @@ export type GestaoMensalPdfProps = {
   valorTotalMensal: number;
 };
 
-function Paragrafos({
-  texto,
-  bold,
-}: {
-  texto: string;
-  bold?: boolean;
-}) {
+function Paragrafos({ texto }: { texto: string }) {
   const linhas = (texto ?? "").split("\n");
   return (
     <>
@@ -109,13 +103,6 @@ function Paragrafos({
           return (
             <Text key={i} style={{ marginBottom: 3 }}>
               {" "}
-            </Text>
-          );
-        }
-        if (bold) {
-          return (
-            <Text key={i} style={[s.par, s.bold]}>
-              {l}
             </Text>
           );
         }
@@ -241,9 +228,9 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
           <View style={s.secaoBar}>
             <Text style={s.secaoTitulo}>DEMONSTRATIVOS INDIVIDUAIS</Text>
           </View>
-          <Paragrafos texto={demonstrativos} bold />
+          <Paragrafos texto={demonstrativos} />
           <Image src={assets.foto} style={[s.fotoSecao, { width: 260 }]} />
-          <Text style={[s.par, s.bold, { marginTop: 4 }]}>
+          <Text style={[s.par, { marginTop: 4 }]}>
             Estes demonstrativos individuais são encaminhados via e-mail através
             do nosso sistema diretamente aos condôminos para conferência mensal.
           </Text>
