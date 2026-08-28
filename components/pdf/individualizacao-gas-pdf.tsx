@@ -179,7 +179,19 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
         {administradora ? <Text>Administradora: {administradora}</Text> : null}
 
         <Text style={s.ref}>Ref.: {INDIVIDUALIZACAO_GAS.ref}</Text>
-        <Text style={[s.par, s.bold, { marginBottom: 4 }]}>{analiseTecnica}</Text>
+        <Text style={[s.par, { marginBottom: 4 }]}>
+          {analiseTecnica.trimStart().startsWith("Análise técnica:") ? (
+            <>
+              <Text style={s.bold}>Análise técnica:</Text>
+              {analiseTecnica.slice(
+                analiseTecnica.indexOf("Análise técnica:") +
+                  "Análise técnica:".length,
+              )}
+            </>
+          ) : (
+            analiseTecnica
+          )}
+        </Text>
 
         {secoes.map((sec, i) => (
           <Secao key={i} n={i + 1} titulo={sec.titulo}>

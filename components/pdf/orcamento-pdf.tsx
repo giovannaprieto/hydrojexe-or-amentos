@@ -144,9 +144,19 @@ function Paragrafos({ texto }: { texto: string }) {
             </Text>
           );
         }
-        const negrito = l.trimStart().startsWith("Análise técnica:");
+        const rotulo = "Análise técnica:";
+        if (l.trimStart().startsWith(rotulo)) {
+          const i0 = l.indexOf(rotulo);
+          return (
+            <Text key={i} style={s.par}>
+              {l.slice(0, i0)}
+              <Text style={s.bold}>{rotulo}</Text>
+              {l.slice(i0 + rotulo.length)}
+            </Text>
+          );
+        }
         return (
-          <Text key={i} style={negrito ? [s.par, s.bold] : s.par}>
+          <Text key={i} style={s.par}>
             {l}
           </Text>
         );
