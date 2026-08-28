@@ -11,7 +11,7 @@ import {
   textoOuNulo,
   type FormState,
 } from "@/lib/forms";
-import { FORMAS_PAGAMENTO_BASE } from "@/lib/formas-pagamento";
+import { parseFormasVisiveis } from "@/lib/formas-pagamento";
 import { diffCampos, registrarHistorico } from "@/lib/historico";
 import { calcularOrcamento, type TipoInput } from "@/lib/orcamento-calc";
 import { VALORES_TIPO_PROPOSTA } from "@/lib/orcamento-tipos";
@@ -50,12 +50,10 @@ function parseParcelasCustom(formData: FormData): number[] {
   }
 }
 
-function parseFormasVisiveis(formData: FormData): number[] {
-  const base = FORMAS_PAGAMENTO_BASE as readonly number[];
-  const marcadas = new Set(
-    formData.getAll("formas_visiveis").map((v) => Math.trunc(Number(v))),
+function formasVisiveisDoForm(formData: FormData): number[] {
+  return parseFormasVisiveis(
+    formData.getAll("formas_visiveis").map((v) => Number(v)),
   );
-  return base.filter((n) => marcadas.has(n));
 }
 
 // ---------------------------------------------------------------------------
@@ -101,6 +99,7 @@ export async function criarOrcamento(
       status: "rascunho",
       tipo_proposta,
       incluir_tss: booleano(formData, "incluir_tss"),
+      formas_pagamento_visiveis: formasVisiveisDoForm(formData),
       parcelas_custom: parseParcelasCustom(formData),
       tss_opcoes: [],
       prazo: textoOuNulo(formData, "prazo"),
@@ -171,15 +170,8 @@ export async function atualizarCabecalho(
     return { ok: false, error: "Tipo de proposta inválido." };
   }
 
-  const formas_pagamento_visiveis = parseFormasVisiveis(formData);
+  const formas_pagamento_visiveis = formasVisiveisDoForm(formData);
   const parcelas_custom = parseParcelasCustom(formData);
-  if (formas_pagamento_visiveis.length === 0 && parcelas_custom.length === 0) {
-    return {
-      ok: false,
-      error:
-        "Selecione ao menos uma forma de pagamento (ou adicione uma forma extra).",
-    };
-  }
 
   const novos = {
     numero,

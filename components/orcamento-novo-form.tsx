@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { criarOrcamento } from "@/app/(app)/orcamentos/actions";
+import { FormasPagamentoVisiveis } from "@/components/formas-pagamento-visiveis";
 import { IconPlus } from "@/components/icons";
 import { ParcelasCustom } from "@/components/parcelas-custom";
 import {
@@ -104,6 +105,8 @@ export function OrcamentoNovoForm({
             label="Incluir TSS (rateio por unidade)"
             defaultChecked
           />
+
+          <FormasPagamentoVisiveis inicial={[1, 6, 9, 12]} />
 
           <ParcelasCustom name="parcelas_custom" inicial={[]} />
 
