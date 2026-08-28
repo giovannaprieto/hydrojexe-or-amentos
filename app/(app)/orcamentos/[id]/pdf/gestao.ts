@@ -16,6 +16,7 @@ export type OrcGestaoCondominio = {
   cidade: string | null;
   uf: string | null;
   administradora: string | null;
+  parcelamento_especial?: boolean | null;
 } | null;
 
 type OrcGestao = {

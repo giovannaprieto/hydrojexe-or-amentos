@@ -6,6 +6,7 @@ import { IndividualizacaoGasPdf } from "@/components/pdf/individualizacao-gas-pd
 import { dataPorExtenso } from "@/lib/data-extenso";
 import {
   filtrarPorFormasVisiveis,
+  parcelasOrigemPreco,
   parseFormasVisiveis,
 } from "@/lib/formas-pagamento";
 import {
@@ -69,13 +70,25 @@ export async function gerarPdfIndividualizacaoGas(
     );
   }
 
+  // parcelamento especial do condomínio: 9x mostra o valor de 6x, 12x o de 9x
+  const valorPorParcelas = new Map(congeladas.map((o) => [o.parcelas, o.valor]));
+  const especial = !!orc.condominios?.parcelamento_especial;
+  const efetivas: TssOpcao[] = especial
+    ? congeladas.map((o) => ({
+        parcelas: o.parcelas,
+        valor:
+          valorPorParcelas.get(parcelasOrigemPreco(o.parcelas, true)) ?? o.valor,
+      }))
+    : congeladas;
+
+  // extras (parcelas_custom) usam SEMPRE o valor real de 12x (não deslocado)
   const base12 =
-    congeladas.find((o) => o.parcelas === 12)?.valor ??
+    valorPorParcelas.get(12) ??
     congeladas[congeladas.length - 1]?.valor ??
     0;
   const opcoes = [
     ...filtrarPorFormasVisiveis(
-      congeladas,
+      efetivas,
       parseFormasVisiveis(orc.formas_pagamento_visiveis),
     ),
     ...parseParcelasCustom(orc.parcelas_custom).map((n) => ({

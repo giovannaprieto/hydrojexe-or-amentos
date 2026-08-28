@@ -204,27 +204,36 @@ export default async function OrcamentoPage({
 
   const condominioNome = (orc.condominios as { nome: string } | null)?.nome;
 
+  // parcelamento especial: no preview de TSS/gás, a faixa >= 9x mostra o valor
+  // unitário da faixa uma abaixo (mesma regra do PDF).
+  type PrecoForma = { nome: string; num_parcelas: number; valorUnit: number };
+  const aplicarEspecial = (arr: PrecoForma[]): PrecoForma[] => {
+    if (!parcelamentoEspecial) return arr;
+    const porParcelas = new Map(arr.map((x) => [x.num_parcelas, x.valorUnit]));
+    return arr.map((x) => ({
+      ...x,
+      valorUnit:
+        porParcelas.get(parcelasOrigemPreco(x.num_parcelas, true)) ??
+        x.valorUnit,
+    }));
+  };
+
   // preço vigente do item "TSS", por forma — p/ o preview automático do
   // formulário de TSS Light (valor por equipamento)
-  const precoTssPorForma: {
-    nome: string;
-    num_parcelas: number;
-    valorUnit: number;
-  }[] =
+  const precoTssPorForma: PrecoForma[] =
     orc.tipo_proposta === "tss_light" && tssItem
-      ? formasProprias.map((f) => ({
-          nome: f.nome,
-          num_parcelas: f.num_parcelas,
-          valorUnit: vigPorForma.get(f.id)?.get(tssItem.id)?.valor ?? 0,
-        }))
+      ? aplicarEspecial(
+          formasProprias.map((f) => ({
+            nome: f.nome,
+            num_parcelas: f.num_parcelas,
+            valorUnit: vigPorForma.get(f.id)?.get(tssItem.id)?.valor ?? 0,
+          })),
+        )
       : [];
 
   // preços vigentes dos medidores de gás, por forma — p/ o preview automático
   // do formulário de individualização de gás
-  const precoPorMedidorGas: Record<
-    string,
-    { nome: string; num_parcelas: number; valorUnit: number }[]
-  > =
+  const precoPorMedidorGas: Record<string, PrecoForma[]> =
     orc.tipo_proposta === "individualizacao_gas"
       ? Object.fromEntries(
           ["gas_1_6", "gas_2_5"].map((slug) => {
@@ -232,11 +241,13 @@ export default async function OrcamentoPage({
             return [
               slug,
               it
-                ? formasProprias.map((f) => ({
-                    nome: f.nome,
-                    num_parcelas: f.num_parcelas,
-                    valorUnit: vigPorForma.get(f.id)?.get(it.id)?.valor ?? 0,
-                  }))
+                ? aplicarEspecial(
+                    formasProprias.map((f) => ({
+                      nome: f.nome,
+                      num_parcelas: f.num_parcelas,
+                      valorUnit: vigPorForma.get(f.id)?.get(it.id)?.valor ?? 0,
+                    })),
+                  )
                 : [],
             ];
           }),
