@@ -1,4 +1,11 @@
 import { NovaTabelaPrecos } from "@/components/nova-tabela-precos";
+import {
+  Badge,
+  Card,
+  EmptyRow,
+  PageHeader,
+  TableWrap,
+} from "@/components/ui-layout";
 import { requireAdmin } from "@/lib/auth";
 import { formatBRL, formatDateBR, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -61,73 +68,73 @@ export default async function PrecosPage() {
   }
 
   return (
-    <main className="flex flex-col gap-12">
-      <section className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="text-xl font-semibold">Tabela de preços</h1>
-          {vigenciaAtual ? (
-            <span className="text-sm text-black/60 dark:text-white/60">
-              Vigente desde {formatDateBR(vigenciaAtual)}
-            </span>
-          ) : null}
-        </div>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo="Tabela de preços"
+        descricao="Valor unitário de cada item por forma de pagamento."
+        etiqueta={
+          vigenciaAtual ? (
+            <Badge tom="info">Vigente desde {formatDateBR(vigenciaAtual)}</Badge>
+          ) : null
+        }
+      />
 
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-black/10 text-black/60 dark:border-white/10 dark:text-white/60">
-              <tr>
-                <th className="px-3 py-2 font-medium">Item</th>
+      <Card plano>
+        <TableWrap>
+          <thead>
+            <tr>
+              <th>Item</th>
+              {formasProprias.map((f) => (
+                <th key={f.id} className="text-right">
+                  {f.nome}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {itensAtivos.map((i) => (
+              <tr key={i.id}>
+                <td className="font-medium whitespace-nowrap text-navy-900">
+                  {i.nome}
+                </td>
                 {formasProprias.map((f) => (
-                  <th key={f.id} className="px-3 py-2 text-right font-medium">
-                    {f.nome}
-                  </th>
+                  <td key={f.id} className="text-right tabular-nums">
+                    {formatBRL(vigentes.get(`${i.id}__${f.id}`) ?? null)}
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {itensAtivos.map((i) => (
-                <tr
-                  key={i.id}
-                  className="border-b border-black/5 last:border-0 dark:border-white/5"
-                >
-                  <td className="whitespace-nowrap px-3 py-2">{i.nome}</td>
-                  {formasProprias.map((f) => (
-                    <td
-                      key={f.id}
-                      className="px-3 py-2 text-right tabular-nums text-black/80 dark:text-white/80"
-                    >
-                      {formatBRL(vigentes.get(`${i.id}__${f.id}`) ?? null)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+            {itensAtivos.length === 0 ? (
+              <EmptyRow colSpan={formasProprias.length + 1}>
+                Nenhum item ativo.
+              </EmptyRow>
+            ) : null}
+          </tbody>
+        </TableWrap>
+      </Card>
 
-        {formasDerivadas.length > 0 ? (
-          <p className="text-xs text-black/50 dark:text-white/50">
-            {formasDerivadas
-              .map(
-                (f) =>
-                  `${f.nome} usa o preço de ${
-                    f.usa_preco_de_forma_id
-                      ? (nomeForma.get(f.usa_preco_de_forma_id) ?? "—")
-                      : "—"
-                  }`,
-              )
-              .join(" · ")}
-          </p>
-        ) : null}
-      </section>
+      {formasDerivadas.length > 0 ? (
+        <p className="hj-hint -mt-4">
+          {formasDerivadas
+            .map(
+              (f) =>
+                `${f.nome} usa o preço de ${
+                  f.usa_preco_de_forma_id
+                    ? (nomeForma.get(f.usa_preco_de_forma_id) ?? "—")
+                    : "—"
+                }`,
+            )
+            .join(" · ")}
+        </p>
+      ) : null}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Nova tabela de preços</h2>
-        <p className="max-w-2xl text-sm text-black/60 dark:text-white/60">
+        <h2 className="hj-section-title">Nova tabela de preços</h2>
+        <p className="max-w-3xl hj-muted">
           Informe a data de início e ajuste os valores (os campos vêm
           preenchidos com a tabela vigente). Ao salvar, a vigência anterior é
-          encerrada nessa data e os novos valores passam a valer — orçamentos
-          já criados não são afetados.
+          encerrada nessa data e os novos valores passam a valer — orçamentos já
+          criados não são afetados.
         </p>
         <NovaTabelaPrecos
           hoje={hoje}
@@ -138,55 +145,49 @@ export default async function PrecosPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Histórico</h2>
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-black/10 text-black/60 dark:border-white/10 dark:text-white/60">
+        <h2 className="hj-section-title">Histórico de vigências</h2>
+        <Card plano>
+          <TableWrap>
+            <thead>
               <tr>
-                <th className="px-3 py-2 font-medium">Item</th>
-                <th className="px-3 py-2 font-medium">Forma</th>
-                <th className="px-3 py-2 text-right font-medium">Valor</th>
-                <th className="px-3 py-2 font-medium">Início</th>
-                <th className="px-3 py-2 font-medium">Fim</th>
+                <th>Item</th>
+                <th>Forma</th>
+                <th className="text-right">Valor</th>
+                <th>Início</th>
+                <th>Fim</th>
               </tr>
             </thead>
             <tbody>
               {todosPrecos.map((p) => (
-                <tr
-                  key={p.id}
-                  className="border-b border-black/5 last:border-0 dark:border-white/5"
-                >
-                  <td className="px-3 py-1.5">
-                    {nomeItem.get(p.item_id) ?? "—"}
-                  </td>
-                  <td className="px-3 py-1.5">
+                <tr key={p.id}>
+                  <td>{nomeItem.get(p.item_id) ?? "—"}</td>
+                  <td className="text-ink-600">
                     {nomeForma.get(p.forma_pagamento_id) ?? "—"}
                   </td>
-                  <td className="px-3 py-1.5 text-right tabular-nums">
+                  <td className="text-right font-medium tabular-nums">
                     {formatBRL(p.valor)}
                   </td>
-                  <td className="px-3 py-1.5">
+                  <td className="text-ink-600">
                     {formatDateBR(p.vigencia_inicio)}
                   </td>
-                  <td className="px-3 py-1.5 text-black/60 dark:text-white/60">
-                    {p.vigencia_fim ? formatDateBR(p.vigencia_fim) : "vigente"}
+                  <td>
+                    {p.vigencia_fim ? (
+                      <span className="text-ink-500">
+                        {formatDateBR(p.vigencia_fim)}
+                      </span>
+                    ) : (
+                      <Badge tom="success">Vigente</Badge>
+                    )}
                   </td>
                 </tr>
               ))}
               {todosPrecos.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-3 py-4 text-center text-black/50 dark:text-white/50"
-                  >
-                    Nenhum preço cadastrado.
-                  </td>
-                </tr>
+                <EmptyRow colSpan={5}>Nenhum preço cadastrado.</EmptyRow>
               ) : null}
             </tbody>
-          </table>
-        </div>
+          </TableWrap>
+        </Card>
       </section>
-    </main>
+    </div>
   );
 }

@@ -3,7 +3,15 @@
 import { useActionState, useState } from "react";
 
 import { salvarGestaoMensal } from "@/app/(app)/orcamentos/actions";
-import { Field, FormError, SubmitButton, TextInput } from "@/components/ui";
+import { IconCheck } from "@/components/icons";
+import {
+  Field,
+  FormError,
+  FormSuccess,
+  SubmitButton,
+  TextInput,
+} from "@/components/ui";
+import { Card } from "@/components/ui-layout";
 import { formatBRL } from "@/lib/format";
 import { emptyFormState } from "@/lib/forms";
 
@@ -37,19 +45,14 @@ export function GestaoMensalForm({ inicial }: { inicial: GestaoMensalInicial }) 
   const totalMensal = totalPontos * nValor;
 
   return (
-    <form
-      action={formAction}
-      className="flex flex-col gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10"
-    >
+    <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="id" value={inicial.id} />
 
-      <p className="text-sm text-black/60 dark:text-white/60">
-        Proposta de <strong>gestão mensal de {inicial.sistema}</strong> (leitura
-        visual). Sem tipos de apartamento e sem parcelamento — a cobrança é
-        mensal, por {inicial.ponto}.
-      </p>
-
-      <div className="grid gap-4 sm:grid-cols-3">
+      <Card
+        titulo={`Gestão mensal de ${inicial.sistema}`}
+        descricao={`Leitura visual. Sem tipos de apartamento e sem parcelamento — a cobrança é mensal, por ${inicial.ponto}.`}
+      >
+      <div className="grid gap-5 sm:grid-cols-3">
         <Field label="Qtd. de apartamentos *">
           <TextInput
             type="number"
@@ -84,18 +87,32 @@ export function GestaoMensalForm({ inicial }: { inicial: GestaoMensalInicial }) 
         </Field>
       </div>
 
-      <div className="rounded-md bg-black/5 px-3 py-2 text-sm dark:bg-white/10">
-        Pontos a serem lidos: <strong>{totalPontos || "—"}</strong> · Valor total
-        mensal: <strong>{formatBRL(totalMensal)}</strong>
-      </div>
+        <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-lg bg-navy-900 px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-brand-200 uppercase">
+              Pontos a serem lidos
+            </p>
+            <p className="text-lg font-semibold text-white tabular-nums">
+              {totalPontos || "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-brand-200 uppercase">
+              Valor total mensal
+            </p>
+            <p className="text-lg font-semibold text-white tabular-nums">
+              {formatBRL(totalMensal)}
+            </p>
+          </div>
+        </div>
+      </Card>
 
-      {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          {state.mensagem ?? "Salvo."}
-        </p>
-      ) : null}
+      {state.ok ? <FormSuccess message={state.mensagem ?? "Salvo."} /> : null}
       <FormError message={state.error} />
-      <SubmitButton>Salvar gestão mensal</SubmitButton>
+
+      <div className="flex justify-end">
+        <SubmitButton icone={<IconCheck />}>Salvar gestão mensal</SubmitButton>
+      </div>
     </form>
   );
 }

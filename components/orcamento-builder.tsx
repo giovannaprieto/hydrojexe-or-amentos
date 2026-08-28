@@ -3,7 +3,8 @@
 import { useActionState, useMemo, useState } from "react";
 
 import { salvarOrcamento } from "@/app/(app)/orcamentos/actions";
-import { FormError, SubmitButton } from "@/components/ui";
+import { IconCheck, IconClose, IconPlus, IconTrash } from "@/components/icons";
+import { FormError, FormSuccess, SubmitButton } from "@/components/ui";
 import { formatBRL } from "@/lib/format";
 import { emptyFormState } from "@/lib/forms";
 import { calcularOrcamento, type CalcResultado } from "@/lib/orcamento-calc";
@@ -18,9 +19,6 @@ type ItemCat = {
 type Forma = { id: string; nome: string };
 type LinhaItem = { item_id: string; quantidade: string };
 type Tipo = { nome: string; unidades: string; itens: LinhaItem[] };
-
-const inputBase =
-  "rounded-md border border-black/15 bg-transparent px-2 py-1 text-sm outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/50";
 
 export function OrcamentoBuilder({
   orcamentoId,
@@ -154,40 +152,52 @@ export function OrcamentoBuilder({
     setTipo(i, { itens: tipos[i].itens.filter((_, k) => k !== j) });
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="id" value={orcamentoId} />
       <input type="hidden" name="payload" value={payload} />
 
-      <p className="text-sm text-black/60 dark:text-white/60">
-        Total de unidades: {base?.totalUnidades ?? 0}
-        {incluirTss
-          ? ` · rateio de TSS por unidade (à vista) ${formatBRL(base?.tssPorUnidade ?? 0)}`
-          : " · sem TSS"}
-        {" · o PDF traz "}
-        {formas.map((f) => f.nome).join(", ")}
-      </p>
+      {/* Resumo da composição ------------------------------------------------ */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-brand-200 bg-brand-50/70 px-4 py-3 text-sm text-navy-800">
+        <span>
+          Total de unidades:{" "}
+          <strong className="tabular-nums">{base?.totalUnidades ?? 0}</strong>
+        </span>
+        <span>
+          {incluirTss ? (
+            <>
+              Rateio de TSS por unidade (à vista):{" "}
+              <strong className="tabular-nums">
+                {formatBRL(base?.tssPorUnidade ?? 0)}
+              </strong>
+            </>
+          ) : (
+            "Sem TSS"
+          )}
+        </span>
+        <span className="text-ink-500">
+          O PDF traz {formas.map((f) => f.nome).join(", ")}
+        </span>
+      </div>
 
+      {/* Tipos de apartamento ------------------------------------------------- */}
       {tipos.map((t, i) => (
-        <div
-          key={i}
-          className="flex flex-col gap-3 rounded-lg border border-black/10 p-4 dark:border-white/10"
-        >
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-sm">
-              <span className="font-medium">Tipo de apartamento</span>
+        <div key={i} className="hj-card overflow-hidden">
+          <div className="flex flex-wrap items-end gap-4 border-b border-ink-200 bg-ink-50/60 px-5 py-4">
+            <label className="flex min-w-56 flex-1 flex-col gap-1.5">
+              <span className="hj-field-label">Tipo de apartamento</span>
               <input
-                className={inputBase}
+                className="hj-control"
                 value={t.nome}
                 onChange={(e) => setTipo(i, { nome: e.target.value })}
                 placeholder="Ex.: Apartamento padrão"
               />
             </label>
-            <label className="flex w-28 flex-col gap-1 text-sm">
-              <span className="font-medium">Unidades</span>
+            <label className="flex w-28 flex-col gap-1.5">
+              <span className="hj-field-label">Unidades</span>
               <input
                 type="number"
                 min="0"
-                className={inputBase}
+                className="hj-control text-right tabular-nums"
                 value={t.unidades}
                 onChange={(e) => setTipo(i, { unidades: e.target.value })}
               />
@@ -196,18 +206,28 @@ export function OrcamentoBuilder({
               <button
                 type="button"
                 onClick={() => rmTipo(i)}
-                className="rounded-md border border-black/15 px-2 py-1 text-sm text-black/60 hover:bg-black/5 dark:border-white/20 dark:text-white/60 dark:hover:bg-white/10"
+                className="hj-btn hj-btn-danger hj-btn-sm mb-0.5"
               >
+                <IconTrash />
                 Remover tipo
               </button>
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 px-5 py-4">
+            {t.itens.length > 0 ? (
+              <div className="hidden gap-2 px-1 sm:flex">
+                <span className="hj-label flex-1">Item</span>
+                <span className="hj-label w-20 text-center">Qtd.</span>
+                <span className="hj-label w-28 text-right">Preço unit.</span>
+                <span className="w-8" />
+              </div>
+            ) : null}
+
             {t.itens.map((ci, j) => (
               <div key={j} className="flex flex-wrap items-center gap-2">
                 <select
-                  className={`${inputBase} min-w-52 flex-1`}
+                  className="hj-control min-w-52 flex-1"
                   value={ci.item_id}
                   onChange={(e) => setLinha(i, j, { item_id: e.target.value })}
                 >
@@ -221,101 +241,117 @@ export function OrcamentoBuilder({
                 <input
                   type="number"
                   min="0"
-                  className={`${inputBase} w-20`}
+                  className="hj-control w-20 text-right tabular-nums"
                   value={ci.quantidade}
                   onChange={(e) =>
                     setLinha(i, j, { quantidade: e.target.value })
                   }
                 />
-                <span className="w-28 text-right text-sm tabular-nums text-black/60 dark:text-white/60">
+                <span className="w-28 text-right text-sm font-medium tabular-nums text-ink-600">
                   {ci.item_id ? formatBRL(precoBase[ci.item_id] ?? 0) : "—"}
                 </span>
                 <button
                   type="button"
                   onClick={() => rmLinha(i, j)}
-                  className="text-sm text-red-600 hover:underline dark:text-red-400"
+                  aria-label="Remover item"
+                  className="rounded-lg p-2 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600"
                 >
-                  remover
+                  <IconClose className="size-4" />
                 </button>
               </div>
             ))}
+
             <button
               type="button"
               onClick={() => addLinha(i)}
-              className="w-fit text-sm text-black/60 underline-offset-2 hover:underline dark:text-white/60"
+              className="hj-btn hj-btn-ghost hj-btn-sm w-fit"
             >
-              + item
+              <IconPlus />
+              Adicionar item
             </button>
           </div>
 
-          <p className="text-sm">
-            Valor por apartamento:{" "}
-            {formas.map((f, k) => {
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-ink-200 bg-ink-50/60 px-5 py-3">
+            <span className="hj-label">Valor por apartamento</span>
+            {formas.map((f) => {
               const r = resultadoPorForma.get(f.id)?.tipos[i];
               return (
-                <span key={f.id}>
-                  {k > 0 ? " · " : ""}
+                <span key={f.id} className="text-sm text-ink-600">
                   {f.nome}{" "}
-                  <strong className="tabular-nums">
+                  <strong className="tabular-nums text-navy-900">
                     {formatBRL(r?.valorPorApartamento ?? 0)}
                   </strong>
                 </span>
               );
             })}
-          </p>
+          </div>
         </div>
       ))}
 
       <button
         type="button"
         onClick={addTipo}
-        className="w-fit rounded-md border border-black/15 px-3 py-2 text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+        className="hj-btn hj-btn-secondary w-fit"
       >
-        + Adicionar tipo de apartamento
+        <IconPlus />
+        Adicionar tipo de apartamento
       </button>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-black/10 p-4 text-sm dark:border-white/10">
-        <p className="font-medium">Gerenciamento mensal</p>
-        <p className="text-black/60 dark:text-white/60">
-          {formatBRL(valorPorHidrometro)} por hidrômetro · contagem automática:{" "}
-          <strong>{base?.qtdHidrometrosAuto ?? 0}</strong>
-        </p>
-        <label className="flex items-center gap-2">
-          <span>Sobrescrever qtd. hidrômetros:</span>
-          <input
-            type="number"
-            min="0"
-            className={`${inputBase} w-24`}
-            placeholder="auto"
-            value={override}
-            onChange={(e) => setOverride(e.target.value)}
-          />
-        </label>
-        <p>
-          Total mensal:{" "}
-          <strong className="tabular-nums">
-            {formatBRL(base?.valorTotalMensal ?? 0)}
-          </strong>{" "}
-          <span className="text-black/50 dark:text-white/50">
-            ({base?.qtdHidrometros ?? 0} hidrômetro(s))
-          </span>
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-1 rounded-lg border border-black/15 bg-black/[0.03] p-4 dark:border-white/15 dark:bg-white/[0.03]">
-        <p className="text-sm font-medium">Total do orçamento por forma</p>
-        {formas.map((f) => (
-          <p key={f.id} className="text-sm tabular-nums">
-            {f.nome}:{" "}
-            <strong>
-              {formatBRL(resultadoPorForma.get(f.id)?.valorTotal ?? 0)}
+      {/* Gerenciamento + totais ----------------------------------------------- */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="hj-card hj-card-pad flex flex-col gap-3">
+          <p className="hj-card-title">Gerenciamento mensal</p>
+          <p className="text-sm text-ink-600">
+            {formatBRL(valorPorHidrometro)} por hidrômetro · contagem
+            automática:{" "}
+            <strong className="text-navy-900">
+              {base?.qtdHidrometrosAuto ?? 0}
             </strong>
           </p>
-        ))}
+          <label className="flex flex-wrap items-center gap-2 text-sm text-ink-700">
+            <span>Sobrescrever qtd. hidrômetros:</span>
+            <input
+              type="number"
+              min="0"
+              className="hj-control w-24 text-right tabular-nums"
+              placeholder="auto"
+              value={override}
+              onChange={(e) => setOverride(e.target.value)}
+            />
+          </label>
+          <p className="mt-auto text-sm text-ink-600">
+            Total mensal:{" "}
+            <strong className="tabular-nums text-navy-900">
+              {formatBRL(base?.valorTotalMensal ?? 0)}
+            </strong>{" "}
+            <span className="text-ink-400">
+              ({base?.qtdHidrometros ?? 0} hidrômetro(s))
+            </span>
+          </p>
+        </div>
+
+        <div className="hj-card hj-card-pad flex flex-col gap-3 bg-navy-900">
+          <p className="text-xs font-semibold tracking-wide text-brand-200 uppercase">
+            Total do orçamento por forma
+          </p>
+          <dl className="flex flex-col gap-1.5">
+            {formas.map((f) => (
+              <div
+                key={f.id}
+                className="flex items-baseline justify-between gap-4 border-b border-white/10 pb-1.5 last:border-0"
+              >
+                <dt className="text-sm text-navy-200">{f.nome}</dt>
+                <dd className="font-semibold tabular-nums text-white">
+                  {formatBRL(resultadoPorForma.get(f.id)?.valorTotal ?? 0)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
 
       {Object.values(precoOrigem).includes("sem") ? (
-        <p className="text-sm text-amber-700 dark:text-amber-400">
+        <p className="hj-alert hj-alert-warn">
           Sem preço na tabela vigente (contam como R$ 0):{" "}
           {itens
             .filter((i) => precoOrigem[i.id] === "sem")
@@ -325,14 +361,14 @@ export function OrcamentoBuilder({
         </p>
       ) : null}
 
-      {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          {state.mensagem ?? "Salvo."}
-        </p>
-      ) : null}
+      {state.ok ? <FormSuccess message={state.mensagem ?? "Salvo."} /> : null}
       <FormError message={state.error} />
 
-      <SubmitButton pendingLabel="Salvando…">Salvar orçamento</SubmitButton>
+      <div className="flex justify-end">
+        <SubmitButton pendingLabel="Salvando…" icone={<IconCheck />}>
+          Salvar orçamento
+        </SubmitButton>
+      </div>
     </form>
   );
 }

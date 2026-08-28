@@ -1,6 +1,13 @@
 import Link from "next/link";
 
 import { FormaPagamentoForm } from "@/components/forma-pagamento-form";
+import {
+  Badge,
+  Card,
+  EmptyRow,
+  PageHeader,
+  TableWrap,
+} from "@/components/ui-layout";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,59 +27,67 @@ export default async function FormasPagamentoPage() {
   const nomePorId = new Map(lista.map((f) => [f.id, f.nome]));
 
   return (
-    <main className="flex flex-col gap-10">
-      <section className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold">Formas de pagamento</h1>
-        <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-black/10 text-black/60 dark:border-white/10 dark:text-white/60">
-              <tr>
-                <th className="px-3 py-2 font-medium">Nome</th>
-                <th className="px-3 py-2 font-medium">Slug</th>
-                <th className="px-3 py-2 font-medium">Parcelas</th>
-                <th className="px-3 py-2 font-medium">Usa preço de</th>
-                <th className="px-3 py-2 font-medium">Ordem</th>
-                <th className="px-3 py-2 font-medium">Ativa</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lista.map((f) => (
-                <tr
-                  key={f.id}
-                  className="border-b border-black/5 last:border-0 dark:border-white/5"
-                >
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/formas-pagamento/${f.id}`}
-                      className="font-medium underline-offset-2 hover:underline"
-                    >
-                      {f.nome}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2 font-mono text-xs text-black/70 dark:text-white/70">
-                    {f.slug}
-                  </td>
-                  <td className="px-3 py-2">{f.num_parcelas}</td>
-                  <td className="px-3 py-2 text-black/70 dark:text-white/70">
-                    {f.usa_preco_de_forma_id
-                      ? (nomePorId.get(f.usa_preco_de_forma_id) ?? "—")
-                      : "—"}
-                  </td>
-                  <td className="px-3 py-2">{f.ordem}</td>
-                  <td className="px-3 py-2">{f.ativo ? "sim" : "não"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo="Formas de pagamento"
+        descricao="Cada forma tem sua própria coluna na tabela de preços. Uma forma pode reaproveitar o preço de outra."
+      />
 
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Nova forma de pagamento</h2>
+      <Card plano>
+        <TableWrap>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th className="hidden md:table-cell">Identificador</th>
+              <th className="text-right">Parcelas</th>
+              <th className="hidden lg:table-cell">Usa preço de</th>
+              <th className="hidden sm:table-cell text-right">Ordem</th>
+              <th>Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lista.map((f) => (
+              <tr key={f.id}>
+                <td>
+                  <Link
+                    href={`/admin/formas-pagamento/${f.id}`}
+                    className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
+                  >
+                    {f.nome}
+                  </Link>
+                </td>
+                <td className="hidden font-mono text-xs text-ink-500 md:table-cell">
+                  {f.slug}
+                </td>
+                <td className="text-right tabular-nums">{f.num_parcelas}</td>
+                <td className="hidden text-ink-600 lg:table-cell">
+                  {f.usa_preco_de_forma_id
+                    ? (nomePorId.get(f.usa_preco_de_forma_id) ?? "—")
+                    : "—"}
+                </td>
+                <td className="hidden text-right text-ink-600 tabular-nums sm:table-cell">
+                  {f.ordem}
+                </td>
+                <td>
+                  <Badge tom={f.ativo ? "success" : "neutral"}>
+                    {f.ativo ? "Ativa" : "Inativa"}
+                  </Badge>
+                </td>
+              </tr>
+            ))}
+            {lista.length === 0 ? (
+              <EmptyRow colSpan={6}>Nenhuma forma cadastrada.</EmptyRow>
+            ) : null}
+          </tbody>
+        </TableWrap>
+      </Card>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="hj-section-title">Nova forma de pagamento</h2>
         <FormaPagamentoForm
           opcoes={lista.map((f) => ({ id: f.id, nome: f.nome }))}
         />
       </section>
-    </main>
+    </div>
   );
 }

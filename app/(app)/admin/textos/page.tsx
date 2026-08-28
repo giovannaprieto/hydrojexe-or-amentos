@@ -1,5 +1,6 @@
 import { ModeloPropostaForm } from "@/components/modelo-proposta-form";
 import { TemplateTextoForm } from "@/components/template-texto-form";
+import { PageHeader } from "@/components/ui-layout";
 import { requireAdmin } from "@/lib/auth";
 import {
   INDIVIDUALIZACAO_GAS,
@@ -31,17 +32,14 @@ export default async function TextosPage() {
   );
 
   return (
-    <main className="flex flex-col gap-10">
-      <section className="flex flex-col gap-4">
-        <h1 className="text-xl font-semibold">Textos-modelo dos orçamentos</h1>
-        <p className="text-sm text-black/60 dark:text-white/60">
-          Edite aqui os textos fixos que entram nos PDFs. Números, valores e
-          tabelas continuam vindo dos dados de cada orçamento.
-        </p>
-      </section>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo="Textos-modelo dos orçamentos"
+        descricao="Edite aqui os textos fixos que entram nos PDFs. Números, valores e tabelas continuam vindo dos dados de cada orçamento."
+      />
 
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">Individualização completa</h2>
+      <section className="flex flex-col gap-3">
+        <h2 className="hj-section-title">Individualização completa</h2>
         <TemplateTextoForm
           inicial={{
             sec_individualizacao_agua: tpl?.sec_individualizacao_agua ?? null,
@@ -56,8 +54,8 @@ export default async function TextosPage() {
         />
       </section>
 
-      <section className="flex flex-col gap-6">
-        <h2 className="text-lg font-semibold">
+      <section className="flex flex-col gap-4">
+        <h2 className="hj-section-title">
           Propostas por situação (gestão mensal, TSS Light, gás)
         </h2>
         {MODELOS_PROPOSTA_TIPOS.map((t) => {
@@ -87,6 +85,6 @@ export default async function TextosPage() {
           );
         })}
       </section>
-    </main>
+    </div>
   );
 }

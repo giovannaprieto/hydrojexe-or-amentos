@@ -3,7 +3,15 @@
 import { useActionState, useState } from "react";
 
 import { salvarModeloProposta } from "@/app/(app)/admin/textos/actions";
-import { FormError, SubmitButton, TextInput, Textarea } from "@/components/ui";
+import { IconCheck, IconPlus, IconTrash } from "@/components/icons";
+import {
+  FormError,
+  FormSuccess,
+  SubmitButton,
+  TextInput,
+  Textarea,
+} from "@/components/ui";
+import { Badge } from "@/components/ui-layout";
 import { emptyFormState } from "@/lib/forms";
 import type { SecaoModelo } from "@/lib/modelos-proposta";
 
@@ -39,78 +47,82 @@ export function ModeloPropostaForm({
   const rm = (i: number) => setSecoes((ls) => ls.filter((_, j) => j !== i));
 
   return (
-    <form
-      action={formAction}
-      className="flex flex-col gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10"
-    >
+    <form action={formAction} className="hj-card flex flex-col">
       <input type="hidden" name="tipo" value={tipo} />
       <input type="hidden" name="secoes" value={JSON.stringify(secoes)} />
 
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-semibold">{nome}</h3>
-        <span className="text-xs text-black/50 dark:text-white/50">
-          {usandoOverride
-            ? "editado (sobrescreve o padrão)"
-            : "usando texto padrão do sistema"}
-        </span>
+      <div className="hj-card-header">
+        <h3 className="hj-card-title">{nome}</h3>
+        <Badge tom={usandoOverride ? "info" : "neutral"}>
+          {usandoOverride ? "Editado" : "Texto padrão do sistema"}
+        </Badge>
       </div>
 
-      {introLabel ? (
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{introLabel}</span>
-          <Textarea name="intro" rows={4} defaultValue={introInicial ?? ""} />
-        </label>
-      ) : null}
+      <div className="flex flex-col gap-4 hj-card-pad">
+        {introLabel ? (
+          <label className="flex flex-col gap-1.5">
+            <span className="hj-field-label">{introLabel}</span>
+            <Textarea name="intro" rows={4} defaultValue={introInicial ?? ""} />
+          </label>
+        ) : null}
 
-      {secoes.map((s, i) => (
-        <div
-          key={i}
-          className="flex flex-col gap-2 rounded-md border border-black/10 p-3 dark:border-white/10"
-        >
-          <div className="flex items-center gap-2">
-            <TextInput
-              placeholder="Título da seção"
-              value={s.titulo}
-              onChange={(e) => patch(i, { titulo: e.target.value })}
+        {secoes.map((s, i) => (
+          <div
+            key={i}
+            className="flex flex-col gap-2.5 rounded-lg border border-ink-200 bg-ink-50/50 p-4"
+          >
+            <div className="flex items-center gap-2">
+              <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-navy-800 text-[0.7rem] font-semibold text-white">
+                {i + 1}
+              </span>
+              <TextInput
+                placeholder="Título da seção"
+                value={s.titulo}
+                onChange={(e) => patch(i, { titulo: e.target.value })}
+              />
+              {secoes.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => rm(i)}
+                  aria-label={`Remover seção ${i + 1}`}
+                  className="shrink-0 rounded-lg p-2 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                >
+                  <IconTrash className="size-4" />
+                </button>
+              ) : null}
+            </div>
+            <Textarea
+              placeholder="Corpo da seção"
+              rows={5}
+              value={s.corpo}
+              onChange={(e) => patch(i, { corpo: e.target.value })}
             />
-            {secoes.length > 1 ? (
-              <button
-                type="button"
-                onClick={() => rm(i)}
-                className="shrink-0 text-sm text-red-600 hover:underline dark:text-red-400"
-              >
-                remover
-              </button>
-            ) : null}
           </div>
-          <Textarea
-            placeholder="Corpo da seção"
-            rows={5}
-            value={s.corpo}
-            onChange={(e) => patch(i, { corpo: e.target.value })}
-          />
-        </div>
-      ))}
+        ))}
 
-      <button
-        type="button"
-        onClick={add}
-        className="self-start text-sm text-black/70 hover:underline dark:text-white/70"
-      >
-        + adicionar seção
-      </button>
+        <button
+          type="button"
+          onClick={add}
+          className="hj-btn hj-btn-secondary hj-btn-sm w-fit"
+        >
+          <IconPlus />
+          Adicionar seção
+        </button>
 
-      <p className="text-xs text-black/50 dark:text-white/50">
-        Para voltar ao texto padrão do sistema, remova todas as seções e salve.
-      </p>
-
-      {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          {state.mensagem ?? "Salvo."}
+        <p className="hj-hint">
+          Para voltar ao texto padrão do sistema, remova todas as seções e
+          salve.
         </p>
-      ) : null}
-      <FormError message={state.error} />
-      <SubmitButton>Salvar “{nome}”</SubmitButton>
+
+        {state.ok ? (
+          <FormSuccess message={state.mensagem ?? "Salvo."} />
+        ) : null}
+        <FormError message={state.error} />
+
+        <div className="flex justify-end">
+          <SubmitButton icone={<IconCheck />}>Salvar “{nome}”</SubmitButton>
+        </div>
+      </div>
     </form>
   );
 }

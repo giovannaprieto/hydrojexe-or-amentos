@@ -3,7 +3,15 @@
 import { useActionState } from "react";
 
 import { aplicarNovaTabela } from "@/app/(app)/admin/precos/actions";
-import { Field, FormError, SubmitButton, TextInput } from "@/components/ui";
+import { IconCheck } from "@/components/icons";
+import {
+  Field,
+  FormError,
+  FormSuccess,
+  SubmitButton,
+  TextInput,
+} from "@/components/ui";
+import { Card, TableWrap } from "@/components/ui-layout";
 import { emptyFormState } from "@/lib/forms";
 
 type Opcao = { id: string; nome: string };
@@ -22,24 +30,27 @@ export function NovaTabelaPrecos({
   const [state, formAction] = useActionState(aplicarNovaTabela, emptyFormState);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <Field label="Vigência a partir de">
-        <TextInput
-          type="date"
-          name="vigencia_inicio"
-          defaultValue={hoje}
-          required
-          className="w-44"
-        />
-      </Field>
+    <form action={formAction} className="flex flex-col gap-5">
+      <Card>
+        <div className="w-52">
+          <Field label="Vigência a partir de">
+            <TextInput
+              type="date"
+              name="vigencia_inicio"
+              defaultValue={hoje}
+              required
+            />
+          </Field>
+        </div>
+      </Card>
 
-      <div className="overflow-x-auto rounded-lg border border-black/10 dark:border-white/10">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-black/10 text-black/60 dark:border-white/10 dark:text-white/60">
+      <Card plano>
+        <TableWrap>
+          <thead>
             <tr>
-              <th className="px-3 py-2 font-medium">Item</th>
+              <th>Item</th>
               {formas.map((f) => (
-                <th key={f.id} className="px-3 py-2 text-right font-medium">
+                <th key={f.id} className="text-right">
                   {f.nome}
                 </th>
               ))}
@@ -47,13 +58,12 @@ export function NovaTabelaPrecos({
           </thead>
           <tbody>
             {itens.map((i) => (
-              <tr
-                key={i.id}
-                className="border-b border-black/5 last:border-0 dark:border-white/5"
-              >
-                <td className="whitespace-nowrap px-3 py-1.5">{i.nome}</td>
+              <tr key={i.id}>
+                <td className="font-medium whitespace-nowrap text-navy-900">
+                  {i.nome}
+                </td>
                 {formas.map((f) => (
-                  <td key={f.id} className="px-2 py-1">
+                  <td key={f.id} className="py-2">
                     <input
                       type="number"
                       step="0.01"
@@ -61,24 +71,26 @@ export function NovaTabelaPrecos({
                       inputMode="decimal"
                       name={`valor__${i.id}__${f.id}`}
                       defaultValue={atuais[`${i.id}__${f.id}`] ?? ""}
-                      className="w-28 rounded-md border border-black/15 bg-transparent px-2 py-1 text-right text-sm outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/50"
+                      className="hj-control ml-auto w-28 py-1.5 text-right tabular-nums"
                     />
                   </td>
                 ))}
               </tr>
             ))}
           </tbody>
-        </table>
-      </div>
+        </TableWrap>
+      </Card>
 
       {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          {state.mensagem ?? "Nova tabela aplicada."}
-        </p>
+        <FormSuccess message={state.mensagem ?? "Nova tabela aplicada."} />
       ) : null}
       <FormError message={state.error} />
 
-      <SubmitButton pendingLabel="Aplicando…">Aplicar nova tabela</SubmitButton>
+      <div className="flex justify-end">
+        <SubmitButton pendingLabel="Aplicando…" icone={<IconCheck />}>
+          Aplicar nova tabela
+        </SubmitButton>
+      </div>
     </form>
   );
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -6,13 +5,23 @@ import {
   excluirOrcamento,
 } from "@/app/(app)/orcamentos/actions";
 import { GestaoMensalForm } from "@/components/gestao-mensal-form";
+import { IconPdf, IconRefresh, IconTrash } from "@/components/icons";
 import { IndividualizacaoGasForm } from "@/components/individualizacao-gas-form";
 import { TssLightForm } from "@/components/tss-light-form";
 import { OrcamentoBuilder } from "@/components/orcamento-builder";
 import { OrcamentoCabecalhoForm } from "@/components/orcamento-cabecalho-form";
 import { OrcamentoHistorico } from "@/components/orcamento-historico";
+import {
+  Alert,
+  Card,
+  DataList,
+  LinkButton,
+  PageHeader,
+  StatusBadge,
+} from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import { MODELOS_GESTAO, isGestaoMensal } from "@/lib/modelos-proposta";
+import { rotuloTipoProposta } from "@/lib/orcamento-tipos";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import {
   precosCongeladosPorForma,
@@ -187,37 +196,43 @@ export default async function OrcamentoPage({
         .filter((o) => o.valor > 0)
     : [];
 
-  return (
-    <main className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <Link
-          href="/orcamentos"
-          className="text-sm text-black/60 dark:text-white/60"
-        >
-          ← Orçamentos
-        </Link>
-        <h1 className="text-xl font-semibold">
-          {orc.numero} · {condominioNome}
-        </h1>
-        <p className="text-sm text-black/60 dark:text-white/60">
-          {formatDateBR(orc.data_orcamento)} · status {orc.status}
-        </p>
-      </div>
+  const podeGerarPdf =
+    orc.tipo_proposta === "completa" ||
+    isGestaoMensal(orc.tipo_proposta) ||
+    orc.tipo_proposta === "tss_light" ||
+    orc.tipo_proposta === "individualizacao_gas";
 
-      {erro ? (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
-          {erro}
-        </p>
-      ) : null}
+  return (
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo={`${orc.numero} · ${condominioNome}`}
+        voltar={{ href: "/orcamentos", rotulo: "Orçamentos" }}
+        etiqueta={<StatusBadge status={orc.status} />}
+        descricao={`${rotuloTipoProposta(orc.tipo_proposta)} · ${formatDateBR(orc.data_orcamento)}`}
+        acoes={
+          podeGerarPdf ? (
+            <LinkButton
+              href={`/orcamentos/${orc.id}/pdf`}
+              variante="primary"
+              externo
+            >
+              <IconPdf />
+              Gerar PDF
+            </LinkButton>
+          ) : null
+        }
+      />
+
+      {erro ? <Alert tom="error">{erro}</Alert> : null}
       {recongelar ? (
-        <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+        <Alert tom="warn">
           Congelamento limpo. Clique em “Salvar orçamento” para recongelar os
           preços pela tabela vigente.
-        </p>
+        </Alert>
       ) : null}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Dados gerais</h2>
+        <h2 className="hj-section-title">Dados gerais</h2>
         <OrcamentoCabecalhoForm
           inicial={{
             id: orc.id,
@@ -239,7 +254,7 @@ export default async function OrcamentoPage({
       {orc.tipo_proposta === "completa" ? (
         <>
           <section className="flex flex-col gap-3">
-            <h2 className="text-lg font-semibold">Composição e cálculo</h2>
+            <h2 className="hj-section-title">Composição e cálculo</h2>
             <OrcamentoBuilder
               orcamentoId={orc.id}
               incluirTss={orc.incluir_tss}
@@ -260,24 +275,40 @@ export default async function OrcamentoPage({
             />
           </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">Última gravação</h2>
-            <div className="rounded-lg border border-black/10 p-4 text-sm dark:border-white/10">
-              <p>
-                Total de unidades: {orc.total_unidades ?? "—"} · TSS congelado (à
-                vista): {formatBRL(orc.valor_tss)} · Total à vista:{" "}
-                <strong>{formatBRL(orc.valor_total)}</strong>
-              </p>
-              <p className="text-black/60 dark:text-white/60">
-                Gerenciamento: {formatBRL(gm?.valor_por_hidrometro ?? 0)}/hidrômetro
-                · {gm?.qtd_hidrometros ?? "—"} hidrômetro(s)
-              </p>
-            </div>
+          <section className="flex flex-col gap-3">
+            <h2 className="hj-section-title">Última gravação</h2>
+            <Card>
+              <DataList
+                colunas={4}
+                itens={[
+                  {
+                    rotulo: "Total de unidades",
+                    valor: orc.total_unidades ?? "—",
+                  },
+                  {
+                    rotulo: "TSS congelado (à vista)",
+                    valor: formatBRL(orc.valor_tss),
+                  },
+                  {
+                    rotulo: "Total à vista",
+                    valor: (
+                      <span className="text-brand-700">
+                        {formatBRL(orc.valor_total)}
+                      </span>
+                    ),
+                  },
+                  {
+                    rotulo: "Gerenciamento",
+                    valor: `${formatBRL(gm?.valor_por_hidrometro ?? 0)}/hidrômetro · ${gm?.qtd_hidrometros ?? "—"} hidrômetro(s)`,
+                  },
+                ]}
+              />
+            </Card>
           </section>
         </>
       ) : isGestaoMensal(orc.tipo_proposta) ? (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Gestão mensal</h2>
+          <h2 className="hj-section-title">Gestão mensal</h2>
           <GestaoMensalForm
             inicial={{
               id: orc.id,
@@ -291,7 +322,7 @@ export default async function OrcamentoPage({
         </section>
       ) : orc.tipo_proposta === "tss_light" ? (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">TSS Light</h2>
+          <h2 className="hj-section-title">TSS Light</h2>
           <TssLightForm
             inicial={{
               id: orc.id,
@@ -302,7 +333,7 @@ export default async function OrcamentoPage({
         </section>
       ) : orc.tipo_proposta === "individualizacao_gas" ? (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Individualização de gás</h2>
+          <h2 className="hj-section-title">Individualização de gás</h2>
           <IndividualizacaoGasForm
             inicial={{
               id: orc.id,
@@ -315,17 +346,17 @@ export default async function OrcamentoPage({
         </section>
       ) : (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Composição e cálculo</h2>
-          <p className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-3 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300">
+          <h2 className="hj-section-title">Composição e cálculo</h2>
+          <Alert tom="warn">
             O editor deste tipo de proposta ainda não está disponível — em breve
             (etapa seguinte). Por enquanto, só o cabeçalho e o histórico
             funcionam para esta proposta.
-          </p>
+          </Alert>
         </section>
       )}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Histórico de alterações</h2>
+        <h2 className="hj-section-title">Histórico de alterações</h2>
         <OrcamentoHistorico
           linhas={(historico ?? []).map((h) => ({
             id: h.id,
@@ -340,41 +371,36 @@ export default async function OrcamentoPage({
         />
       </section>
 
-      <section className="flex flex-wrap gap-3 border-t border-black/10 pt-4 dark:border-white/10">
-        {orc.tipo_proposta === "completa" ||
-        isGestaoMensal(orc.tipo_proposta) ||
-        orc.tipo_proposta === "tss_light" ||
-        orc.tipo_proposta === "individualizacao_gas" ? (
-          <a
-            href={`/orcamentos/${orc.id}/pdf`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background"
-          >
-            Gerar PDF
-          </a>
-        ) : null}
-        {orc.tipo_proposta === "completa" ? (
-          <form action={atualizarPrecosPelaTabela}>
-            <input type="hidden" name="id" value={orc.id} />
-            <button
-              type="submit"
-              className="rounded-md border border-black/15 px-3 py-2 text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+      <section className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-200 pt-6">
+        <div className="flex flex-wrap gap-2">
+          {podeGerarPdf ? (
+            <LinkButton
+              href={`/orcamentos/${orc.id}/pdf`}
+              variante="primary"
+              externo
             >
-              Recongelar preços pela tabela atual
-            </button>
-          </form>
-        ) : null}
+              <IconPdf />
+              Gerar PDF
+            </LinkButton>
+          ) : null}
+          {orc.tipo_proposta === "completa" ? (
+            <form action={atualizarPrecosPelaTabela}>
+              <input type="hidden" name="id" value={orc.id} />
+              <button type="submit" className="hj-btn hj-btn-secondary">
+                <IconRefresh />
+                Recongelar preços pela tabela atual
+              </button>
+            </form>
+          ) : null}
+        </div>
         <form action={excluirOrcamento}>
           <input type="hidden" name="id" value={orc.id} />
-          <button
-            type="submit"
-            className="rounded-md border border-red-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-          >
+          <button type="submit" className="hj-btn hj-btn-danger">
+            <IconTrash />
             Excluir orçamento
           </button>
         </form>
       </section>
-    </main>
+    </div>
   );
 }

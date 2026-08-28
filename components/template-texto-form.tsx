@@ -3,7 +3,14 @@
 import { useActionState } from "react";
 
 import { salvarTemplateTexto } from "@/app/(app)/admin/textos/actions";
-import { FormError, SubmitButton, Textarea } from "@/components/ui";
+import { IconCheck } from "@/components/icons";
+import {
+  FormError,
+  FormSuccess,
+  SubmitButton,
+  Textarea,
+} from "@/components/ui";
+import { Card } from "@/components/ui-layout";
 import { emptyFormState } from "@/lib/forms";
 
 export type TemplateTextoInicial = {
@@ -40,34 +47,30 @@ export function TemplateTextoForm({
   );
 
   return (
-    <form
-      action={formAction}
-      className="flex flex-col gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10"
-    >
-      <p className="text-sm text-black/60 dark:text-white/60">
-        Textos fixos do orçamento <strong>Individualização completa</strong>. As
-        seções 7 (Prazo) e 8 (Investimento) são geradas a partir dos dados de
-        cada orçamento.
-      </p>
+    <form action={formAction} className="flex flex-col gap-5">
+      <Card descricao="As seções 7 (Prazo) e 8 (Investimento) são geradas a partir dos dados de cada orçamento.">
+        <div className="flex flex-col gap-5">
+          {CAMPOS.map((c) => (
+            <label key={c.nome} className="flex flex-col gap-1.5">
+              <span className="hj-field-label">{c.rotulo}</span>
+              <Textarea
+                name={c.nome}
+                defaultValue={inicial[c.nome] ?? ""}
+                rows={5}
+              />
+            </label>
+          ))}
+        </div>
+      </Card>
 
-      {CAMPOS.map((c) => (
-        <label key={c.nome} className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{c.rotulo}</span>
-          <Textarea
-            name={c.nome}
-            defaultValue={inicial[c.nome] ?? ""}
-            rows={5}
-          />
-        </label>
-      ))}
-
-      {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          {state.mensagem ?? "Salvo."}
-        </p>
-      ) : null}
+      {state.ok ? <FormSuccess message={state.mensagem ?? "Salvo."} /> : null}
       <FormError message={state.error} />
-      <SubmitButton>Salvar textos do completo</SubmitButton>
+
+      <div className="flex justify-end">
+        <SubmitButton icone={<IconCheck />}>
+          Salvar textos do completo
+        </SubmitButton>
+      </div>
     </form>
   );
 }

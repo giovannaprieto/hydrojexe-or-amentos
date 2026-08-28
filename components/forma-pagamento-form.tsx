@@ -6,14 +6,17 @@ import {
   atualizarForma,
   criarForma,
 } from "@/app/(app)/admin/formas-pagamento/actions";
+import { IconCheck, IconPlus } from "@/components/icons";
 import {
   Checkbox,
   Field,
   FormError,
+  FormSuccess,
   Select,
   SubmitButton,
   TextInput,
 } from "@/components/ui";
+import { Card } from "@/components/ui-layout";
 import { emptyFormState } from "@/lib/forms";
 import type { Tables } from "@/types/database";
 
@@ -36,65 +39,71 @@ export function FormaPagamentoForm({
   const outras = opcoes.filter((o) => o.id !== inicial?.id);
 
   return (
-    <form action={formAction} className="flex max-w-xl flex-col gap-4">
+    <form action={formAction} className="flex max-w-3xl flex-col gap-5">
       {inicial ? <input type="hidden" name="id" value={inicial.id} /> : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Nome *">
-          <TextInput name="nome" required defaultValue={inicial?.nome ?? ""} />
-        </Field>
-        <Field label="Slug" hint="Em branco: gera a partir do nome.">
-          <TextInput name="slug" defaultValue={inicial?.slug ?? ""} />
-        </Field>
-      </div>
+      <Card>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Nome *">
+            <TextInput name="nome" required defaultValue={inicial?.nome ?? ""} />
+          </Field>
+          <Field label="Slug" hint="Em branco: gera a partir do nome.">
+            <TextInput name="slug" defaultValue={inicial?.slug ?? ""} />
+          </Field>
 
-      <div className="grid gap-4 sm:grid-cols-[8rem_8rem]">
-        <Field label="Nº de parcelas">
-          <TextInput
-            name="num_parcelas"
-            type="number"
-            min={1}
-            defaultValue={String(inicial?.num_parcelas ?? 1)}
-          />
-        </Field>
-        <Field label="Ordem">
-          <TextInput
-            name="ordem"
-            type="number"
-            defaultValue={String(inicial?.ordem ?? 0)}
-          />
-        </Field>
-      </div>
+          <Field label="Nº de parcelas">
+            <TextInput
+              name="num_parcelas"
+              type="number"
+              min={1}
+              defaultValue={String(inicial?.num_parcelas ?? 1)}
+            />
+          </Field>
+          <Field label="Ordem">
+            <TextInput
+              name="ordem"
+              type="number"
+              defaultValue={String(inicial?.ordem ?? 0)}
+            />
+          </Field>
 
-      <Field
-        label="Usa preço de"
-        hint="Ex.: 24x reaproveita os preços de 12x. Em branco = preço próprio."
-      >
-        <Select
-          name="usa_preco_de_forma_id"
-          defaultValue={inicial?.usa_preco_de_forma_id ?? ""}
-        >
-          <option value="">— preço próprio —</option>
-          {outras.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.nome}
-            </option>
-          ))}
-        </Select>
-      </Field>
+          <div className="sm:col-span-2">
+            <Field
+              label="Usa preço de"
+              hint="Ex.: 24x reaproveita os preços de 12x. Em branco = preço próprio."
+            >
+              <Select
+                name="usa_preco_de_forma_id"
+                defaultValue={inicial?.usa_preco_de_forma_id ?? ""}
+              >
+                <option value="">— preço próprio —</option>
+                {outras.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.nome}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
 
-      <Checkbox
-        name="ativo"
-        label="Ativa"
-        defaultChecked={inicial?.ativo ?? true}
-      />
+          <div className="sm:col-span-2">
+            <Checkbox
+              name="ativo"
+              label="Ativa"
+              defaultChecked={inicial?.ativo ?? true}
+            />
+          </div>
+        </div>
+      </Card>
 
-      {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">Salvo.</p>
-      ) : null}
+      {state.ok ? <FormSuccess message="Salvo." /> : null}
       <FormError message={state.error} />
 
-      <SubmitButton>{editando ? "Salvar" : "Adicionar forma"}</SubmitButton>
+      <div className="flex justify-end">
+        <SubmitButton icone={editando ? <IconCheck /> : <IconPlus />}>
+          {editando ? "Salvar" : "Adicionar forma"}
+        </SubmitButton>
+      </div>
     </form>
   );
 }

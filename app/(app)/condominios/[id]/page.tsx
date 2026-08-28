@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { excluirCondominio } from "@/app/(app)/condominios/actions";
 import { CondominioForm } from "@/components/condominio-form";
+import { IconTrash } from "@/components/icons";
+import { Alert, Badge, PageHeader } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,41 +35,40 @@ export default async function EditarCondominioPage({
   const orcamentos = count ?? 0;
 
   return (
-    <main className="flex flex-col gap-6">
-      <Link
-        href="/condominios"
-        className="text-sm text-black/60 dark:text-white/60"
-      >
-        ← Condomínios
-      </Link>
-      <h1 className="text-xl font-semibold">{condominio.nome}</h1>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo={condominio.nome}
+        voltar={{ href: "/condominios", rotulo: "Condomínios" }}
+        etiqueta={
+          orcamentos > 0 ? (
+            <Badge tom="info">{orcamentos} orçamento(s)</Badge>
+          ) : null
+        }
+        descricao={
+          [condominio.cidade, condominio.uf].filter(Boolean).join(" / ") ||
+          undefined
+        }
+      />
 
-      {erro ? (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
-          {erro}
-        </p>
-      ) : null}
+      {erro ? <Alert tom="error">{erro}</Alert> : null}
 
       <CondominioForm inicial={condominio} />
 
-      <form
-        action={excluirCondominio}
-        className="mt-2 flex flex-col gap-1 border-t border-black/10 pt-4 dark:border-white/10"
-      >
-        <input type="hidden" name="id" value={condominio.id} />
-        <button
-          type="submit"
-          className="w-fit rounded-md border border-red-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-        >
-          Excluir condomínio
-        </button>
+      <section className="flex flex-col gap-2 border-t border-ink-200 pt-6">
+        <form action={excluirCondominio}>
+          <input type="hidden" name="id" value={condominio.id} />
+          <button type="submit" className="hj-btn hj-btn-danger">
+            <IconTrash />
+            Excluir condomínio
+          </button>
+        </form>
         {orcamentos > 0 ? (
-          <span className="text-xs text-black/50 dark:text-white/50">
+          <span className="hj-hint">
             Este condomínio tem {orcamentos} orçamento(s); a exclusão será
             bloqueada pelo banco.
           </span>
         ) : null}
-      </form>
-    </main>
+      </section>
+    </div>
   );
 }

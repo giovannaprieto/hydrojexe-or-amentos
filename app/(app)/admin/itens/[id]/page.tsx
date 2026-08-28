@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { excluirItem } from "@/app/(app)/admin/itens/actions";
+import { IconTrash } from "@/components/icons";
 import { ItemForm } from "@/components/item-form";
+import { Alert, PageHeader } from "@/components/ui-layout";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,35 +29,26 @@ export default async function EditarItemPage({
   if (!item) notFound();
 
   return (
-    <main className="flex flex-col gap-6">
-      <Link
-        href="/admin/itens"
-        className="text-sm text-black/60 dark:text-white/60"
-      >
-        ← Itens
-      </Link>
-      <h1 className="text-xl font-semibold">{item.nome}</h1>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo={item.nome}
+        voltar={{ href: "/admin/itens", rotulo: "Serviços e itens" }}
+        descricao={item.slug}
+      />
 
-      {erro ? (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
-          {erro}
-        </p>
-      ) : null}
+      {erro ? <Alert tom="error">{erro}</Alert> : null}
 
       <ItemForm inicial={item} />
 
-      <form
-        action={excluirItem}
-        className="mt-2 border-t border-black/10 pt-4 dark:border-white/10"
-      >
-        <input type="hidden" name="id" value={item.id} />
-        <button
-          type="submit"
-          className="w-fit rounded-md border border-red-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
-        >
-          Excluir item
-        </button>
-      </form>
-    </main>
+      <section className="border-t border-ink-200 pt-6">
+        <form action={excluirItem}>
+          <input type="hidden" name="id" value={item.id} />
+          <button type="submit" className="hj-btn hj-btn-danger">
+            <IconTrash />
+            Excluir item
+          </button>
+        </form>
+      </section>
+    </div>
   );
 }

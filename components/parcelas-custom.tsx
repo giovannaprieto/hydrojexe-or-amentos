@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { IconClose, IconPlus } from "@/components/icons";
+
 /**
  * Editor da lista "formas de pagamento extras" (nº de parcelas).
  * Emite um <input type="hidden" name={name}> com JSON do array (ex.: "[18,24]").
@@ -23,17 +25,22 @@ export function ParcelasCustom({
     .filter((n) => Number.isFinite(n) && n >= 2);
 
   return (
-    <div className="flex flex-col gap-2 text-sm">
-      <span className="font-medium">Formas de pagamento extras (nº de parcelas)</span>
-      <span className="text-xs text-black/50 dark:text-white/50">
+    <div className="flex flex-col gap-2">
+      <span className="hj-field-label">
+        Formas de pagamento extras (nº de parcelas)
+      </span>
+      <span className="hj-hint">
         Usam os preços de 12x. Ex.: 18, 24, 36. Entram no PDF como opções a mais.
       </span>
 
       <input type="hidden" name={name} value={JSON.stringify(numeros)} />
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="mt-1 flex flex-wrap items-center gap-2">
         {lista.map((v, i) => (
-          <div key={i} className="flex items-center gap-1">
+          <span
+            key={i}
+            className="inline-flex items-center gap-1 rounded-lg border border-ink-300 bg-white py-1 pr-1 pl-2"
+          >
             <input
               type="number"
               min="2"
@@ -41,24 +48,26 @@ export function ParcelasCustom({
               onChange={(e) =>
                 setLista((l) => l.map((x, k) => (k === i ? e.target.value : x)))
               }
-              className="w-20 rounded-md border border-black/15 bg-transparent px-2 py-1 text-right outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/50"
+              className="w-12 border-0 bg-transparent p-0 text-right text-sm font-medium tabular-nums outline-none"
             />
-            <span className="text-black/50 dark:text-white/50">x</span>
+            <span className="text-sm text-ink-500">x</span>
             <button
               type="button"
               onClick={() => setLista((l) => l.filter((_, k) => k !== i))}
-              className="text-xs text-red-600 hover:underline dark:text-red-400"
+              aria-label={`Remover ${v || "parcela"}`}
+              className="ml-0.5 rounded p-1 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600"
             >
-              remover
+              <IconClose className="size-3.5" />
             </button>
-          </div>
+          </span>
         ))}
         <button
           type="button"
           onClick={() => setLista((l) => [...l, ""])}
-          className="rounded-md border border-black/15 px-2 py-1 text-xs hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+          className="hj-btn hj-btn-secondary hj-btn-sm"
         >
-          + adicionar
+          <IconPlus />
+          Adicionar
         </button>
       </div>
     </div>

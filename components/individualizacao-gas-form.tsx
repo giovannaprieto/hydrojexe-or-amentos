@@ -3,7 +3,15 @@
 import { useActionState, useState } from "react";
 
 import { salvarIndividualizacaoGas } from "@/app/(app)/orcamentos/actions";
-import { Field, FormError, SubmitButton, TextInput } from "@/components/ui";
+import { IconCheck, IconPlus, IconTrash } from "@/components/icons";
+import {
+  Field,
+  FormError,
+  FormSuccess,
+  SubmitButton,
+  TextInput,
+} from "@/components/ui";
+import { Card } from "@/components/ui-layout";
 import { formatBRL } from "@/lib/format";
 import { emptyFormState } from "@/lib/forms";
 import { textoFormaParcelas } from "@/lib/modelos-proposta";
@@ -61,21 +69,15 @@ export function IndividualizacaoGasForm({
     parsed.find((o) => o.parcelas <= 1)?.valor ?? parsed[0]?.valor ?? 0;
 
   return (
-    <form
-      action={formAction}
-      className="flex flex-col gap-4 rounded-lg border border-black/10 p-4 dark:border-white/10"
-    >
+    <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="id" value={inicial.id} />
       <input type="hidden" name="opcoes" value={opcoesJson} />
 
-      <p className="text-sm text-black/60 dark:text-white/60">
-        <strong>Individualização de gás</strong> (instalação de gasômetros por
-        telemetria). Até 4 opções de investimento — parcelamento sem entrada
-        (“Em 0N parcelas de R$ valor÷N”); use <strong>1</strong> parcela para “à
-        vista”.
-      </p>
-
-      <div className="grid gap-4 sm:grid-cols-3">
+      <Card
+        titulo="Instalação"
+        descricao="Instalação de gasômetros por telemetria."
+      >
+        <div className="grid gap-5 sm:grid-cols-3">
         <Field label="Qtd. de apartamentos *">
           <TextInput
             type="number"
@@ -107,79 +109,107 @@ export function IndividualizacaoGasForm({
             onChange={(e) => setGer(e.target.value)}
           />
         </Field>
-      </div>
+        </div>
+      </Card>
 
-      <div className="flex flex-col gap-3">
-        <span className="text-sm font-medium">Opções de investimento</span>
-        {linhas.map((l, i) => {
-          const valorN = Number(l.valor.replace(",", ".")) || 0;
-          const parcelasN = Math.trunc(Number(l.parcelas) || 0);
-          return (
-            <div
-              key={i}
-              className="flex flex-wrap items-end gap-3 rounded-md border border-black/10 p-3 dark:border-white/10"
+      <Card
+        titulo="Opções de investimento"
+        descricao="Até 4 opções. Parcelamento sem entrada (“Em 0N parcelas de R$ valor÷N”); use 1 parcela para “à vista”."
+        acoes={
+          linhas.length < 4 ? (
+            <button
+              type="button"
+              onClick={addLinha}
+              className="hj-btn hj-btn-secondary hj-btn-sm"
             >
-              <span className="text-sm font-medium">Opção {i + 1}</span>
-              <Field label="Valor por apartamento (R$)">
-                <TextInput
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={l.valor}
-                  onChange={(e) => setLinha(i, { valor: e.target.value })}
-                  className="w-36"
-                />
-              </Field>
-              <Field label="Nº de parcelas">
-                <TextInput
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={l.parcelas}
-                  onChange={(e) => setLinha(i, { parcelas: e.target.value })}
-                  className="w-28"
-                />
-              </Field>
-              <span className="pb-2 text-sm text-black/60 dark:text-white/60">
-                {valorN > 0
-                  ? textoFormaParcelas({ valor: valorN, parcelas: parcelasN })
-                  : "—"}
-              </span>
-              {linhas.length > 1 ? (
-                <button
-                  type="button"
-                  onClick={() => rmLinha(i)}
-                  className="pb-2 text-sm text-red-600 hover:underline dark:text-red-400"
-                >
-                  remover
-                </button>
-              ) : null}
-            </div>
-          );
-        })}
-        {linhas.length < 4 ? (
-          <button
-            type="button"
-            onClick={addLinha}
-            className="self-start text-sm text-black/70 hover:underline dark:text-white/70"
-          >
-            + adicionar opção
-          </button>
-        ) : null}
-      </div>
+              <IconPlus />
+              Adicionar opção
+            </button>
+          ) : null
+        }
+      >
+        <div className="flex flex-col gap-3">
+          {linhas.map((l, i) => {
+            const valorN = Number(l.valor.replace(",", ".")) || 0;
+            const parcelasN = Math.trunc(Number(l.parcelas) || 0);
+            return (
+              <div
+                key={i}
+                className="flex flex-wrap items-end gap-4 rounded-lg border border-ink-200 bg-ink-50/50 p-4"
+              >
+                <span className="mb-2 inline-flex size-7 items-center justify-center rounded-full bg-navy-800 text-xs font-semibold text-white">
+                  {i + 1}
+                </span>
+                <div className="w-44">
+                  <Field label="Valor por apartamento (R$)">
+                    <TextInput
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={l.valor}
+                      onChange={(e) => setLinha(i, { valor: e.target.value })}
+                    />
+                  </Field>
+                </div>
+                <div className="w-32">
+                  <Field label="Nº de parcelas">
+                    <TextInput
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={l.parcelas}
+                      onChange={(e) => setLinha(i, { parcelas: e.target.value })}
+                    />
+                  </Field>
+                </div>
+                <span className="mb-2 flex-1 text-sm font-medium text-brand-700">
+                  {valorN > 0
+                    ? textoFormaParcelas({ valor: valorN, parcelas: parcelasN })
+                    : "—"}
+                </span>
+                {linhas.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => rmLinha(i)}
+                    aria-label={`Remover opção ${i + 1}`}
+                    className="mb-1 rounded-lg p-2 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                  >
+                    <IconTrash className="size-4" />
+                  </button>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
 
-      <div className="rounded-md bg-black/5 px-3 py-2 text-sm dark:bg-white/10">
-        Pontos a serem instalados: <strong>{totalMedidores || "—"}</strong> ·
-        Snapshot (Total à vista): <strong>{formatBRL(snapshot)}</strong>
-      </div>
+        <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-lg bg-navy-900 px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-brand-200 uppercase">
+              Pontos a serem instalados
+            </p>
+            <p className="text-lg font-semibold text-white tabular-nums">
+              {totalMedidores || "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold tracking-wide text-brand-200 uppercase">
+              Total à vista (registrado)
+            </p>
+            <p className="text-lg font-semibold text-white tabular-nums">
+              {formatBRL(snapshot)}
+            </p>
+          </div>
+        </div>
+      </Card>
 
-      {state.ok ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          {state.mensagem ?? "Salvo."}
-        </p>
-      ) : null}
+      {state.ok ? <FormSuccess message={state.mensagem ?? "Salvo."} /> : null}
       <FormError message={state.error} />
-      <SubmitButton>Salvar individualização de gás</SubmitButton>
+
+      <div className="flex justify-end">
+        <SubmitButton icone={<IconCheck />}>
+          Salvar individualização de gás
+        </SubmitButton>
+      </div>
     </form>
   );
 }

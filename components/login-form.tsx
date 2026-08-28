@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { signIn, type LoginState } from "@/app/login/actions";
+import { Field, TextInput } from "@/components/ui";
 
 const initialState: LoginState = { error: null };
 
@@ -10,38 +11,36 @@ export function LoginForm() {
   const [state, formAction, pending] = useActionState(signIn, initialState);
 
   return (
-    <form action={formAction} className="flex w-full max-w-sm flex-col gap-4">
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">E-mail</span>
-        <input
+    <form action={formAction} className="flex w-full flex-col gap-5">
+      <Field label="E-mail">
+        <TextInput
           type="email"
           name="email"
           required
           autoComplete="email"
           autoFocus
-          className="rounded-md border border-black/15 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/50"
+          placeholder="voce@hydrojexe.com.br"
         />
-      </label>
+      </Field>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Senha</span>
-        <input
+      <Field label="Senha">
+        <TextInput
           type="password"
           name="password"
           required
           autoComplete="current-password"
-          className="rounded-md border border-black/15 bg-transparent px-3 py-2 outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/50"
+          placeholder="••••••••"
         />
-      </label>
+      </Field>
 
       {state.error ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+        <p className="hj-alert hj-alert-error">{state.error}</p>
       ) : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity disabled:opacity-60"
+        className="hj-btn hj-btn-primary w-full py-2.5"
       >
         {pending ? "Entrando…" : "Entrar"}
       </button>

@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { OrcamentoNovoForm } from "@/components/orcamento-novo-form";
+import { Alert, PageHeader } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import { hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -34,16 +33,17 @@ export default async function NovoOrcamentoPage() {
   );
 
   return (
-    <main className="flex flex-col gap-6">
-      <Link href="/orcamentos" className="text-sm text-black/60 dark:text-white/60">
-        ← Orçamentos
-      </Link>
-      <h1 className="text-xl font-semibold">Novo orçamento</h1>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        titulo="Novo orçamento"
+        descricao="Escolha o tipo de proposta e o condomínio. Depois de criar, você monta a composição e gera o PDF."
+        voltar={{ href: "/orcamentos", rotulo: "Orçamentos" }}
+      />
 
       {(condominios ?? []).length === 0 ? (
-        <p className="text-sm text-black/60 dark:text-white/60">
+        <Alert tom="warn">
           Cadastre um condomínio antes de criar um orçamento.
-        </p>
+        </Alert>
       ) : (
         <OrcamentoNovoForm
           condominios={condominios ?? []}
@@ -51,6 +51,6 @@ export default async function NovoOrcamentoPage() {
           hoje={hoje}
         />
       )}
-    </main>
+    </div>
   );
 }
