@@ -18,6 +18,20 @@ npm run dev
 
 App em http://localhost:3000.
 
+## Deploy (Vercel)
+
+Publicado em <https://hydrojexe-orcamentos.vercel.app>, com deploy automático a
+cada `git push` na `main`.
+
+`vercel.json` fixa as funções em **`gru1` (São Paulo)** — a mesma região do
+projeto Supabase (`sa-east-1`). Sem isso as funções rodam em `iad1`
+(Washington) e cada consulta ao banco atravessa o continente (medido: 243 ms →
+132 ms por página).
+
+Se a Vercel perder um push (não disparar o build), use o Deploy Hook em
+Settings → Git → Deploy Hooks: um `POST` na URL do hook publica o commit mais
+recente da `main`.
+
 ## Variáveis de ambiente
 
 Ver `.env.local.example`. Valores em Supabase Dashboard → Project Settings → API.
