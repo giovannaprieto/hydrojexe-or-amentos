@@ -525,6 +525,7 @@ export type Database = {
           sec_objetivo: string | null
           sec_procedimento_tecnico: string | null
           sec_intervencao: string | null
+          sec_intervencao_agua_nao_preparado: string | null
           sec_tramites_administrativos: string | null
           sec_gerenciamento_mensal: string | null
           sec_garantia: string | null
@@ -542,6 +543,7 @@ export type Database = {
           sec_objetivo?: string | null
           sec_procedimento_tecnico?: string | null
           sec_intervencao?: string | null
+          sec_intervencao_agua_nao_preparado?: string | null
           sec_tramites_administrativos?: string | null
           sec_gerenciamento_mensal?: string | null
           sec_garantia?: string | null
@@ -559,6 +561,7 @@ export type Database = {
           sec_objetivo?: string | null
           sec_procedimento_tecnico?: string | null
           sec_intervencao?: string | null
+          sec_intervencao_agua_nao_preparado?: string | null
           sec_tramites_administrativos?: string | null
           sec_gerenciamento_mensal?: string | null
           sec_garantia?: string | null

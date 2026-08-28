@@ -48,6 +48,9 @@ export async function salvarTemplateTexto(
       sec_objetivo: val("sec_objetivo"),
       sec_procedimento_tecnico: val("sec_procedimento_tecnico"),
       sec_intervencao: val("sec_intervencao"),
+      sec_intervencao_agua_nao_preparado: val(
+        "sec_intervencao_agua_nao_preparado",
+      ),
       sec_tramites_administrativos: val("sec_tramites_administrativos"),
       sec_gerenciamento_mensal: val("sec_gerenciamento_mensal"),
       sec_garantia: val("sec_garantia"),

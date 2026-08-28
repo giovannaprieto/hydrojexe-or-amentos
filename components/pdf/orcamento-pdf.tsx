@@ -140,8 +140,6 @@ export type OrcamentoPdfProps = {
   condominioEndereco: string;
   administradora: string | null;
   valorPorHidrometro: number;
-  /** condomínio marcado como preparado (shafts) — sem fotos de obra */
-  aguaPreparado: boolean;
   assets: OrcamentoPdfAssets;
   textos: {
     individualizacao: string;
@@ -193,20 +191,113 @@ function Secao({
   n,
   titulo,
   children,
+  quebravel,
 }: {
   n: number;
   titulo: string;
   children: React.ReactNode;
+  /** deixa o conteúdo quebrar entre páginas (seções longas, ex.: retrofit) */
+  quebravel?: boolean;
 }) {
   return (
-    <View wrap={false}>
-      <View style={s.secaoBar}>
+    <View wrap={!!quebravel}>
+      <View style={s.secaoBar} wrap={false} minPresenceAhead={60}>
         <Text style={s.secaoTitulo}>
           {n}. {titulo}
         </Text>
       </View>
       {children}
     </View>
+  );
+}
+
+/** marcadores de foto que podem aparecer no meio do texto da INTERVENÇÃO */
+const FOTOS_INTERVENCAO = [
+  "{foto_antes_depois}",
+  "{foto_revestimento}",
+  "{foto_hidrometro}",
+  "{foto_caixa_inspecao}",
+] as const;
+
+function ConteudoIntervencao({
+  texto,
+  assets,
+}: {
+  texto: string;
+  assets: OrcamentoPdfAssets;
+}) {
+  const temMarcador = FOTOS_INTERVENCAO.some((m) => texto.includes(m));
+  const partes = texto.split(
+    /(\{foto_antes_depois\}|\{foto_revestimento\}|\{foto_hidrometro\}|\{foto_caixa_inspecao\})/g,
+  );
+
+  return (
+    <>
+      {partes.map((p, i) => {
+        if (p === "{foto_antes_depois}") {
+          return (
+            <View key={i} wrap={false}>
+              <Image
+                src={assets.retrofitAntesDepois}
+                style={[s.fotoSecao, { width: 290 }]}
+              />
+            </View>
+          );
+        }
+        if (p === "{foto_revestimento}") {
+          return (
+            <View key={i} wrap={false}>
+              <Image
+                src={assets.retrofitRevestimento}
+                style={[s.fotoSecao, { width: 330 }]}
+              />
+            </View>
+          );
+        }
+        if (p === "{foto_hidrometro}") {
+          return (
+            <View key={i} wrap={false}>
+              <Image
+                src={assets.fotoIntervencao}
+                style={[s.fotoSecao, { width: 300 }]}
+              />
+            </View>
+          );
+        }
+        if (p === "{foto_caixa_inspecao}") {
+          return (
+            <View key={i} wrap={false}>
+              <View style={s.fotosLinha}>
+                <Image
+                  src={assets.retrofitCaixaAberta}
+                  style={{ width: 120 }}
+                />
+                <Image
+                  src={assets.retrofitCaixaFechada}
+                  style={{ width: 78 }}
+                />
+              </View>
+              <Text style={s.legendaFoto}>
+                Exemplos dos hidrômetros já instalados, sob as caixas de inspeção
+                na cor branca, com porta retrátil que permite a conferência
+                mensal do extrato cobrado por cada morador. No modelo da esquerda
+                a caixa está destampada e na direita fechada.
+              </Text>
+            </View>
+          );
+        }
+        if (p.trim() === "") return null;
+        return <Paragrafos key={i} texto={p} />;
+      })}
+
+      {/* sem marcadores (preparado / modelo genérico) -> foto padrão do medidor */}
+      {temMarcador ? null : (
+        <Image
+          src={assets.fotoIntervencao}
+          style={[s.fotoSecao, { width: 300 }]}
+        />
+      )}
+    </>
   );
 }
 
@@ -254,7 +345,6 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
     condominioEndereco,
     administradora,
     valorPorHidrometro,
-    aguaPreparado,
     assets,
     textos,
     tipos,
@@ -298,44 +388,9 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
         >
           <Paragrafos texto={textos.procedimento} />
         </Secao>
-        <Secao n={4} titulo="INTERVENÇÃO">
-          <Paragrafos texto={textos.intervencao} />
-          <Image src={assets.fotoIntervencao} style={[s.fotoSecao, { width: 300 }]} />
+        <Secao n={4} titulo="INTERVENÇÃO" quebravel>
+          <ConteudoIntervencao texto={textos.intervencao} assets={assets} />
         </Secao>
-        {!aguaPreparado ? (
-          <View>
-            <View wrap={false}>
-              <Image
-                src={assets.retrofitAntesDepois}
-                style={[s.fotoSecao, { width: 290 }]}
-              />
-            </View>
-            <View wrap={false}>
-              <Image
-                src={assets.retrofitRevestimento}
-                style={[s.fotoSecao, { width: 330 }]}
-              />
-            </View>
-            <View wrap={false}>
-              <View style={s.fotosLinha}>
-                <Image
-                  src={assets.retrofitCaixaAberta}
-                  style={{ width: 120 }}
-                />
-                <Image
-                  src={assets.retrofitCaixaFechada}
-                  style={{ width: 78 }}
-                />
-              </View>
-              <Text style={s.legendaFoto}>
-                Exemplos dos hidrômetros já instalados, sob as caixas de inspeção
-                na cor branca, com porta retrátil que permite a conferência
-                mensal do extrato cobrado por cada morador. No modelo da esquerda
-                a caixa está destampada e na direita fechada.
-              </Text>
-            </View>
-          </View>
-        ) : null}
         <Secao n={5} titulo="TRÂMITES ADMINISTRATIVOS FINAIS">
           <Paragrafos texto={textos.tramites} />
         </Secao>

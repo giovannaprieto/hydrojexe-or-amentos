@@ -76,7 +76,7 @@ export async function GET(
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
+      "id, numero, data_orcamento, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
     )
     .eq("id", id)
     .single();
@@ -311,10 +311,16 @@ export async function GET(
       if (it) slugsNaComposicao.add(it.slug);
     }
   }
-  const intervencaoTexto = (tpl?.sec_intervencao ?? "").replace(
-    /\{hidrometros\}/g,
-    fraseHidrometros(totalHidrometros, slugsNaComposicao),
-  );
+  // Não preparado (retrofit) tem uma seção INTERVENÇÃO própria, com fotos
+  // interligadas por marcadores; preparado usa sec_intervencao ({hidrometros}).
+  const intervencaoNaoPrep = tpl?.sec_intervencao_agua_nao_preparado?.trim();
+  const intervencaoTexto =
+    !cond?.agua_preparado && intervencaoNaoPrep
+      ? intervencaoNaoPrep
+      : (tpl?.sec_intervencao ?? "").replace(
+          /\{hidrometros\}/g,
+          fraseHidrometros(totalHidrometros, slugsNaComposicao),
+        );
 
   const enderecoLinha = [
     cond?.endereco,
@@ -356,7 +362,6 @@ export async function GET(
       condominioEndereco: enderecoLinha,
       administradora: cond?.administradora ?? null,
       valorPorHidrometro: gm?.valor_por_hidrometro ?? 0,
-      aguaPreparado: !!cond?.agua_preparado,
       assets: {
         header: aHeader,
         footer: aFooter,

@@ -20,6 +20,7 @@ export type TemplateTextoInicial = {
   sec_objetivo: string | null;
   sec_procedimento_tecnico: string | null;
   sec_intervencao: string | null;
+  sec_intervencao_agua_nao_preparado: string | null;
   sec_tramites_administrativos: string | null;
   sec_gerenciamento_mensal: string | null;
   sec_garantia: string | null;
@@ -46,7 +47,16 @@ const CAMPOS: {
   },
   { nome: "sec_objetivo", rotulo: "2. Objetivo da proposta" },
   { nome: "sec_procedimento_tecnico", rotulo: "3. Procedimento técnico" },
-  { nome: "sec_intervencao", rotulo: "4. Intervenção" },
+  {
+    nome: "sec_intervencao",
+    rotulo: "4. Intervenção — prédio preparado",
+    hint: "Usada quando o condomínio está marcado como preparado. Aceita {hidrometros}.",
+  },
+  {
+    nome: "sec_intervencao_agua_nao_preparado",
+    rotulo: "4b. Intervenção — prédio não preparado (retrofit)",
+    hint: "Marcadores de foto no meio do texto: {foto_antes_depois}, {foto_revestimento}, {foto_hidrometro}, {foto_caixa_inspecao}.",
+  },
   {
     nome: "sec_tramites_administrativos",
     rotulo: "5. Trâmites administrativos finais",
