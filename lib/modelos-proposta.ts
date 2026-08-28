@@ -125,7 +125,6 @@ export const TSS_LIGHT = {
       titulo: "O QUE É E COMO FUNCIONA",
       corpo:
         "O TSS Light é um concentrador de dados que recebe os sinais de rádio dos medidores e os envia, via rede de dados móveis (3G/4G), para nossos servidores, que disponibilizam a informação de consumo diário no Portal do Cliente.\n" +
-        "\n" +
         "Após análise técnica, o equipamento, normalmente, é instalado em um dos elevadores do condomínio que, durante seu movimento entre os andares, realiza a captura dos sinais de rádio dos medidores.",
     },
   ] as SecaoModelo[],
