@@ -314,15 +314,29 @@ export async function GET(
     .filter(Boolean)
     .join(" - ");
 
-  const [aHeader, aFooter, aWatermark, aFotoInterv, aFotoGer, aTechem] =
-    await Promise.all([
-      assetDataUri("timbre-header.png"),
-      assetDataUri("timbre-footer.png"),
-      assetDataUri("timbre-watermark.png"),
-      assetDataUri("foto-intervencao.png"),
-      assetDataUri("foto-gerenciamento.png"),
-      assetDataUri("logo-techem.png"),
-    ]);
+  const [
+    aHeader,
+    aFooter,
+    aWatermark,
+    aFotoInterv,
+    aFotoGer,
+    aTechem,
+    aRetroAntesDepois,
+    aRetroRevestimento,
+    aRetroCaixaAberta,
+    aRetroCaixaFechada,
+  ] = await Promise.all([
+    assetDataUri("timbre-header.png"),
+    assetDataUri("timbre-footer.png"),
+    assetDataUri("timbre-watermark.png"),
+    assetDataUri("foto-intervencao.png"),
+    assetDataUri("foto-gerenciamento.png"),
+    assetDataUri("logo-techem.png"),
+    assetDataUri("foto-retrofit-antes-depois.jpg"),
+    assetDataUri("foto-retrofit-revestimento.jpg"),
+    assetDataUri("foto-retrofit-caixa-aberta.jpg"),
+    assetDataUri("foto-retrofit-caixa-fechada.jpg"),
+  ]);
 
   const buffer = await renderToBuffer(
     createElement(OrcamentoPdf, {
@@ -333,6 +347,7 @@ export async function GET(
       condominioEndereco: enderecoLinha,
       administradora: cond?.administradora ?? null,
       valorPorHidrometro: gm?.valor_por_hidrometro ?? 0,
+      aguaPreparado: !!cond?.agua_preparado,
       assets: {
         header: aHeader,
         footer: aFooter,
@@ -340,6 +355,10 @@ export async function GET(
         fotoIntervencao: aFotoInterv,
         fotoGerenciamento: aFotoGer,
         techem: aTechem,
+        retrofitAntesDepois: aRetroAntesDepois,
+        retrofitRevestimento: aRetroRevestimento,
+        retrofitCaixaAberta: aRetroCaixaAberta,
+        retrofitCaixaFechada: aRetroCaixaFechada,
       },
       textos: {
         individualizacao: individualizacaoTexto,

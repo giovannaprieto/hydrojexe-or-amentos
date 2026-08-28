@@ -28,6 +28,21 @@ const s = StyleSheet.create({
   secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
   par: { marginBottom: 3, textIndent: 18 },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
+  fotosLinha: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 14,
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  legendaFoto: {
+    fontFamily: "Times-Bold",
+    fontSize: 9,
+    textAlign: "center",
+    textIndent: 0,
+    marginTop: 2,
+    marginBottom: 6,
+  },
   centroTitulo: {
     fontFamily: "Times-Bold",
     textAlign: "center",
@@ -110,6 +125,11 @@ export type OrcamentoPdfAssets = {
   fotoIntervencao: string;
   fotoGerenciamento: string;
   techem: string;
+  /** fotos de obra — só entram quando o prédio NÃO é preparado */
+  retrofitAntesDepois: string;
+  retrofitRevestimento: string;
+  retrofitCaixaAberta: string;
+  retrofitCaixaFechada: string;
 };
 
 export type OrcamentoPdfProps = {
@@ -120,6 +140,8 @@ export type OrcamentoPdfProps = {
   condominioEndereco: string;
   administradora: string | null;
   valorPorHidrometro: number;
+  /** condomínio marcado como preparado (shafts) — sem fotos de obra */
+  aguaPreparado: boolean;
   assets: OrcamentoPdfAssets;
   textos: {
     individualizacao: string;
@@ -232,6 +254,7 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
     condominioEndereco,
     administradora,
     valorPorHidrometro,
+    aguaPreparado,
     assets,
     textos,
     tipos,
@@ -279,6 +302,40 @@ export function OrcamentoPdf(props: OrcamentoPdfProps) {
           <Paragrafos texto={textos.intervencao} />
           <Image src={assets.fotoIntervencao} style={[s.fotoSecao, { width: 300 }]} />
         </Secao>
+        {!aguaPreparado ? (
+          <View>
+            <View wrap={false}>
+              <Image
+                src={assets.retrofitAntesDepois}
+                style={[s.fotoSecao, { width: 290 }]}
+              />
+            </View>
+            <View wrap={false}>
+              <Image
+                src={assets.retrofitRevestimento}
+                style={[s.fotoSecao, { width: 330 }]}
+              />
+            </View>
+            <View wrap={false}>
+              <View style={s.fotosLinha}>
+                <Image
+                  src={assets.retrofitCaixaAberta}
+                  style={{ width: 120 }}
+                />
+                <Image
+                  src={assets.retrofitCaixaFechada}
+                  style={{ width: 78 }}
+                />
+              </View>
+              <Text style={s.legendaFoto}>
+                Exemplos dos hidrômetros já instalados, sob as caixas de inspeção
+                na cor branca, com porta retrátil que permite a conferência
+                mensal do extrato cobrado por cada morador. No modelo da esquerda
+                a caixa está destampada e na direita fechada.
+              </Text>
+            </View>
+          </View>
+        ) : null}
         <Secao n={5} titulo="TRÂMITES ADMINISTRATIVOS FINAIS">
           <Paragrafos texto={textos.tramites} />
         </Secao>
