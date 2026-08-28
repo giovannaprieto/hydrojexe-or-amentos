@@ -47,14 +47,20 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  --radius-card: 0.75rem;
+  --radius-card: 1rem;
+
+  /* Sombras "flutuantes" — estilo SaaS premium --------------------------- */
+  --shadow-soft: 0 1px 2px rgba(16, 36, 60, 0.04), 0 4px 12px rgba(16, 36, 60, 0.05);
+  --shadow-float: 0 2px 6px rgba(16, 36, 60, 0.06), 0 12px 32px rgba(16, 36, 60, 0.09);
+  --shadow-brand: 0 6px 18px rgba(36, 120, 166, 0.28);
+  --shadow-navy: 0 6px 16px rgba(16, 36, 60, 0.22);
 }
 
 /* Tema escuro por classe .dark no <html> (alternância na barra lateral) ---- */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f4f7fb;
+  --background: #eef2f8;
   --foreground: #171c24;
   color-scheme: light;
 }
@@ -133,21 +139,22 @@ body {
 @layer components {
   /* --- Superfícies -------------------------------------------------------- */
   .hj-card {
-    @apply rounded-xl border border-ink-200 bg-white shadow-[0_1px_2px_rgba(16,36,60,0.04)];
+    @apply rounded-2xl bg-white ring-1 ring-ink-200/70;
+    box-shadow: var(--shadow-soft);
   }
   .hj-card-pad {
-    @apply p-5;
+    @apply p-6;
   }
   .hj-card-header {
-    @apply flex flex-wrap items-center justify-between gap-3 border-b border-ink-200 px-5 py-4;
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-ink-200/70 px-6 py-4;
   }
   .hj-card-title {
-    @apply text-sm font-semibold tracking-wide text-navy-800 uppercase;
+    @apply text-[0.8rem] font-semibold tracking-wide text-navy-800 uppercase;
   }
 
   /* --- Tipografia --------------------------------------------------------- */
   .hj-page-title {
-    @apply text-2xl font-semibold tracking-tight text-navy-900;
+    @apply text-[1.7rem] leading-tight font-semibold tracking-[-0.02em] text-navy-900;
   }
   .hj-section-title {
     @apply text-base font-semibold text-navy-900;
@@ -155,25 +162,34 @@ body {
   .hj-muted {
     @apply text-sm text-ink-500;
   }
+  /* Número de destaque (indicadores, totais) ----------------------------- */
+  .hj-stat {
+    @apply text-3xl font-semibold tracking-[-0.02em] text-navy-900 tabular-nums;
+  }
   .hj-label {
     @apply text-xs font-medium tracking-wide text-ink-600 uppercase;
   }
 
   /* --- Botões ------------------------------------------------------------- */
   .hj-btn {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg
-      px-4 py-2 text-sm font-medium whitespace-nowrap transition
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl
+      px-4 py-2 text-sm font-medium whitespace-nowrap
+      transition-[background-color,box-shadow,transform,border-color] duration-150
       focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2
-      focus-visible:outline-none disabled:pointer-events-none disabled:opacity-55;
+      focus-visible:outline-none active:translate-y-px
+      disabled:pointer-events-none disabled:opacity-55;
   }
   .hj-btn-primary {
-    @apply bg-navy-800 text-white shadow-sm hover:bg-navy-700 active:bg-navy-900;
+    @apply bg-navy-800 text-white hover:bg-navy-700 active:bg-navy-900;
+    box-shadow: var(--shadow-navy);
   }
   .hj-btn-secondary {
-    @apply border border-ink-300 bg-white text-navy-800 hover:border-ink-400 hover:bg-ink-50;
+    @apply border border-ink-200 bg-white text-navy-800 shadow-[0_1px_2px_rgba(16,36,60,0.04)]
+      hover:border-ink-300 hover:bg-ink-50;
   }
   .hj-btn-accent {
-    @apply bg-brand-500 text-white shadow-sm hover:bg-brand-600;
+    @apply bg-brand-500 text-white hover:bg-brand-600;
+    box-shadow: var(--shadow-brand);
   }
   .hj-btn-ghost {
     @apply text-ink-600 hover:bg-ink-100 hover:text-navy-800;
@@ -187,9 +203,10 @@ body {
 
   /* --- Campos de formulário ----------------------------------------------- */
   .hj-control {
-    @apply w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm
-      text-ink-900 transition placeholder:text-ink-400
-      focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none
+    @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm
+      text-ink-900 shadow-[0_1px_2px_rgba(16,36,60,0.04)] transition
+      placeholder:text-ink-400
+      focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none
       disabled:bg-ink-50 disabled:text-ink-500;
   }
   .hj-field-label {
@@ -204,11 +221,11 @@ body {
     @apply w-full border-collapse text-left text-sm;
   }
   .hj-table thead th {
-    @apply border-b border-ink-200 bg-ink-50 px-4 py-2.5 text-xs font-semibold
-      tracking-wide text-ink-600 uppercase;
+    @apply border-b border-ink-200/70 bg-ink-50/60 px-5 py-3 text-[0.7rem] font-semibold
+      tracking-[0.06em] text-ink-500 uppercase;
   }
   .hj-table tbody td {
-    @apply border-b border-ink-100 px-4 py-3 text-ink-800;
+    @apply border-b border-ink-100 px-5 py-3.5 text-ink-800;
   }
   .hj-table tbody tr:last-child td {
     @apply border-b-0;
@@ -239,7 +256,7 @@ body {
 
   /* --- Avisos ------------------------------------------------------------- */
   .hj-alert {
-    @apply rounded-lg border px-4 py-3 text-sm;
+    @apply rounded-xl border px-4 py-3 text-sm;
   }
   .hj-alert-error {
     @apply border-red-200 bg-red-50 text-red-700;
@@ -256,8 +273,8 @@ body {
 
   /* --- Navegação lateral --------------------------------------------------- */
   .hj-nav-link {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium
-      text-navy-100/80 transition-colors hover:bg-white/10 hover:text-white;
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
+      text-navy-100/80 transition-colors duration-150 hover:bg-white/10 hover:text-white;
   }
   .hj-nav-link-active {
     @apply bg-white/12 text-white shadow-[inset_2px_0_0_var(--color-brand-300)];

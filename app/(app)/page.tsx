@@ -62,7 +62,7 @@ export default async function DashboardPage() {
       />
 
       {/* Indicadores ---------------------------------------------------------- */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <Indicador
           rotulo="Total de orçamentos"
           valor={String(lista.length)}
@@ -95,8 +95,12 @@ export default async function DashboardPage() {
 
       {/* Valor aprovado + atalhos --------------------------------------------- */}
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="hj-card overflow-hidden bg-navy-900 lg:col-span-1">
-          <div className="flex h-full flex-col justify-between gap-6 p-6">
+        <div className="hj-card relative overflow-hidden bg-navy-900 lg:col-span-1">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-16 -right-12 size-56 rounded-full bg-brand-500/20 blur-3xl"
+          />
+          <div className="relative flex h-full flex-col justify-between gap-6 p-6">
             <div className="flex items-center gap-2.5 text-brand-200">
               <IconWallet className="size-5" />
               <span className="text-xs font-semibold tracking-widest uppercase">
@@ -104,7 +108,7 @@ export default async function DashboardPage() {
               </span>
             </div>
             <div>
-              <p className="text-3xl font-semibold tracking-tight text-white">
+              <p className="text-3xl font-semibold tracking-[-0.02em] text-white tabular-nums">
                 {formatBRL(somaAprovados)}
               </p>
               <p className="mt-1.5 text-sm text-navy-300">
@@ -221,10 +225,10 @@ export default async function DashboardPage() {
 /* -------------------------------------------------------------------------- */
 
 const TONS = {
-  navy: "bg-navy-100 text-navy-700",
-  brand: "bg-brand-100 text-brand-700",
-  amber: "bg-amber-100 text-amber-700",
-  emerald: "bg-emerald-100 text-emerald-700",
+  navy: "bg-navy-50 text-navy-600 ring-1 ring-navy-100",
+  brand: "bg-brand-50 text-brand-600 ring-1 ring-brand-100",
+  amber: "bg-amber-50 text-amber-600 ring-1 ring-amber-100",
+  emerald: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
 } as const;
 
 function Indicador({
@@ -241,16 +245,14 @@ function Indicador({
   tom: keyof typeof TONS;
 }) {
   return (
-    <div className="hj-card hj-card-pad flex items-start justify-between gap-4">
-      <div className="flex flex-col gap-1">
+    <div className="hj-card hj-card-pad flex items-start justify-between gap-4 transition-shadow duration-200 hover:shadow-[var(--shadow-float)]">
+      <div className="flex flex-col gap-1.5">
         <p className="hj-label">{rotulo}</p>
-        <p className="text-3xl font-semibold tracking-tight text-navy-900 tabular-nums">
-          {valor}
-        </p>
+        <p className="hj-stat">{valor}</p>
         <p className="text-xs text-ink-500">{nota}</p>
       </div>
       <span
-        className={`grid size-10 shrink-0 place-items-center rounded-lg ${TONS[tom]}`}
+        className={`grid size-11 shrink-0 place-items-center rounded-2xl ${TONS[tom]}`}
       >
         {icone}
       </span>
@@ -272,9 +274,9 @@ function Atalho({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-lg border border-ink-200 px-4 py-3 transition-colors hover:border-brand-300 hover:bg-brand-50/60"
+      className="group flex items-center gap-3 rounded-xl border border-ink-200 px-4 py-3 transition-all duration-150 hover:-translate-y-px hover:border-brand-300 hover:bg-brand-50/60 hover:shadow-[var(--shadow-soft)]"
     >
-      <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink-100 text-ink-600 transition-colors group-hover:bg-brand-500 group-hover:text-white">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-ink-100 text-ink-600 transition-colors group-hover:bg-brand-500 group-hover:text-white">
         {icone}
       </span>
       <span className="min-w-0">

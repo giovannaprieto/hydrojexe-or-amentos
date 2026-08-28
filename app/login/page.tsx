@@ -51,7 +51,10 @@ export default async function LoginPage() {
           </p>
         </div>
 
-        <div className="mt-10 rounded-2xl bg-white p-7 shadow-xl">
+        <div
+          className="mt-10 rounded-2xl bg-white p-8 ring-1 ring-white/10"
+          style={{ boxShadow: "var(--shadow-float)" }}
+        >
           <LoginForm />
         </div>
       </div>
