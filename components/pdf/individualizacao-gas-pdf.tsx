@@ -8,6 +8,7 @@ import {
   type SecaoModelo,
   type TssOpcao,
 } from "@/lib/modelos-proposta";
+import { linhasParagrafo } from "@/lib/pdf-texto";
 
 const C_BAR = CORES.bar;
 const C_LINE = CORES.line;
@@ -111,7 +112,7 @@ export type IndividualizacaoGasPdfProps = {
 function Paragrafos({ texto }: { texto: string }) {
   return (
     <>
-      {(texto ?? "").split("\n").map((l, i) => (
+      {linhasParagrafo(texto).map((l, i) => (
         <Text key={i} style={l.trim() === "" ? { marginBottom: 3 } : s.par}>
           {l.trim() === "" ? " " : l}
         </Text>

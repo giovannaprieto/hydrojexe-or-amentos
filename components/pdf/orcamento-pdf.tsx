@@ -2,6 +2,7 @@
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
 import { CORES, paginaBase, Timbre } from "@/components/pdf/timbre";
+import { linhasParagrafo } from "@/lib/pdf-texto";
 
 const C_BAR = CORES.bar;
 const C_LINE = CORES.line;
@@ -134,7 +135,7 @@ export type OrcamentoPdfProps = {
 };
 
 function Paragrafos({ texto }: { texto: string }) {
-  const linhas = (texto ?? "").split("\n");
+  const linhas = linhasParagrafo(texto);
   return (
     <>
       {linhas.map((l, i) => {
