@@ -195,22 +195,25 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
 
         {secoes.map((sec, i) =>
           i === nUlt - 1 ? (
-            <Secao key={i} n={i + 1} titulo={sec.titulo}>
-              <View wrap={false}>
-                <Paragrafos texto={sec.corpo} />
-                <Image
-                  src={assets.fotoMedidor}
-                  style={[s.fotoSecao, { width: 150 }]}
-                />
-                <Text style={s.par}>
-                  a) A quantidade de medidores será de {doisDig(totalMedidores)}
-                  {ext} unidades.
-                </Text>
-                <Text style={s.par}>
-                  b) Execução de teste de estanqueidade em todo o sistema.
+            <View key={i} wrap={false}>
+              <View style={s.secaoBar}>
+                <Text style={s.secaoTitulo}>
+                  {i + 1}. {sec.titulo}
                 </Text>
               </View>
-            </Secao>
+              <Paragrafos texto={sec.corpo} />
+              <Image
+                src={assets.fotoMedidor}
+                style={[s.fotoSecao, { width: 150 }]}
+              />
+              <Text style={s.par}>
+                a) A quantidade de medidores será de {doisDig(totalMedidores)}
+                {ext} unidades.
+              </Text>
+              <Text style={s.par}>
+                b) Execução de teste de estanqueidade em todo o sistema.
+              </Text>
+            </View>
           ) : (
             <Secao key={i} n={i + 1} titulo={sec.titulo}>
               <Paragrafos texto={sec.corpo} />
