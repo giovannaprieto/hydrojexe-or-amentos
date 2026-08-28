@@ -247,7 +247,7 @@ export function GestaoMensalPdf(props: GestaoMensalPdfProps) {
         </Text>
         <Text style={{ marginTop: 10 }}>Atenciosamente,</Text>
         <Text style={s.assinatura}>
-          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA
+          HYDROJEXE - INDIVIDUALIZAÇÃO DE MEDIÇÃO DE ÁGUA E GÁS LTDA.
         </Text>
       </Page>
     </Document>
