@@ -13,6 +13,7 @@ import {
   IconFormas,
   IconLogout,
   IconMenu,
+  IconObra,
   IconOrcamento,
   IconPrecos,
   IconRelatorio,
@@ -35,6 +36,7 @@ const PRINCIPAL: Item[] = [
   { href: "/", rotulo: "Dashboard", Icone: IconDashboard },
   { href: "/orcamentos", rotulo: "Orçamentos", Icone: IconOrcamento, prefixo: true },
   { href: "/condominios", rotulo: "Condomínios", Icone: IconBuilding, prefixo: true },
+  { href: "/obras", rotulo: "Obras", Icone: IconObra, prefixo: true },
   { href: "/calculadora", rotulo: "Calculadora", Icone: IconCalculadora },
   { href: "/relatorios", rotulo: "Relatórios", Icone: IconRelatorio },
 ];

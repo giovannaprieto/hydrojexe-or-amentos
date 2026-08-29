@@ -6,6 +6,7 @@ import {
   desarquivarCondominio,
   excluirCondominio,
 } from "@/app/(app)/condominios/actions";
+import { criarObra } from "@/app/(app)/obras/actions";
 import { CondominioForm } from "@/components/condominio-form";
 import { IconTrash } from "@/components/icons";
 import { Timeline, type LinhaTimeline } from "@/components/timeline";
@@ -88,6 +89,15 @@ export default async function CondominioPage({
         .in("orcamento_id", orcIds)
         .order("criado_em", { ascending: false })
     : { data: [] };
+
+  const { data: obraExistente } = await supabase
+    .from("obras")
+    .select("id")
+    .eq("condominio_id", id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const orcAprovado = orcamentos.find((o) => o.status === "aprovado") ?? null;
 
   const numeroPorId = new Map(orcamentos.map((o) => [o.id, o.numero]));
 
@@ -230,6 +240,39 @@ export default async function CondominioPage({
               ) : null}
             </tbody>
           </TableWrap>
+        </Card>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="hj-section-title">Obra / instalação</h2>
+        <Card>
+          {obraExistente ? (
+            <Link
+              href={`/obras/${obraExistente.id}`}
+              className="hj-btn hj-btn-secondary w-fit"
+            >
+              Ver obra deste condomínio
+            </Link>
+          ) : (
+            <form action={criarObra} className="flex flex-col gap-2">
+              <input type="hidden" name="condominio_id" value={condominio.id} />
+              {orcAprovado ? (
+                <input
+                  type="hidden"
+                  name="orcamento_id"
+                  value={orcAprovado.id}
+                />
+              ) : null}
+              <button type="submit" className="hj-btn hj-btn-primary w-fit">
+                Iniciar obra
+              </button>
+              <span className="hj-hint">
+                {orcAprovado
+                  ? `Vinculada ao orçamento aprovado ${orcAprovado.numero}.`
+                  : "Sem orçamento aprovado — a obra fica sem valor de referência."}
+              </span>
+            </form>
+          )}
         </Card>
       </section>
 

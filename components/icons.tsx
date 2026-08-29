@@ -120,6 +120,15 @@ export const IconRefresh = (p: IconProps) => (
   </Base>
 );
 
+export const IconObra = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M12 3a6 6 0 0 0-6 6v2h12V9a6 6 0 0 0-6-6z" />
+    <path d="M4 11h16v3H4z" />
+    <path d="M12 3v4M8.5 4.2 10 7M15.5 4.2 14 7" />
+    <path d="M6 14v6M18 14v6M6 20h12" />
+  </Base>
+);
+
 export const IconCalculadora = (p: IconProps) => (
   <Base {...p}>
     <rect x="4" y="3" width="16" height="18" rx="2" />
