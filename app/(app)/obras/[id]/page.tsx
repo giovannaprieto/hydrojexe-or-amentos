@@ -5,12 +5,12 @@ import { excluirObra, excluirRequisicao } from "@/app/(app)/obras/actions";
 import { IconTrash } from "@/components/icons";
 import { ObraApartamentos } from "@/components/obra-apartamentos";
 import { ObraDadosForm } from "@/components/obra-dados-form";
+import { ObraDeducoes } from "@/components/obra-deducoes";
 import { RequisicaoForm } from "@/components/requisicao-form";
 import {
   Alert,
   Badge,
   Card,
-  DataList,
   EmptyRow,
   PageHeader,
   TableWrap,
@@ -18,9 +18,49 @@ import {
 import { requireUsuario } from "@/lib/auth";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import { TOM_STATUS_OBRA, rotuloStatusObra } from "@/lib/obras";
+import { calcularFinanceiroObra, formatPct } from "@/lib/obras-financeiro";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Obra · Hydrojexe" };
+
+function LinhaDre({
+  rotulo,
+  valor,
+  suave,
+  sub,
+  destaque,
+  sinalCor,
+}: {
+  rotulo: string;
+  valor: number;
+  suave?: boolean;
+  sub?: boolean;
+  destaque?: boolean;
+  sinalCor?: boolean;
+}) {
+  return (
+    <div
+      className={`flex justify-between py-1.5 ${
+        sub || destaque ? "border-t border-ink-200 font-medium" : ""
+      } ${destaque ? "text-base text-navy-900" : ""}`}
+    >
+      <dt className={suave ? "text-ink-500" : "text-navy-900"}>{rotulo}</dt>
+      <dd
+        className={`tabular-nums ${
+          sinalCor
+            ? valor >= 0
+              ? "text-emerald-700"
+              : "text-red-600"
+            : suave
+              ? "text-ink-500"
+              : "text-navy-900"
+        }`}
+      >
+        {formatBRL(valor)}
+      </dd>
+    </div>
+  );
+}
 
 export default async function ObraPage({
   params,
@@ -43,19 +83,25 @@ export default async function ObraPage({
     .single();
   if (!obra) notFound();
 
-  const [{ data: aptos }, { data: reqs }] = await Promise.all([
-    supabase
-      .from("obra_apartamentos")
-      .select("identificacao, status, data_conclusao, observacao")
-      .eq("obra_id", id)
-      .order("ordem"),
-    supabase
-      .from("obra_requisicoes")
-      .select("id, numero, data, valor_total, anexo_path, created_at")
-      .eq("obra_id", id)
-      .order("data", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: aptos }, { data: reqs }, { data: deducoes }] =
+    await Promise.all([
+      supabase
+        .from("obra_apartamentos")
+        .select("identificacao, status, data_conclusao, observacao")
+        .eq("obra_id", id)
+        .order("ordem"),
+      supabase
+        .from("obra_requisicoes")
+        .select("id, numero, data, valor_total, anexo_path, created_at")
+        .eq("obra_id", id)
+        .order("data", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("obra_deducoes")
+        .select("descricao, valor")
+        .eq("obra_id", id)
+        .order("ordem"),
+    ]);
 
   const cond = obra.condominios as unknown as { nome: string } | null;
   const orc = obra.orcamentos as unknown as {
@@ -64,13 +110,17 @@ export default async function ObraPage({
   } | null;
 
   const listaReqs = reqs ?? [];
+  const listaDeducoes = deducoes ?? [];
   const custoMateriais = listaReqs.reduce(
     (a, r) => a + (r.valor_total ?? 0),
     0,
   );
-  const custoTotal = custoMateriais + (obra.outros_custos ?? 0);
-  const aprovado = orc?.valor_total ?? null;
-  const resultado = aprovado != null ? aprovado - custoTotal : null;
+  const fin = calcularFinanceiroObra({
+    receitaBruta: orc?.valor_total ?? null,
+    deducoes: listaDeducoes.reduce((a, d) => a + (d.valor ?? 0), 0),
+    materiais: custoMateriais,
+    outrosCustos: obra.outros_custos ?? 0,
+  });
 
   return (
     <div className="flex flex-col gap-8">
@@ -93,37 +143,57 @@ export default async function ObraPage({
             {orc ? ` · orçamento ${orc.numero}` : ""}
           </>
         }
+        acoes={
+          <a href={`/obras/${obra.id}/export`} className="hj-btn hj-btn-secondary">
+            Exportar Excel
+          </a>
+        }
       />
 
       {erro ? <Alert tom="error">{erro}</Alert> : null}
 
-      <Card titulo="Resumo de custos">
-        <DataList
-          colunas={4}
-          itens={[
-            { rotulo: "Materiais", valor: formatBRL(custoMateriais) },
-            {
-              rotulo: "Outros custos",
-              valor: formatBRL(obra.outros_custos ?? 0),
-            },
-            { rotulo: "Custo total", valor: formatBRL(custoTotal) },
-            {
-              rotulo: "Resultado vs. aprovado",
-              valor:
-                resultado == null ? (
-                  "—"
-                ) : (
-                  <span
-                    className={
-                      resultado >= 0 ? "text-emerald-700" : "text-red-600"
-                    }
-                  >
-                    {formatBRL(resultado)}
-                  </span>
-                ),
-            },
-          ]}
-        />
+      <Card titulo="Resultado da obra">
+        <dl className="flex flex-col text-sm">
+          <LinhaDre rotulo="Receita bruta (valor aprovado)" valor={fin.receitaBruta} />
+          <LinhaDre
+            rotulo="(−) Impostos e retenções"
+            valor={-fin.deducoes}
+            suave
+          />
+          <LinhaDre rotulo="= Receita líquida" valor={fin.receitaLiquida} sub />
+          <LinhaDre rotulo="(−) Materiais" valor={-fin.materiais} suave />
+          <LinhaDre
+            rotulo="(−) Outros custos (mão de obra etc.)"
+            valor={-fin.outrosCustos}
+            suave
+          />
+          <LinhaDre
+            rotulo="= Resultado"
+            valor={fin.resultado}
+            destaque
+            sinalCor
+          />
+          <div className="mt-2 flex justify-between border-t border-ink-200 pt-2 text-ink-500">
+            <dt>Margem sobre a receita bruta</dt>
+            <dd
+              className={
+                fin.margem == null
+                  ? ""
+                  : fin.resultado >= 0
+                    ? "text-emerald-700"
+                    : "text-red-600"
+              }
+            >
+              {formatPct(fin.margem)}
+            </dd>
+          </div>
+        </dl>
+        {fin.receitaBruta === 0 ? (
+          <p className="hj-hint mt-3">
+            Sem orçamento aprovado vinculado — a receita está zerada. Vincule pelo
+            condomínio ou aprove um orçamento.
+          </p>
+        ) : null}
       </Card>
 
       <section className="flex flex-col gap-3">
@@ -138,6 +208,19 @@ export default async function ObraPage({
               outros_custos: obra.outros_custos ?? 0,
               observacoes: obra.observacoes,
             }}
+          />
+        </Card>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="hj-section-title">Impostos e retenções</h2>
+        <Card>
+          <ObraDeducoes
+            obraId={obra.id}
+            inicial={listaDeducoes.map((d) => ({
+              descricao: d.descricao,
+              valor: String(d.valor ?? ""),
+            }))}
           />
         </Card>
       </section>

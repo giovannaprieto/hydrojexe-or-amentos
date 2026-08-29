@@ -143,6 +143,47 @@ export async function salvarApartamentosObra(
   };
 }
 
+export async function salvarDeducoes(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireUsuario();
+  const id = texto(formData, "id");
+  if (!id) return { ok: false, error: "Registro inválido." };
+
+  let linhas: unknown;
+  try {
+    linhas = JSON.parse(texto(formData, "linhas"));
+  } catch {
+    return { ok: false, error: "Não foi possível ler as deduções." };
+  }
+  if (!Array.isArray(linhas)) return { ok: false, error: "Formato inválido." };
+
+  const registros = (linhas as Record<string, unknown>[])
+    .map((l, i) => ({
+      obra_id: id,
+      descricao: String(l.descricao ?? "").trim(),
+      valor: round2(dec(l.valor as string)),
+      ordem: i,
+    }))
+    .filter((r) => r.descricao !== "");
+
+  const supabase = await createClient();
+  await supabase.from("obra_deducoes").delete().eq("obra_id", id);
+  if (registros.length > 0) {
+    const { error } = await supabase.from("obra_deducoes").insert(registros);
+    if (error) return { ok: false, error: mensagemErroBanco(error) };
+  }
+
+  revalidatePath(`/obras/${id}`);
+  revalidatePath("/obras");
+  return {
+    ok: true,
+    error: null,
+    mensagem: `${registros.length} dedução(ões) salva(s).`,
+  };
+}
+
 export async function salvarRequisicao(
   _prev: FormState,
   formData: FormData,

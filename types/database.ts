@@ -287,6 +287,30 @@ export type Database = {
         }
         Relationships: []
       }
+      obra_deducoes: {
+        Row: {
+          id: string
+          obra_id: string
+          descricao: string
+          valor: number
+          ordem: number
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          descricao: string
+          valor?: number
+          ordem?: number
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          descricao?: string
+          valor?: number
+          ordem?: number
+        }
+        Relationships: []
+      }
       gerenciamento_mensal: {
         Row: {
           id: string
