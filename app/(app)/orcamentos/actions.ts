@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -237,9 +239,15 @@ export async function atualizarCabecalho(
     observacoes: textoOuNulo(formData, "observacoes"),
   };
 
+  const virouEnviado = status === "enviado" && atual.status !== "enviado";
   const { error } = await supabase
     .from("orcamentos")
-    .update({ ...novos, ano: anoDoNumero(numero), atualizado_por: usuario.id })
+    .update({
+      ...novos,
+      ano: anoDoNumero(numero),
+      atualizado_por: usuario.id,
+      ...(virouEnviado ? { enviado_em: new Date().toISOString() } : {}),
+    })
     .eq("id", id);
   if (error) return { ok: false, error: mensagemErroBanco(error) };
 
@@ -281,6 +289,58 @@ export async function atualizarCabecalho(
   revalidatePath(`/orcamentos/${id}`);
   revalidatePath("/orcamentos");
   return { ok: true, error: null, mensagem: "Cabeçalho salvo." };
+}
+
+// ---------------------------------------------------------------------------
+// Marcar como enviado (usado pelo botão de WhatsApp) — gera o token do link
+// público, grava enviado_em e uma foto do orçamento.
+// ---------------------------------------------------------------------------
+export async function marcarEnviado(
+  id: string,
+): Promise<{ ok: boolean; token?: string; error?: string }> {
+  const usuario = await requireUsuario();
+  if (!id) return { ok: false, error: "Registro inválido." };
+  const supabase = await createClient();
+
+  const { data: orc } = await supabase
+    .from("orcamentos")
+    .select("id, status, token_publico")
+    .eq("id", id)
+    .single();
+  if (!orc) return { ok: false, error: "Orçamento não encontrado." };
+
+  const token = orc.token_publico ?? randomUUID();
+  const eraOutro = orc.status !== "enviado";
+
+  const { error } = await supabase
+    .from("orcamentos")
+    .update({
+      token_publico: token,
+      atualizado_por: usuario.id,
+      ...(eraOutro
+        ? { status: "enviado", enviado_em: new Date().toISOString() }
+        : {}),
+    })
+    .eq("id", id);
+  if (error) return { ok: false, error: mensagemErroBanco(error) };
+
+  if (eraOutro) {
+    await registrarHistorico(supabase, {
+      orcamento_id: id,
+      entidade: "orcamentos",
+      entidade_id: id,
+      acao: "atualizar",
+      campo: "status",
+      descricao: "Enviado por WhatsApp",
+      alterado_por: usuario.id,
+    });
+    await gravarSnapshotOrcamento(supabase, id, "enviado", usuario.id);
+  }
+
+  revalidatePath(`/orcamentos/${id}`);
+  revalidatePath("/orcamentos");
+  revalidatePath("/");
+  return { ok: true, token };
 }
 
 // ---------------------------------------------------------------------------

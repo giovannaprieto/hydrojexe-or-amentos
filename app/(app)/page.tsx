@@ -32,6 +32,23 @@ const MESES = [
   "dez",
 ];
 
+const DIAS_SEM_RESPOSTA = 7;
+
+/** orçamentos enviados parados há >= 7 dias, do mais parado ao menos */
+function aguardandoResposta<
+  T extends { enviado_em: string | null },
+>(enviados: T[]): (T & { dias: number })[] {
+  const agora = Date.now();
+  return enviados
+    .map((o) => {
+      const t = o.enviado_em ? new Date(o.enviado_em).getTime() : agora;
+      return { ...o, dias: Math.floor((agora - t) / 86_400_000) };
+    })
+    .filter((o) => o.dias >= DIAS_SEM_RESPOSTA)
+    .sort((a, b) => b.dias - a.dias)
+    .slice(0, 6);
+}
+
 /** rótulos dos últimos 6 meses (YYYY-MM) até o mês atual */
 function ultimosSeisMeses(): { chave: string; rotulo: string }[] {
   const out: { chave: string; rotulo: string }[] = [];
@@ -73,6 +90,8 @@ export default async function DashboardPage() {
   const aprovados = porStatus("aprovado");
   const somaAprovados = aprovados.reduce((a, o) => a + (o.valor_total ?? 0), 0);
   const recentes = lista.slice(0, 8);
+  const semResposta = aguardandoResposta(enviados);
+
   const conversao =
     enviados.length + aprovados.length > 0
       ? Math.round(
@@ -230,6 +249,60 @@ export default async function DashboardPage() {
           </TableWrap>
         </Card>
       </div>
+
+      {semResposta.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="hj-section-title">Aguardando resposta</h2>
+          <Card plano>
+            <TableWrap>
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Condomínio</th>
+                  <th className="text-right">Parado há</th>
+                  <th className="hidden sm:table-cell text-right">
+                    Total à vista
+                  </th>
+                  <th className="w-10" />
+                </tr>
+              </thead>
+              <tbody>
+                {semResposta.map((o) => {
+                  const cond = o.condominios as { nome: string } | null;
+                  return (
+                    <tr key={o.id}>
+                      <td>
+                        <Link
+                          href={`/orcamentos/${o.id}`}
+                          className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
+                        >
+                          {o.numero}
+                        </Link>
+                      </td>
+                      <td>{cond?.nome ?? "—"}</td>
+                      <td className="text-right font-medium tabular-nums text-amber-700">
+                        {o.dias} dia(s)
+                      </td>
+                      <td className="hidden text-right tabular-nums sm:table-cell">
+                        {formatBRL(o.valor_total)}
+                      </td>
+                      <td className="text-right">
+                        <Link
+                          href={`/orcamentos/${o.id}/pdf`}
+                          title="Abrir PDF"
+                          className="inline-grid size-7 place-items-center rounded-lg text-ink-400 transition-colors hover:bg-ink-100 hover:text-navy-800"
+                        >
+                          <IconPdf className="size-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </TableWrap>
+          </Card>
+        </section>
+      ) : null}
 
       <p className="hj-hint">
         {totalCondominios ?? 0} condomínio(s) cadastrado(s) ·{" "}

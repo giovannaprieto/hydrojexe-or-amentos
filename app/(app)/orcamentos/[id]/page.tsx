@@ -8,6 +8,7 @@ import {
 } from "@/app/(app)/orcamentos/actions";
 import { GestaoMensalForm } from "@/components/gestao-mensal-form";
 import { IconPdf, IconRefresh, IconTrash } from "@/components/icons";
+import { EnviarWhatsapp } from "@/components/enviar-whatsapp";
 import { IndividualizacaoAguaSemTecForm } from "@/components/individualizacao-agua-sem-tec-form";
 import { IndividualizacaoGasForm } from "@/components/individualizacao-gas-form";
 import { TssLightForm } from "@/components/tss-light-form";
@@ -534,6 +535,13 @@ export default async function OrcamentoPage({
               <IconPdf />
               Gerar PDF
             </LinkButton>
+          ) : null}
+          {podeGerarPdf ? (
+            <EnviarWhatsapp
+              id={orc.id}
+              numero={orc.numero}
+              condominio={condominioNome ?? "condomínio"}
+            />
           ) : null}
           {orc.tipo_proposta === "completa" ? (
             <form action={atualizarPrecosPelaTabela}>

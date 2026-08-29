@@ -75,8 +75,17 @@ export async function GET(
 ) {
   await requireUsuario();
   const { id } = await params;
-  const supabase = await createClient();
+  return gerarPdfDoOrcamento(await createClient(), id);
+}
 
+type DbClient = Awaited<ReturnType<typeof createClient>>;
+
+/** Gera o PDF de um orçamento (branch por tipo). Usado pela rota autenticada
+ *  e pela rota pública /publico/orcamento/[token]. */
+export async function gerarPdfDoOrcamento(
+  supabase: DbClient,
+  id: string,
+): Promise<Response> {
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
