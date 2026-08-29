@@ -11,9 +11,9 @@ const C_LINE = CORES.line;
 const s = StyleSheet.create({
   page: paginaBase,
   destinatarioRight: { textAlign: "right", marginBottom: 12 },
-  bold: { fontFamily: "Times-Bold" },
+  bold: { fontFamily: "Plex", fontWeight: 700 },
   ref: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textDecoration: "underline",
     marginTop: 8,
     marginBottom: 8,
@@ -25,7 +25,7 @@ const s = StyleSheet.create({
     marginTop: 14,
     marginBottom: 6,
   },
-  secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
+  secaoTitulo: { fontFamily: "PlexSerif", fontWeight: 700, fontSize: 11 },
   par: { marginBottom: 3, textIndent: 18 },
   tabela: {
     borderTop: `0.5 solid ${C_LINE}`,
@@ -49,7 +49,7 @@ const s = StyleSheet.create({
   },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
   assinatura: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textDecoration: "underline",
     textAlign: "left",
     textIndent: 0,

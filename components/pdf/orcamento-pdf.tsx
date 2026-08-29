@@ -11,9 +11,9 @@ const C_RED = CORES.red;
 const s = StyleSheet.create({
   page: paginaBase,
   destinatarioRight: { textAlign: "right", marginBottom: 12 },
-  bold: { fontFamily: "Times-Bold" },
+  bold: { fontFamily: "Plex", fontWeight: 700 },
   ref: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textDecoration: "underline",
     marginTop: 8,
     marginBottom: 8,
@@ -25,7 +25,7 @@ const s = StyleSheet.create({
     marginTop: 14,
     marginBottom: 6,
   },
-  secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
+  secaoTitulo: { fontFamily: "PlexSerif", fontWeight: 700, fontSize: 11 },
   par: { marginBottom: 3, textIndent: 18 },
   fotoSecao: { marginTop: 5, marginBottom: 5, alignSelf: "center" },
   fotosLinha: {
@@ -36,7 +36,7 @@ const s = StyleSheet.create({
     marginBottom: 3,
   },
   legendaFoto: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     fontSize: 9,
     lineHeight: 1.3,
     textAlign: "center",
@@ -45,13 +45,13 @@ const s = StyleSheet.create({
     marginBottom: 8,
   },
   centroTitulo: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textAlign: "center",
     marginTop: 10,
     marginBottom: 4,
   },
   opcaoTitulo: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textAlign: "center",
     marginTop: 8,
     marginBottom: 2,
@@ -72,7 +72,7 @@ const s = StyleSheet.create({
     textAlign: "center",
   },
   assinatura: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textDecoration: "underline",
     textAlign: "left",
     textIndent: 0,
@@ -86,7 +86,7 @@ const s = StyleSheet.create({
   },
   gerVermelho: {
     color: C_RED,
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     marginTop: 8,
   },
 });

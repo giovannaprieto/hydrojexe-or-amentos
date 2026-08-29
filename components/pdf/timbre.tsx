@@ -1,6 +1,10 @@
 /* eslint-disable jsx-a11y/alt-text -- <Image> aqui é do @react-pdf, não é <img> HTML */
 import { Image, StyleSheet, Text, View } from "@react-pdf/renderer";
 
+import { registrarFontesPdf } from "@/lib/pdf-fonts";
+
+registrarFontesPdf();
+
 /** cores compartilhadas dos PDFs */
 export const CORES = {
   bar: "#dbe4ea",
@@ -14,10 +18,10 @@ export const paginaBase = {
   paddingTop: 100,
   paddingBottom: 74,
   paddingHorizontal: 48,
-  fontSize: 10,
-  fontFamily: "Times-Roman",
+  fontSize: 9.5,
+  fontFamily: "Plex",
   color: "#1a1a1a",
-  lineHeight: 1.4,
+  lineHeight: 1.45,
   textAlign: "justify",
 } as const;
 

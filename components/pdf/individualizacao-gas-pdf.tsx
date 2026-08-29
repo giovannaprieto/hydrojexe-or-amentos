@@ -17,9 +17,9 @@ const C_RED = CORES.red;
 const s = StyleSheet.create({
   page: paginaBase,
   destinatarioRight: { textAlign: "right", marginBottom: 12 },
-  bold: { fontFamily: "Times-Bold" },
+  bold: { fontFamily: "Plex", fontWeight: 700 },
   ref: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textDecoration: "underline",
     marginTop: 8,
     marginBottom: 8,
@@ -31,10 +31,10 @@ const s = StyleSheet.create({
     marginTop: 14,
     marginBottom: 6,
   },
-  secaoTitulo: { fontFamily: "Times-Bold", fontSize: 10.5 },
+  secaoTitulo: { fontFamily: "PlexSerif", fontWeight: 700, fontSize: 11 },
   par: { marginBottom: 3, textIndent: 18 },
   opcaoTitulo: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textAlign: "center",
     marginTop: 8,
     marginBottom: 2,
@@ -58,9 +58,9 @@ const s = StyleSheet.create({
     textAlign: "center",
   },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
-  gerVermelho: { color: C_RED, fontFamily: "Times-Bold", marginTop: 8 },
+  gerVermelho: { color: C_RED, fontFamily: "Plex", fontWeight: 700, marginTop: 8 },
   assinatura: {
-    fontFamily: "Times-Bold",
+    fontFamily: "Plex", fontWeight: 700,
     textDecoration: "underline",
     textAlign: "left",
     textIndent: 0,
