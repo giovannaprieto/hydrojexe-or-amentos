@@ -343,6 +343,31 @@ export async function marcarEnviado(
   return { ok: true, token };
 }
 
+export async function revogarLinkPublico(formData: FormData): Promise<void> {
+  const usuario = await requireUsuario();
+  const id = texto(formData, "id");
+  if (!id) return;
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("orcamentos")
+    .update({ token_publico: null, atualizado_por: usuario.id })
+    .eq("id", id);
+  if (error) return;
+
+  await registrarHistorico(supabase, {
+    orcamento_id: id,
+    entidade: "orcamentos",
+    entidade_id: id,
+    acao: "atualizar",
+    campo: "token_publico",
+    descricao: "Link público revogado",
+    alterado_por: usuario.id,
+  });
+
+  revalidatePath(`/orcamentos/${id}`);
+}
+
 // ---------------------------------------------------------------------------
 // Salvar a montagem (tipos + composição) — calcula e CONGELA os preços
 // de TODAS as formas próprias. Snapshots = valores à vista.

@@ -5,6 +5,7 @@ import {
   arquivarOrcamento,
   desarquivarOrcamento,
   excluirOrcamento,
+  revogarLinkPublico,
 } from "@/app/(app)/orcamentos/actions";
 import { GestaoMensalForm } from "@/components/gestao-mensal-form";
 import { IconPdf, IconRefresh, IconTrash } from "@/components/icons";
@@ -549,6 +550,18 @@ export default async function OrcamentoPage({
               <button type="submit" className="hj-btn hj-btn-secondary">
                 <IconRefresh />
                 Recongelar preços pela tabela atual
+              </button>
+            </form>
+          ) : null}
+          {orc.token_publico ? (
+            <form action={revogarLinkPublico}>
+              <input type="hidden" name="id" value={orc.id} />
+              <button
+                type="submit"
+                className="hj-btn hj-btn-secondary"
+                title="Invalida o link público do PDF já enviado. Um novo envio gera outro link."
+              >
+                Revogar link público
               </button>
             </form>
           ) : null}

@@ -77,37 +77,6 @@ export type Database = {
         Relationships: [
         ]
       }
-      orcamento_snapshots: {
-        Row: {
-          id: string
-          orcamento_id: string
-          status: string
-          valor_total: number | null
-          dados: Json
-          criado_por: string | null
-          criado_em: string
-        }
-        Insert: {
-          id?: string
-          orcamento_id: string
-          status: string
-          valor_total?: number | null
-          dados: Json
-          criado_por?: string | null
-          criado_em?: string
-        }
-        Update: {
-          id?: string
-          orcamento_id?: string
-          status?: string
-          valor_total?: number | null
-          dados?: Json
-          criado_por?: string | null
-          criado_em?: string
-        }
-        Relationships: [
-        ]
-      }
       formas_pagamento: {
         Row: {
           id: string
@@ -151,165 +120,6 @@ export type Database = {
           referencedColumns: ["id"]
         }
         ]
-      }
-      obras: {
-        Row: {
-          id: string
-          condominio_id: string
-          orcamento_id: string | null
-          status: string
-          previsao_inicio: string | null
-          previsao_fim: string | null
-          outros_custos: number
-          observacoes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          condominio_id: string
-          orcamento_id?: string | null
-          status?: string
-          previsao_inicio?: string | null
-          previsao_fim?: string | null
-          outros_custos?: number
-          observacoes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          condominio_id?: string
-          orcamento_id?: string | null
-          status?: string
-          previsao_inicio?: string | null
-          previsao_fim?: string | null
-          outros_custos?: number
-          observacoes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      obra_apartamentos: {
-        Row: {
-          id: string
-          obra_id: string
-          identificacao: string
-          status: string
-          data_conclusao: string | null
-          observacao: string | null
-          ordem: number
-        }
-        Insert: {
-          id?: string
-          obra_id: string
-          identificacao: string
-          status?: string
-          data_conclusao?: string | null
-          observacao?: string | null
-          ordem?: number
-        }
-        Update: {
-          id?: string
-          obra_id?: string
-          identificacao?: string
-          status?: string
-          data_conclusao?: string | null
-          observacao?: string | null
-          ordem?: number
-        }
-        Relationships: []
-      }
-      obra_requisicoes: {
-        Row: {
-          id: string
-          obra_id: string
-          numero: string | null
-          data: string | null
-          anexo_path: string | null
-          valor_total: number
-          criado_por: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          obra_id: string
-          numero?: string | null
-          data?: string | null
-          anexo_path?: string | null
-          valor_total?: number
-          criado_por?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          obra_id?: string
-          numero?: string | null
-          data?: string | null
-          anexo_path?: string | null
-          valor_total?: number
-          criado_por?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      obra_materiais: {
-        Row: {
-          id: string
-          requisicao_id: string
-          descricao: string
-          quantidade: number
-          unidade: string | null
-          valor_unitario: number
-          valor_total: number
-          ordem: number
-        }
-        Insert: {
-          id?: string
-          requisicao_id: string
-          descricao: string
-          quantidade?: number
-          unidade?: string | null
-          valor_unitario?: number
-          valor_total?: number
-          ordem?: number
-        }
-        Update: {
-          id?: string
-          requisicao_id?: string
-          descricao?: string
-          quantidade?: number
-          unidade?: string | null
-          valor_unitario?: number
-          valor_total?: number
-          ordem?: number
-        }
-        Relationships: []
-      }
-      obra_deducoes: {
-        Row: {
-          id: string
-          obra_id: string
-          descricao: string
-          valor: number
-          ordem: number
-        }
-        Insert: {
-          id?: string
-          obra_id: string
-          descricao: string
-          valor?: number
-          ordem?: number
-        }
-        Update: {
-          id?: string
-          obra_id?: string
-          descricao?: string
-          valor?: number
-          ordem?: number
-        }
-        Relationships: []
       }
       gerenciamento_mensal: {
         Row: {
@@ -489,6 +299,264 @@ export type Database = {
         Relationships: [
         ]
       }
+      obra_apartamentos: {
+        Row: {
+          id: string
+          obra_id: string
+          identificacao: string
+          status: string
+          data_conclusao: string | null
+          observacao: string | null
+          ordem: number
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          identificacao: string
+          status?: string
+          data_conclusao?: string | null
+          observacao?: string | null
+          ordem?: number
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          identificacao?: string
+          status?: string
+          data_conclusao?: string | null
+          observacao?: string | null
+          ordem?: number
+        }
+        Relationships: [
+        {
+          foreignKeyName: "obra_apartamentos_obra_id_fkey"
+          columns: ["obra_id"]
+          isOneToOne: false
+          referencedRelation: "obras"
+          referencedColumns: ["id"]
+        }
+        ]
+      }
+      obra_deducoes: {
+        Row: {
+          id: string
+          obra_id: string
+          descricao: string
+          valor: number
+          ordem: number
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          descricao: string
+          valor?: number
+          ordem?: number
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          descricao?: string
+          valor?: number
+          ordem?: number
+        }
+        Relationships: [
+        {
+          foreignKeyName: "obra_deducoes_obra_id_fkey"
+          columns: ["obra_id"]
+          isOneToOne: false
+          referencedRelation: "obras"
+          referencedColumns: ["id"]
+        }
+        ]
+      }
+      obra_materiais: {
+        Row: {
+          id: string
+          requisicao_id: string
+          descricao: string
+          quantidade: number
+          unidade: string | null
+          valor_unitario: number
+          valor_total: number
+          ordem: number
+        }
+        Insert: {
+          id?: string
+          requisicao_id: string
+          descricao: string
+          quantidade?: number
+          unidade?: string | null
+          valor_unitario?: number
+          valor_total?: number
+          ordem?: number
+        }
+        Update: {
+          id?: string
+          requisicao_id?: string
+          descricao?: string
+          quantidade?: number
+          unidade?: string | null
+          valor_unitario?: number
+          valor_total?: number
+          ordem?: number
+        }
+        Relationships: [
+        {
+          foreignKeyName: "obra_materiais_requisicao_id_fkey"
+          columns: ["requisicao_id"]
+          isOneToOne: false
+          referencedRelation: "obra_requisicoes"
+          referencedColumns: ["id"]
+        }
+        ]
+      }
+      obra_requisicoes: {
+        Row: {
+          id: string
+          obra_id: string
+          numero: string | null
+          data: string | null
+          anexo_path: string | null
+          valor_total: number
+          criado_por: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          numero?: string | null
+          data?: string | null
+          anexo_path?: string | null
+          valor_total?: number
+          criado_por?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          numero?: string | null
+          data?: string | null
+          anexo_path?: string | null
+          valor_total?: number
+          criado_por?: string | null
+          created_at?: string
+        }
+        Relationships: [
+        {
+          foreignKeyName: "obra_requisicoes_obra_id_fkey"
+          columns: ["obra_id"]
+          isOneToOne: false
+          referencedRelation: "obras"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "obra_requisicoes_criado_por_fkey"
+          columns: ["criado_por"]
+          isOneToOne: false
+          referencedRelation: "usuarios"
+          referencedColumns: ["id"]
+        }
+        ]
+      }
+      obras: {
+        Row: {
+          id: string
+          condominio_id: string
+          orcamento_id: string | null
+          status: string
+          previsao_inicio: string | null
+          previsao_fim: string | null
+          outros_custos: number
+          observacoes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          condominio_id: string
+          orcamento_id?: string | null
+          status?: string
+          previsao_inicio?: string | null
+          previsao_fim?: string | null
+          outros_custos?: number
+          observacoes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          condominio_id?: string
+          orcamento_id?: string | null
+          status?: string
+          previsao_inicio?: string | null
+          previsao_fim?: string | null
+          outros_custos?: number
+          observacoes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+        {
+          foreignKeyName: "obras_condominio_id_fkey"
+          columns: ["condominio_id"]
+          isOneToOne: false
+          referencedRelation: "condominios"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "obras_orcamento_id_fkey"
+          columns: ["orcamento_id"]
+          isOneToOne: false
+          referencedRelation: "orcamentos"
+          referencedColumns: ["id"]
+        }
+        ]
+      }
+      orcamento_snapshots: {
+        Row: {
+          id: string
+          orcamento_id: string
+          status: string
+          valor_total: number | null
+          dados: Json
+          criado_por: string | null
+          criado_em: string
+        }
+        Insert: {
+          id?: string
+          orcamento_id: string
+          status: string
+          valor_total?: number | null
+          dados: Json
+          criado_por?: string | null
+          criado_em?: string
+        }
+        Update: {
+          id?: string
+          orcamento_id?: string
+          status?: string
+          valor_total?: number | null
+          dados?: Json
+          criado_por?: string | null
+          criado_em?: string
+        }
+        Relationships: [
+        {
+          foreignKeyName: "orcamento_snapshots_orcamento_id_fkey"
+          columns: ["orcamento_id"]
+          isOneToOne: false
+          referencedRelation: "orcamentos"
+          referencedColumns: ["id"]
+        },
+        {
+          foreignKeyName: "orcamento_snapshots_criado_por_fkey"
+          columns: ["criado_por"]
+          isOneToOne: false
+          referencedRelation: "usuarios"
+          referencedColumns: ["id"]
+        }
+        ]
+      }
       orcamento_valores_congelados: {
         Row: {
           id: string
@@ -568,11 +636,11 @@ export type Database = {
           updated_at: string
           incluir_tss: boolean
           parcelas_custom: number[]
-          formas_pagamento_visiveis: number[]
           tipo_proposta: string
           qtd_equipamentos: number | null
           tss_opcoes: Json
           medidor_gas: string | null
+          formas_pagamento_visiveis: number[]
           arquivado_em: string | null
           enviado_em: string | null
           token_publico: string | null
@@ -596,11 +664,11 @@ export type Database = {
           updated_at?: string
           incluir_tss?: boolean
           parcelas_custom: number[]
-          formas_pagamento_visiveis?: number[]
           tipo_proposta?: string
           qtd_equipamentos?: number | null
           tss_opcoes: Json
           medidor_gas?: string | null
+          formas_pagamento_visiveis: number[]
           arquivado_em?: string | null
           enviado_em?: string | null
           token_publico?: string | null
@@ -624,11 +692,11 @@ export type Database = {
           updated_at?: string
           incluir_tss?: boolean
           parcelas_custom?: number[]
-          formas_pagamento_visiveis?: number[]
           tipo_proposta?: string
           qtd_equipamentos?: number | null
           tss_opcoes?: Json
           medidor_gas?: string | null
+          formas_pagamento_visiveis?: number[]
           arquivado_em?: string | null
           enviado_em?: string | null
           token_publico?: string | null
@@ -728,54 +796,54 @@ export type Database = {
           nome: string
           is_padrao: boolean
           sec_individualizacao_agua: string | null
-          sec_analise_agua_preparado: string | null
-          sec_analise_agua_nao_preparado: string | null
           sec_objetivo: string | null
           sec_procedimento_tecnico: string | null
           sec_intervencao: string | null
-          sec_intervencao_agua_nao_preparado: string | null
           sec_tramites_administrativos: string | null
           sec_gerenciamento_mensal: string | null
           sec_garantia: string | null
           ativo: boolean
           created_at: string
           updated_at: string
+          sec_analise_agua_preparado: string | null
+          sec_analise_agua_nao_preparado: string | null
+          sec_intervencao_agua_nao_preparado: string | null
         }
         Insert: {
           id?: string
           nome: string
           is_padrao?: boolean
           sec_individualizacao_agua?: string | null
-          sec_analise_agua_preparado?: string | null
-          sec_analise_agua_nao_preparado?: string | null
           sec_objetivo?: string | null
           sec_procedimento_tecnico?: string | null
           sec_intervencao?: string | null
-          sec_intervencao_agua_nao_preparado?: string | null
           sec_tramites_administrativos?: string | null
           sec_gerenciamento_mensal?: string | null
           sec_garantia?: string | null
           ativo?: boolean
           created_at?: string
           updated_at?: string
+          sec_analise_agua_preparado?: string | null
+          sec_analise_agua_nao_preparado?: string | null
+          sec_intervencao_agua_nao_preparado?: string | null
         }
         Update: {
           id?: string
           nome?: string
           is_padrao?: boolean
           sec_individualizacao_agua?: string | null
-          sec_analise_agua_preparado?: string | null
-          sec_analise_agua_nao_preparado?: string | null
           sec_objetivo?: string | null
           sec_procedimento_tecnico?: string | null
           sec_intervencao?: string | null
-          sec_intervencao_agua_nao_preparado?: string | null
           sec_tramites_administrativos?: string | null
           sec_gerenciamento_mensal?: string | null
           sec_garantia?: string | null
           ativo?: boolean
           created_at?: string
           updated_at?: string
+          sec_analise_agua_preparado?: string | null
+          sec_analise_agua_nao_preparado?: string | null
+          sec_intervencao_agua_nao_preparado?: string | null
         }
         Relationships: [
         ]
@@ -910,11 +978,11 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      salvar_montagem_orcamento: {
-        Args: Record<string, unknown>
-        Returns: undefined
-      }
       rls_auto_enable: {
+        Args: Record<string, unknown>
+        Returns: unknown
+      }
+      salvar_montagem_orcamento: {
         Args: Record<string, unknown>
         Returns: unknown
       }
