@@ -44,7 +44,7 @@ export default async function CalculadoraPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <PageHeader
         titulo="Calculadora de orçamento"
         descricao="Simulação rápida de valores, usando as mesmas regras dos orçamentos oficiais. Nada é cadastrado."

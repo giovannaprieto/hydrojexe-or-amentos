@@ -85,7 +85,7 @@ export default async function OrcamentosPage({
   const lista = orcamentos ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <PageHeader
         titulo="Orçamentos"
         descricao={`${lista.length} orçamento(s) encontrado(s).`}

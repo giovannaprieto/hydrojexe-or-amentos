@@ -1,14 +1,10 @@
 import { FunilComercial } from "@/components/funil-comercial";
+import { GraficoMeses } from "@/components/grafico-meses";
 import {
   RelatoriosFiltros,
   type FiltrosRelatorio,
 } from "@/components/relatorios-filtros";
-import {
-  Card,
-  EmptyRow,
-  PageHeader,
-  TableWrap,
-} from "@/components/ui-layout";
+import { Card, EstadoVazio, PageHeader } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import { formatBRL } from "@/lib/format";
 import { resumirRelatorio, type OrcamentoRelatorio } from "@/lib/relatorios";
@@ -24,15 +20,19 @@ function Indicador({
   rotulo,
   valor,
   nota,
+  destaque,
 }: {
   rotulo: string;
   valor: string;
   nota?: string;
+  destaque?: boolean;
 }) {
   return (
     <div className="hj-card hj-card-pad flex flex-col gap-1">
       <p className="hj-label">{rotulo}</p>
-      <p className="text-2xl font-semibold tracking-tight text-navy-900 tabular-nums">
+      <p
+        className={`tabular-nums ${destaque ? "hj-stat" : "text-xl font-semibold tracking-tight text-navy-900"}`}
+      >
         {valor}
       </p>
       {nota ? <p className="text-xs text-ink-500">{nota}</p> : null}
@@ -40,33 +40,43 @@ function Indicador({
   );
 }
 
-function ListaContagem({
+function Ranking({
   titulo,
   itens,
 }: {
   titulo: string;
   itens: { rotulo: string; total: number }[];
 }) {
+  const max = Math.max(1, ...itens.map((i) => i.total));
   return (
     <section className="flex flex-col gap-3">
       <h2 className="hj-section-title">{titulo}</h2>
-      <Card plano>
-        <TableWrap>
-          <tbody>
+      <Card>
+        {itens.length === 0 ? (
+          <p className="text-sm text-ink-400">Sem dados no período.</p>
+        ) : (
+          <ol className="flex flex-col gap-2.5">
             {itens.slice(0, 8).map((it, i) => (
-              <tr key={it.rotulo}>
-                <td className="w-8 text-ink-400 tabular-nums">{i + 1}</td>
-                <td className="font-medium text-navy-900">{it.rotulo}</td>
-                <td className="text-right font-medium tabular-nums">
+              <li key={it.rotulo} className="flex items-center gap-3 text-sm">
+                <span className="w-4 shrink-0 text-ink-400 tabular-nums">
+                  {i + 1}
+                </span>
+                <span className="w-40 shrink-0 truncate font-medium text-navy-900">
+                  {it.rotulo}
+                </span>
+                <span className="h-2 flex-1 overflow-hidden rounded-full bg-ink-100">
+                  <span
+                    className="block h-full rounded-full bg-brand-500"
+                    style={{ width: `${Math.round((it.total / max) * 100)}%` }}
+                  />
+                </span>
+                <span className="w-8 shrink-0 text-right font-semibold tabular-nums">
                   {it.total}
-                </td>
-              </tr>
+                </span>
+              </li>
             ))}
-            {itens.length === 0 ? (
-              <EmptyRow colSpan={3}>Sem dados no período.</EmptyRow>
-            ) : null}
-          </tbody>
-        </TableWrap>
+          </ol>
+        )}
       </Card>
     </section>
   );
@@ -115,7 +125,7 @@ export default async function RelatoriosPage({
   let query = supabase
     .from("orcamentos")
     .select(
-      "status, tipo_proposta, valor_total, criado_por, condominios(administradora), usuarios!criado_por(nome)",
+      "status, tipo_proposta, valor_total, data_orcamento, criado_por, condominios(administradora), usuarios!criado_por(nome)",
     );
   if (filtros.de) query = query.gte("data_orcamento", filtros.de);
   if (filtros.ate) query = query.lte("data_orcamento", filtros.ate);
@@ -136,6 +146,7 @@ export default async function RelatoriosPage({
     status: o.status,
     tipo_proposta: o.tipo_proposta,
     valor_total: o.valor_total,
+    data: o.data_orcamento,
     administradora:
       (o.condominios as { administradora: string | null } | null)
         ?.administradora ?? null,
@@ -152,10 +163,10 @@ export default async function RelatoriosPage({
       : "—";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <PageHeader
         titulo="Relatório comercial"
-        descricao="Calculado a partir dos orçamentos reais. Use os filtros para recortar o período/responsável/administradora."
+        descricao="Calculado a partir dos orçamentos reais. Filtre por período, responsável, administradora, tipo ou status."
       />
 
       <RelatoriosFiltros
@@ -164,41 +175,70 @@ export default async function RelatoriosPage({
         administradoras={administradoras}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Indicador rotulo="Orçamentos" valor={String(r.total)} />
-        <Indicador rotulo="Enviados" valor={String(r.enviados)} />
-        <Indicador rotulo="Aprovados" valor={String(r.aprovados)} />
-        <Indicador
-          rotulo="Taxa de conversão"
-          valor={conversao}
-          nota="aprovados ÷ enviados"
+      {r.total === 0 ? (
+        <EstadoVazio
+          titulo="Nenhum orçamento nos filtros atuais"
+          descricao="Ajuste o período ou limpe os filtros para ver os números."
         />
-        <Indicador
-          rotulo="Valor médio"
-          valor={formatBRL(r.valorMedio)}
-          nota="dos orçamentos filtrados"
-        />
-      </div>
+      ) : (
+        <>
+          {/* Volume ------------------------------------------------------- */}
+          <section className="flex flex-col gap-3">
+            <h2 className="hj-section-title">Volume</h2>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <Indicador
+                rotulo="Orçamentos"
+                valor={String(r.total)}
+                destaque
+                nota={`${r.rascunhos} rascunho(s)`}
+              />
+              <Indicador rotulo="Enviados" valor={String(r.enviados)} destaque />
+              <Indicador
+                rotulo="Aprovados"
+                valor={String(r.aprovados)}
+                destaque
+              />
+              <Indicador
+                rotulo="Valor médio"
+                valor={formatBRL(r.valorMedio)}
+                nota="por orçamento"
+                destaque
+              />
+            </div>
+          </section>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Indicador rotulo="Rascunhos" valor={String(r.rascunhos)} />
-        <Indicador rotulo="Recusados" valor={String(r.recusados)} />
-        <Indicador rotulo="Cancelados" valor={String(r.cancelados)} />
-      </div>
+          <section className="flex flex-col gap-3">
+            <h2 className="hj-section-title">Últimos 6 meses</h2>
+            <GraficoMeses dados={r.porMes} />
+          </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="hj-section-title">Funil comercial</h2>
-        <FunilComercial etapas={r.funil} />
-      </section>
+          {/* Conversão -------------------------------------------------- */}
+          <section className="flex flex-col gap-3">
+            <h2 className="hj-section-title">Conversão</h2>
+            <div className="grid gap-4 lg:grid-cols-3">
+              <Indicador
+                rotulo="Taxa de conversão"
+                valor={conversao}
+                nota="aprovados ÷ enviados"
+                destaque
+              />
+              <Indicador rotulo="Recusados" valor={String(r.recusados)} />
+              <Indicador rotulo="Cancelados" valor={String(r.cancelados)} />
+            </div>
+            <FunilComercial etapas={r.funil} />
+          </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <ListaContagem titulo="Serviços mais orçados" itens={r.servicos} />
-        <ListaContagem
-          titulo="Administradoras com mais oportunidades"
-          itens={r.administradoras}
-        />
-        <ListaContagem titulo="Responsáveis" itens={r.responsaveis} />
-      </div>
+          {/* Ranking --------------------------------------------------- */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Ranking titulo="Serviços mais orçados" itens={r.servicos} />
+            <Ranking
+              titulo="Administradoras com mais oportunidades"
+              itens={r.administradoras}
+            />
+            <Ranking titulo="Responsáveis" itens={r.responsaveis} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,15 +1,7 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
-import {
-  IconBuilding,
-  IconCheck,
-  IconClock,
-  IconOrcamento,
-  IconPlus,
-  IconSend,
-  IconWallet,
-} from "@/components/icons";
+import { IconPdf, IconPlus, IconWallet } from "@/components/icons";
+import { MiniTendencia } from "@/components/mini-tendencia";
 import {
   Card,
   EmptyRow,
@@ -20,12 +12,40 @@ import {
 } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import { formatBRL, formatDateBR } from "@/lib/format";
-import { rotuloTipoProposta } from "@/lib/orcamento-tipos";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Dashboard · Hydrojexe" };
 
 const primeiroNome = (nome: string) => nome.trim().split(/\s+/)[0];
+const MESES = [
+  "jan",
+  "fev",
+  "mar",
+  "abr",
+  "mai",
+  "jun",
+  "jul",
+  "ago",
+  "set",
+  "out",
+  "nov",
+  "dez",
+];
+
+/** rótulos dos últimos 6 meses (YYYY-MM) até o mês atual */
+function ultimosSeisMeses(): { chave: string; rotulo: string }[] {
+  const out: { chave: string; rotulo: string }[] = [];
+  const d = new Date();
+  d.setDate(1);
+  for (let i = 5; i >= 0; i--) {
+    const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    out.push({
+      chave: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`,
+      rotulo: MESES[m.getMonth()],
+    });
+  }
+  return out;
+}
 
 export default async function DashboardPage() {
   const usuario = await requireUsuario();
@@ -46,13 +66,35 @@ export default async function DashboardPage() {
   const enviados = porStatus("enviado");
   const aprovados = porStatus("aprovado");
   const somaAprovados = aprovados.reduce((a, o) => a + (o.valor_total ?? 0), 0);
-  const recentes = lista.slice(0, 6);
+  const recentes = lista.slice(0, 8);
+  const conversao =
+    enviados.length + aprovados.length > 0
+      ? Math.round(
+          (aprovados.length / (enviados.length + aprovados.length)) * 100,
+        )
+      : null;
+
+  const meses = ultimosSeisMeses();
+  const contaPorMes = (filtro: (s: string) => boolean) =>
+    meses.map(
+      (m) =>
+        lista.filter(
+          (o) =>
+            (o.data_orcamento ?? "").slice(0, 7) === m.chave &&
+            filtro(o.status),
+        ).length,
+    );
+  const criadosMes = contaPorMes(() => true);
+  const aprovadosMes = contaPorMes((s) => s === "aprovado");
+  const enviadosMes = contaPorMes((s) => s === "enviado" || s === "aprovado");
+
+  const mesAtual = MESES[new Date().getMonth()];
 
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
         titulo={`Olá, ${primeiroNome(usuario.nome)}`}
-        descricao="Visão geral dos orçamentos da Hydrojexe."
+        descricao={`Panorama comercial — referência de ${mesAtual}.`}
         acoes={
           <LinkButton href="/orcamentos/novo" variante="primary">
             <IconPlus />
@@ -61,41 +103,36 @@ export default async function DashboardPage() {
         }
       />
 
-      {/* Indicadores ---------------------------------------------------------- */}
+      {/* Indicadores com tendência --------------------------------------- */}
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <Indicador
-          rotulo="Total de orçamentos"
-          valor={String(lista.length)}
-          nota={`${totalCondominios ?? 0} condomínio(s) cadastrado(s)`}
-          icone={<IconOrcamento />}
-          tom="navy"
+        <IndicadorTendencia
+          rotulo="Orçamentos criados"
+          valor={String(criadosMes[criadosMes.length - 1])}
+          nota={`${lista.length} no total`}
+          serie={criadosMes}
         />
-        <Indicador
-          rotulo="Em andamento"
-          valor={String(rascunhos.length)}
-          nota="Rascunhos aguardando envio"
-          icone={<IconClock />}
-          tom="amber"
-        />
-        <Indicador
-          rotulo="Enviados"
+        <IndicadorTendencia
+          rotulo="Enviados (em aberto)"
           valor={String(enviados.length)}
-          nota="Aguardando resposta do cliente"
-          icone={<IconSend />}
-          tom="brand"
+          nota={`${rascunhos.length} rascunho(s)`}
+          serie={enviadosMes}
         />
-        <Indicador
-          rotulo="Aprovados"
-          valor={String(aprovados.length)}
-          nota="Propostas fechadas"
-          icone={<IconCheck />}
-          tom="emerald"
+        <IndicadorTendencia
+          rotulo="Aprovados no mês"
+          valor={String(aprovadosMes[aprovadosMes.length - 1])}
+          nota={`${aprovados.length} no total`}
+          serie={aprovadosMes}
         />
+        <div className="hj-card hj-card-pad flex flex-col justify-between gap-3">
+          <p className="hj-label">Taxa de conversão</p>
+          <p className="hj-stat">{conversao != null ? `${conversao}%` : "—"}</p>
+          <p className="text-xs text-ink-500">aprovados ÷ (enviados + aprovados)</p>
+        </div>
       </div>
 
-      {/* Valor aprovado + atalhos --------------------------------------------- */}
+      {/* Valor aprovado + recentes ------------------------------------------ */}
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="hj-card relative overflow-hidden bg-navy-900 lg:col-span-1">
+        <div className="hj-card relative overflow-hidden bg-navy-900">
           <div
             aria-hidden
             className="pointer-events-none absolute -top-16 -right-12 size-56 rounded-full bg-brand-500/20 blur-3xl"
@@ -120,169 +157,107 @@ export default async function DashboardPage() {
         </div>
 
         <Card
-          titulo="Atalhos"
+          titulo="Orçamentos recentes"
           className="lg:col-span-2"
-          descricao="Acesso rápido às áreas mais usadas."
-        >
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Atalho
+          plano
+          acoes={
+            <Link
               href="/orcamentos"
-              titulo="Orçamentos"
-              descricao="Consultar, editar e gerar PDF"
-              icone={<IconOrcamento />}
-            />
-            <Atalho
-              href="/condominios"
-              titulo="Condomínios"
-              descricao="Cadastro de clientes"
-              icone={<IconBuilding />}
-            />
-            {usuario.perfil === "admin" ? (
-              <>
-                <Atalho
-                  href="/admin/precos"
-                  titulo="Tabela de preços"
-                  descricao="Valores vigentes por forma de pagamento"
-                  icone={<IconWallet />}
-                />
-                <Atalho
-                  href="/admin/textos"
-                  titulo="Textos-modelo"
-                  descricao="Conteúdo fixo das propostas"
-                  icone={<IconCheck />}
-                />
-              </>
-            ) : null}
-          </div>
+              className="text-sm font-medium text-brand-600 transition-colors hover:text-brand-700"
+            >
+              Ver todos
+            </Link>
+          }
+        >
+          <TableWrap>
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Condomínio</th>
+                <th className="hidden sm:table-cell">Status</th>
+                <th className="text-right">Total à vista</th>
+                <th className="hidden md:table-cell text-right">Data</th>
+                <th className="w-10" />
+              </tr>
+            </thead>
+            <tbody>
+              {recentes.map((o) => {
+                const cond = o.condominios as { nome: string } | null;
+                return (
+                  <tr key={o.id}>
+                    <td>
+                      <Link
+                        href={`/orcamentos/${o.id}`}
+                        className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
+                      >
+                        {o.numero}
+                      </Link>
+                    </td>
+                    <td>{cond?.nome ?? "—"}</td>
+                    <td className="hidden sm:table-cell">
+                      <StatusBadge status={o.status} />
+                    </td>
+                    <td className="text-right font-medium tabular-nums">
+                      {formatBRL(o.valor_total)}
+                    </td>
+                    <td className="hidden text-right text-ink-500 md:table-cell">
+                      {formatDateBR(o.data_orcamento)}
+                    </td>
+                    <td className="text-right">
+                      <Link
+                        href={`/orcamentos/${o.id}/pdf`}
+                        title="Abrir PDF"
+                        className="inline-grid size-7 place-items-center rounded-lg text-ink-400 transition-colors hover:bg-ink-100 hover:text-navy-800"
+                      >
+                        <IconPdf className="size-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+              {recentes.length === 0 ? (
+                <EmptyRow colSpan={6}>
+                  Nenhum orçamento ainda — comece criando o primeiro.
+                </EmptyRow>
+              ) : null}
+            </tbody>
+          </TableWrap>
         </Card>
       </div>
 
-      {/* Atividade recente ---------------------------------------------------- */}
-      <Card
-        titulo="Orçamentos recentes"
-        plano
-        acoes={
-          <Link
-            href="/orcamentos"
-            className="text-sm font-medium text-brand-600 transition-colors hover:text-brand-700"
-          >
-            Ver todos
-          </Link>
-        }
-      >
-        <TableWrap>
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Condomínio</th>
-              <th className="hidden sm:table-cell">Tipo</th>
-              <th>Status</th>
-              <th className="text-right">Total à vista</th>
-              <th className="hidden sm:table-cell">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentes.map((o) => {
-              const cond = o.condominios as { nome: string } | null;
-              return (
-                <tr key={o.id}>
-                  <td>
-                    <Link
-                      href={`/orcamentos/${o.id}`}
-                      className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
-                    >
-                      {o.numero}
-                    </Link>
-                  </td>
-                  <td>{cond?.nome ?? "—"}</td>
-                  <td className="hidden text-ink-600 sm:table-cell">
-                    {rotuloTipoProposta(o.tipo_proposta)}
-                  </td>
-                  <td>
-                    <StatusBadge status={o.status} />
-                  </td>
-                  <td className="text-right font-medium tabular-nums">
-                    {formatBRL(o.valor_total)}
-                  </td>
-                  <td className="hidden text-ink-500 sm:table-cell">
-                    {formatDateBR(o.data_orcamento)}
-                  </td>
-                </tr>
-              );
-            })}
-            {recentes.length === 0 ? (
-              <EmptyRow colSpan={6}>
-                Nenhum orçamento ainda. Comece criando o primeiro.
-              </EmptyRow>
-            ) : null}
-          </tbody>
-        </TableWrap>
-      </Card>
+      <p className="hj-hint">
+        {totalCondominios ?? 0} condomínio(s) cadastrado(s) ·{" "}
+        <Link href="/relatorios" className="text-brand-600 hover:text-brand-700">
+          ver relatório completo
+        </Link>
+      </p>
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
 
-const TONS = {
-  navy: "bg-navy-50 text-navy-600 ring-1 ring-navy-100",
-  brand: "bg-brand-50 text-brand-600 ring-1 ring-brand-100",
-  amber: "bg-amber-50 text-amber-600 ring-1 ring-amber-100",
-  emerald: "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100",
-} as const;
-
-function Indicador({
+function IndicadorTendencia({
   rotulo,
   valor,
   nota,
-  icone,
-  tom,
+  serie,
 }: {
   rotulo: string;
   valor: string;
   nota: string;
-  icone: ReactNode;
-  tom: keyof typeof TONS;
+  serie: number[];
 }) {
   return (
-    <div className="hj-card hj-card-pad flex items-start justify-between gap-4 transition-shadow duration-200 hover:shadow-[var(--shadow-float)]">
-      <div className="flex flex-col gap-1.5">
-        <p className="hj-label">{rotulo}</p>
+    <div className="hj-card hj-card-pad flex flex-col gap-2">
+      <p className="hj-label">{rotulo}</p>
+      <div className="flex items-end justify-between gap-3">
         <p className="hj-stat">{valor}</p>
-        <p className="text-xs text-ink-500">{nota}</p>
+        <div className="w-24 shrink-0">
+          <MiniTendencia valores={serie} />
+        </div>
       </div>
-      <span
-        className={`grid size-11 shrink-0 place-items-center rounded-2xl ${TONS[tom]}`}
-      >
-        {icone}
-      </span>
+      <p className="text-xs text-ink-500">{nota}</p>
     </div>
-  );
-}
-
-function Atalho({
-  href,
-  titulo,
-  descricao,
-  icone,
-}: {
-  href: string;
-  titulo: string;
-  descricao: string;
-  icone: ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-center gap-3 rounded-xl border border-ink-200 px-4 py-3 transition-all duration-150 hover:-translate-y-px hover:border-brand-300 hover:bg-brand-50/60 hover:shadow-[var(--shadow-soft)]"
-    >
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-ink-100 text-ink-600 transition-colors group-hover:bg-brand-500 group-hover:text-white">
-        {icone}
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-medium text-navy-900">{titulo}</span>
-        <span className="block truncate text-xs text-ink-500">{descricao}</span>
-      </span>
-    </Link>
   );
 }

@@ -113,22 +113,10 @@ export function OrcamentoCabecalhoForm({
       </Card>
 
       <Card
-        titulo="Condições comerciais"
-        descricao="Entram no cálculo e no PDF da proposta."
+        titulo="Pagamento"
+        descricao="Formas exibidas no PDF e condições fora do padrão."
       >
         <div className="flex flex-col gap-5">
-          <div className="max-w-xs">
-            <Field label="Gerenciamento mensal (R$/hidrômetro)">
-              <TextInput
-                type="number"
-                step="0.01"
-                min="0"
-                name="valor_por_hidrometro"
-                defaultValue={String(inicial.valor_por_hidrometro)}
-              />
-            </Field>
-          </div>
-
           <Checkbox
             name="incluir_tss"
             label="Incluir TSS (rateio por unidade)"
@@ -143,6 +131,23 @@ export function OrcamentoCabecalhoForm({
             name="parcelas_custom"
             inicial={inicial.parcelas_custom}
           />
+        </div>
+      </Card>
+
+      <Card
+        titulo="Gerenciamento mensal"
+        descricao="Valor da leitura/monitoramento após a instalação."
+      >
+        <div className="max-w-xs">
+          <Field label="Gerenciamento mensal (R$/hidrômetro)">
+            <TextInput
+              type="number"
+              step="0.01"
+              min="0"
+              name="valor_por_hidrometro"
+              defaultValue={String(inicial.valor_por_hidrometro)}
+            />
+          </Field>
         </div>
       </Card>
 

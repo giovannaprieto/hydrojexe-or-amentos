@@ -6,6 +6,7 @@ export type OrcamentoRelatorio = {
   valor_total: number | null;
   administradora: string | null;
   responsavel: string | null;
+  data: string | null;
 };
 
 export type ContagemItem = { rotulo: string; total: number };
@@ -25,7 +26,47 @@ export type ResumoRelatorio = {
   administradoras: ContagemItem[];
   responsaveis: ContagemItem[];
   funil: { rotulo: string; total: number }[];
+  /** série dos últimos 6 meses: criados x aprovados */
+  porMes: { rotulo: string; criados: number; aprovados: number }[];
 };
+
+const MESES_ABREV = [
+  "jan",
+  "fev",
+  "mar",
+  "abr",
+  "mai",
+  "jun",
+  "jul",
+  "ago",
+  "set",
+  "out",
+  "nov",
+  "dez",
+];
+
+function seriePorMes(
+  linhas: OrcamentoRelatorio[],
+): { rotulo: string; criados: number; aprovados: number }[] {
+  const hoje = new Date();
+  hoje.setDate(1);
+  const meses: { chave: string; rotulo: string }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const m = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+    meses.push({
+      chave: `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`,
+      rotulo: MESES_ABREV[m.getMonth()],
+    });
+  }
+  return meses.map((m) => {
+    const doMes = linhas.filter((o) => (o.data ?? "").slice(0, 7) === m.chave);
+    return {
+      rotulo: m.rotulo,
+      criados: doMes.length,
+      aprovados: doMes.filter((o) => o.status === "aprovado").length,
+    };
+  });
+}
 
 function topContagem(
   linhas: OrcamentoRelatorio[],
@@ -84,5 +125,6 @@ export function resumirRelatorio(
       { rotulo: "Enviados", total: enviados },
       { rotulo: "Aprovados", total: aprovados },
     ],
+    porMes: seriePorMes(linhas),
   };
 }

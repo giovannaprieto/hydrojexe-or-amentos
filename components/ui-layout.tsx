@@ -201,6 +201,35 @@ export function LinkButton({
   );
 }
 
+/* --- Estado vazio (nível de página / seção) ----------------------------- */
+
+export function EstadoVazio({
+  icone,
+  titulo,
+  descricao,
+  acao,
+}: {
+  icone?: ReactNode;
+  titulo: string;
+  descricao?: ReactNode;
+  acao?: ReactNode;
+}) {
+  return (
+    <div className="hj-card flex flex-col items-center gap-3 px-6 py-14 text-center">
+      {icone ? (
+        <span className="grid size-12 place-items-center rounded-2xl bg-ink-100 text-ink-400">
+          {icone}
+        </span>
+      ) : null}
+      <p className="text-sm font-medium text-navy-900">{titulo}</p>
+      {descricao ? (
+        <p className="max-w-sm text-sm text-ink-500">{descricao}</p>
+      ) : null}
+      {acao ? <div className="mt-1">{acao}</div> : null}
+    </div>
+  );
+}
+
 /* --- Lista de definições (pares rótulo/valor) ----------------------------- */
 
 export function DataList({
