@@ -203,8 +203,8 @@ export const INDIVIDUALIZACAO_GAS = {
 // Overrides pela tabela public.modelos_proposta (editáveis na tela de admin)
 // ---------------------------------------------------------------------------
 export const MODELOS_PROPOSTA_TIPOS: { tipo: string; nome: string }[] = [
-  { tipo: "gestao_mensal_agua", nome: "Gestão mensal — água" },
-  { tipo: "gestao_mensal_gas", nome: "Gestão mensal — gás" },
+  { tipo: "gestao_mensal_agua", nome: "Individualização de água — visual" },
+  { tipo: "gestao_mensal_gas", nome: "Individualização de gás — visual" },
   { tipo: "tss_light", nome: "TSS Light" },
   { tipo: "individualizacao_gas", nome: "Individualização de gás" },
 ];

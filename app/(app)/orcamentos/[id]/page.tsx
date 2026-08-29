@@ -376,7 +376,7 @@ export default async function OrcamentoPage({
         </>
       ) : isGestaoMensal(orc.tipo_proposta) ? (
         <section className="flex flex-col gap-3">
-          <h2 className="hj-section-title">Gestão mensal</h2>
+          <h2 className="hj-section-title">Individualização visual — leitura mensal</h2>
           <GestaoMensalForm
             inicial={{
               id: orc.id,

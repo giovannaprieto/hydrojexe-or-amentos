@@ -49,8 +49,8 @@ export function GestaoMensalForm({ inicial }: { inicial: GestaoMensalInicial }) 
       <input type="hidden" name="id" value={inicial.id} />
 
       <Card
-        titulo={`Gestão mensal de ${inicial.sistema}`}
-        descricao={`Leitura visual. Sem tipos de apartamento e sem parcelamento — a cobrança é mensal, por ${inicial.ponto}.`}
+        titulo={`Individualização de ${inicial.sistema} — visual`}
+        descricao={`Leitura visual mensal. Sem tipos de apartamento e sem parcelamento — a cobrança é mensal, por ${inicial.ponto}.`}
       >
       <div className="grid gap-5 sm:grid-cols-3">
         <Field label="Qtd. de apartamentos *">
