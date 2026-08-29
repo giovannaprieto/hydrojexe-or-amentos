@@ -264,18 +264,20 @@ export default async function OrcamentoPage({
 
   // preço vigente do "Hidrômetro Visual", por forma — p/ o preview do
   // formulário de individualização de água sem tecnologia
+  // "sem tecnologia" não usa parcelamento especial; formas sem preço vigente
+  // (a tabela do visual pode ir só até 9x) ficam de fora.
   const precoHidrometroVisualPorForma: PrecoForma[] =
     orc.tipo_proposta === "individualizacao_agua_sem_tecnologia"
       ? (() => {
           const it = catalogo.find((i) => i.slug === "hidrometro_visual");
           return it
-            ? aplicarEspecial(
-                formasProprias.map((f) => ({
+            ? formasProprias
+                .map((f) => ({
                   nome: f.nome,
                   num_parcelas: f.num_parcelas,
                   valorUnit: vigPorForma.get(f.id)?.get(it.id)?.valor ?? 0,
-                })),
-              )
+                }))
+                .filter((f) => f.valorUnit > 0)
             : [];
         })()
       : [];

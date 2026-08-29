@@ -896,14 +896,18 @@ export async function salvarIndividualizacaoAguaSemTec(
     [item.id],
     orc.data_orcamento,
   );
-  const opcoes = formas.map((f) => {
-    const unit = vig.get(f.id)?.get(item.id)?.valor ?? 0;
-    return {
-      valor: Math.round(unit * pontosPorApartamento * 100) / 100,
-      parcelas: f.num_parcelas,
-    };
-  });
-  if (opcoes.every((o) => o.valor <= 0)) {
+  // a tabela do hidrômetro visual pode não ter todas as faixas (ex.: vai só
+  // até 9x) — as formas sem preço vigente ficam de fora.
+  const opcoes = formas
+    .map((f) => {
+      const unit = vig.get(f.id)?.get(item.id)?.valor ?? 0;
+      return {
+        valor: Math.round(unit * pontosPorApartamento * 100) / 100,
+        parcelas: f.num_parcelas,
+      };
+    })
+    .filter((o) => o.valor > 0);
+  if (opcoes.length === 0) {
     return {
       ok: false,
       error:

@@ -6,7 +6,6 @@ import { IndividualizacaoAguaSemTecPdf } from "@/components/pdf/individualizacao
 import { dataPorExtenso } from "@/lib/data-extenso";
 import {
   filtrarPorFormasVisiveis,
-  parcelasOrigemPreco,
   parseFormasVisiveis,
 } from "@/lib/formas-pagamento";
 import {
@@ -68,23 +67,15 @@ export async function gerarPdfIndividualizacaoAguaSemTec(
     );
   }
 
+  // "sem tecnologia" não usa parcelamento especial (a tabela vai só até 9x).
   const valorPorParcelas = new Map(congeladas.map((o) => [o.parcelas, o.valor]));
-  const especial = !!orc.condominios?.parcelamento_especial;
-  const efetivas: TssOpcao[] = especial
-    ? congeladas.map((o) => ({
-        parcelas: o.parcelas,
-        valor:
-          valorPorParcelas.get(parcelasOrigemPreco(o.parcelas, true)) ?? o.valor,
-      }))
-    : congeladas;
-
   const base12 =
     valorPorParcelas.get(12) ??
     congeladas[congeladas.length - 1]?.valor ??
     0;
   const opcoes = [
     ...filtrarPorFormasVisiveis(
-      efetivas,
+      congeladas,
       parseFormasVisiveis(orc.formas_pagamento_visiveis),
     ),
     ...parseParcelasCustom(orc.parcelas_custom).map((n) => ({
