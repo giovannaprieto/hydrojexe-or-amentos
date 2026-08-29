@@ -13,33 +13,60 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Condomínios · Hydrojexe" };
 
-export default async function CondominiosPage() {
+export default async function CondominiosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ arquivados?: string }>;
+}) {
   await requireUsuario();
+  const verArquivados = (await searchParams).arquivados === "1";
 
   const supabase = await createClient();
-  const { data: condominios } = await supabase
+  let query = supabase
     .from("condominios")
     .select("id, nome, cidade, uf, administradora, contato_nome, contato_telefone")
     .order("nome");
+  query = verArquivados
+    ? query.not("arquivado_em", "is", null)
+    : query.is("arquivado_em", null);
+  const { data: condominios } = await query;
 
   const lista = condominios ?? [];
 
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        titulo="Condomínios"
+        titulo={verArquivados ? "Condomínios arquivados" : "Condomínios"}
         descricao={
           lista.length > 0
-            ? `${lista.length} cliente(s) cadastrado(s).`
-            : "Nenhum condomínio cadastrado ainda."
+            ? `${lista.length} cliente(s).`
+            : "Nada por aqui."
         }
         acoes={
-          <LinkButton href="/condominios/novo" variante="primary">
-            <IconPlus />
-            Novo condomínio
-          </LinkButton>
+          <>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- route handler de download, não é página */}
+            <a
+              href="/condominios/export"
+              className="hj-btn hj-btn-secondary"
+            >
+              Exportar
+            </a>
+            <LinkButton href="/condominios/novo" variante="primary">
+              <IconPlus />
+              Novo condomínio
+            </LinkButton>
+          </>
         }
       />
+
+      {verArquivados ? (
+        <Link
+          href="/condominios"
+          className="w-fit text-sm font-medium text-brand-600 hover:text-brand-700"
+        >
+          ← voltar aos ativos
+        </Link>
+      ) : null}
 
       <Card plano>
         <TableWrap>
@@ -83,6 +110,15 @@ export default async function CondominiosPage() {
           </tbody>
         </TableWrap>
       </Card>
+
+      {!verArquivados ? (
+        <Link
+          href="/condominios?arquivados=1"
+          className="w-fit text-xs font-medium text-ink-500 hover:text-brand-600"
+        >
+          Ver condomínios arquivados
+        </Link>
+      ) : null}
     </div>
   );
 }

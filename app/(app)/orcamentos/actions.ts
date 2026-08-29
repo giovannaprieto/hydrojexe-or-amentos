@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { requireUsuario } from "@/lib/auth";
+import { requireAdmin, requireUsuario } from "@/lib/auth";
 import {
   booleano,
   mensagemErroBanco,
@@ -1002,8 +1002,35 @@ export async function atualizarPrecosPelaTabela(formData: FormData): Promise<voi
 // ---------------------------------------------------------------------------
 // Excluir
 // ---------------------------------------------------------------------------
-export async function excluirOrcamento(formData: FormData): Promise<void> {
+export async function arquivarOrcamento(formData: FormData): Promise<void> {
+  const usuario = await requireUsuario();
+  const supabase = await createClient();
+  const id = texto(formData, "id");
+  if (!id) return;
+  await supabase
+    .from("orcamentos")
+    .update({ arquivado_em: new Date().toISOString(), atualizado_por: usuario.id })
+    .eq("id", id);
+  revalidatePath("/orcamentos");
+  revalidatePath(`/orcamentos/${id}`);
+  redirect("/orcamentos");
+}
+
+export async function desarquivarOrcamento(formData: FormData): Promise<void> {
   await requireUsuario();
+  const supabase = await createClient();
+  const id = texto(formData, "id");
+  if (!id) return;
+  await supabase
+    .from("orcamentos")
+    .update({ arquivado_em: null })
+    .eq("id", id);
+  revalidatePath("/orcamentos");
+  revalidatePath(`/orcamentos/${id}`);
+}
+
+export async function excluirOrcamento(formData: FormData): Promise<void> {
+  await requireAdmin();
   const supabase = await createClient();
   const id = texto(formData, "id");
   if (!id) return;

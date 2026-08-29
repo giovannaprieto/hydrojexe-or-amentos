@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 
 import {
   atualizarPrecosPelaTabela,
+  arquivarOrcamento,
+  desarquivarOrcamento,
   excluirOrcamento,
 } from "@/app/(app)/orcamentos/actions";
 import { GestaoMensalForm } from "@/components/gestao-mensal-form";
@@ -44,7 +46,8 @@ export default async function OrcamentoPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ erro?: string; recongelar?: string }>;
 }) {
-  await requireUsuario();
+  const usuario = await requireUsuario();
+  const isAdmin = usuario.perfil === "admin";
   const { id } = await params;
   const { erro, recongelar } = await searchParams;
   const supabase = await createClient();
@@ -52,7 +55,7 @@ export default async function OrcamentoPage({
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, condominios(nome, parcelamento_especial)",
+      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial)",
     )
     .eq("id", id)
     .single();
@@ -542,13 +545,32 @@ export default async function OrcamentoPage({
             </form>
           ) : null}
         </div>
-        <form action={excluirOrcamento}>
-          <input type="hidden" name="id" value={orc.id} />
-          <button type="submit" className="hj-btn hj-btn-danger">
-            <IconTrash />
-            Excluir orçamento
-          </button>
-        </form>
+        <div className="flex flex-wrap gap-2">
+          {orc.arquivado_em ? (
+            <form action={desarquivarOrcamento}>
+              <input type="hidden" name="id" value={orc.id} />
+              <button type="submit" className="hj-btn hj-btn-secondary">
+                Desarquivar
+              </button>
+            </form>
+          ) : (
+            <form action={arquivarOrcamento}>
+              <input type="hidden" name="id" value={orc.id} />
+              <button type="submit" className="hj-btn hj-btn-secondary">
+                Arquivar
+              </button>
+            </form>
+          )}
+          {isAdmin ? (
+            <form action={excluirOrcamento}>
+              <input type="hidden" name="id" value={orc.id} />
+              <button type="submit" className="hj-btn hj-btn-danger">
+                <IconTrash />
+                Excluir definitivamente
+              </button>
+            </form>
+          ) : null}
+        </div>
       </section>
     </div>
   );

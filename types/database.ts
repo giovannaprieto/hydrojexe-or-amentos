@@ -32,6 +32,7 @@ export type Database = {
           agua_preparado: boolean
           parcelamento_especial: boolean
           qtd_unidades: number | null
+          arquivado_em: string | null
         }
         Insert: {
           id?: string
@@ -51,6 +52,7 @@ export type Database = {
           agua_preparado?: boolean
           parcelamento_especial?: boolean
           qtd_unidades?: number | null
+          arquivado_em?: string | null
         }
         Update: {
           id?: string
@@ -70,6 +72,7 @@ export type Database = {
           agua_preparado?: boolean
           parcelamento_especial?: boolean
           qtd_unidades?: number | null
+          arquivado_em?: string | null
         }
         Relationships: [
         ]
@@ -148,6 +151,141 @@ export type Database = {
           referencedColumns: ["id"]
         }
         ]
+      }
+      obras: {
+        Row: {
+          id: string
+          condominio_id: string
+          orcamento_id: string | null
+          status: string
+          previsao_inicio: string | null
+          previsao_fim: string | null
+          outros_custos: number
+          observacoes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          condominio_id: string
+          orcamento_id?: string | null
+          status?: string
+          previsao_inicio?: string | null
+          previsao_fim?: string | null
+          outros_custos?: number
+          observacoes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          condominio_id?: string
+          orcamento_id?: string | null
+          status?: string
+          previsao_inicio?: string | null
+          previsao_fim?: string | null
+          outros_custos?: number
+          observacoes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      obra_apartamentos: {
+        Row: {
+          id: string
+          obra_id: string
+          identificacao: string
+          status: string
+          data_conclusao: string | null
+          observacao: string | null
+          ordem: number
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          identificacao: string
+          status?: string
+          data_conclusao?: string | null
+          observacao?: string | null
+          ordem?: number
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          identificacao?: string
+          status?: string
+          data_conclusao?: string | null
+          observacao?: string | null
+          ordem?: number
+        }
+        Relationships: []
+      }
+      obra_requisicoes: {
+        Row: {
+          id: string
+          obra_id: string
+          numero: string | null
+          data: string | null
+          anexo_path: string | null
+          valor_total: number
+          criado_por: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          numero?: string | null
+          data?: string | null
+          anexo_path?: string | null
+          valor_total?: number
+          criado_por?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          numero?: string | null
+          data?: string | null
+          anexo_path?: string | null
+          valor_total?: number
+          criado_por?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      obra_materiais: {
+        Row: {
+          id: string
+          requisicao_id: string
+          descricao: string
+          quantidade: number
+          unidade: string | null
+          valor_unitario: number
+          valor_total: number
+          ordem: number
+        }
+        Insert: {
+          id?: string
+          requisicao_id: string
+          descricao: string
+          quantidade?: number
+          unidade?: string | null
+          valor_unitario?: number
+          valor_total?: number
+          ordem?: number
+        }
+        Update: {
+          id?: string
+          requisicao_id?: string
+          descricao?: string
+          quantidade?: number
+          unidade?: string | null
+          valor_unitario?: number
+          valor_total?: number
+          ordem?: number
+        }
+        Relationships: []
       }
       gerenciamento_mensal: {
         Row: {
@@ -411,6 +549,9 @@ export type Database = {
           qtd_equipamentos: number | null
           tss_opcoes: Json
           medidor_gas: string | null
+          arquivado_em: string | null
+          enviado_em: string | null
+          token_publico: string | null
         }
         Insert: {
           id?: string
@@ -436,6 +577,9 @@ export type Database = {
           qtd_equipamentos?: number | null
           tss_opcoes: Json
           medidor_gas?: string | null
+          arquivado_em?: string | null
+          enviado_em?: string | null
+          token_publico?: string | null
         }
         Update: {
           id?: string
@@ -461,6 +605,9 @@ export type Database = {
           qtd_equipamentos?: number | null
           tss_opcoes?: Json
           medidor_gas?: string | null
+          arquivado_em?: string | null
+          enviado_em?: string | null
+          token_publico?: string | null
         }
         Relationships: [
         {

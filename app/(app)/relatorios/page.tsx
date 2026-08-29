@@ -126,7 +126,8 @@ export default async function RelatoriosPage({
     .from("orcamentos")
     .select(
       "status, tipo_proposta, valor_total, data_orcamento, criado_por, condominios(administradora), usuarios!criado_por(nome)",
-    );
+    )
+    .is("arquivado_em", null);
   if (filtros.de) query = query.gte("data_orcamento", filtros.de);
   if (filtros.ate) query = query.lte("data_orcamento", filtros.ate);
   if (filtros.responsavel) query = query.eq("criado_por", filtros.responsavel);

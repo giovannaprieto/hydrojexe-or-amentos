@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { requireUsuario } from "@/lib/auth";
+import { requireAdmin, requireUsuario } from "@/lib/auth";
 import {
   booleano,
   mensagemErroBanco,
@@ -114,8 +114,35 @@ export async function atualizarCondominio(
   return { ok: true, error: null };
 }
 
-export async function excluirCondominio(formData: FormData): Promise<void> {
+export async function arquivarCondominio(formData: FormData): Promise<void> {
   await requireUsuario();
+  const id = texto(formData, "id");
+  if (!id) return;
+  const supabase = await createClient();
+  await supabase
+    .from("condominios")
+    .update({ arquivado_em: new Date().toISOString() })
+    .eq("id", id);
+  revalidatePath("/condominios");
+  revalidatePath(`/condominios/${id}`);
+  redirect("/condominios");
+}
+
+export async function desarquivarCondominio(formData: FormData): Promise<void> {
+  await requireUsuario();
+  const id = texto(formData, "id");
+  if (!id) return;
+  const supabase = await createClient();
+  await supabase
+    .from("condominios")
+    .update({ arquivado_em: null })
+    .eq("id", id);
+  revalidatePath("/condominios");
+  revalidatePath(`/condominios/${id}`);
+}
+
+export async function excluirCondominio(formData: FormData): Promise<void> {
+  await requireAdmin();
   const id = texto(formData, "id");
   if (!id) return;
 

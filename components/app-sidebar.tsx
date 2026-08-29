@@ -147,17 +147,23 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
         {/* Perfil ------------------------------------------------------------- */}
         <div className="border-t border-white/10 p-3">
           <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-500/25 text-sm font-semibold text-brand-200">
-              {iniciais(usuario.nome)}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-white">
-                {usuario.nome}
-              </p>
-              <p className="truncate text-xs text-navy-300 capitalize">
-                {usuario.perfil}
-              </p>
-            </div>
+            <Link
+              href="/perfil"
+              onClick={() => setAberto(false)}
+              className="flex min-w-0 flex-1 items-center gap-3 rounded-lg transition-colors hover:opacity-90"
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-500/25 text-sm font-semibold text-brand-200">
+                {iniciais(usuario.nome)}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-white">
+                  {usuario.nome}
+                </span>
+                <span className="block truncate text-xs text-navy-300 capitalize">
+                  {usuario.perfil}
+                </span>
+              </span>
+            </Link>
             <ThemeToggle />
             <form action="/logout" method="post">
               <button

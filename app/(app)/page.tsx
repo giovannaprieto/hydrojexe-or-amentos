@@ -54,10 +54,16 @@ export default async function DashboardPage() {
   const [{ data: orcamentos }, { count: totalCondominios }] = await Promise.all([
     supabase
       .from("orcamentos")
-      .select("id, numero, data_orcamento, status, tipo_proposta, valor_total, condominios(nome)")
+      .select(
+        "id, numero, data_orcamento, status, tipo_proposta, valor_total, enviado_em, condominios(nome)",
+      )
+      .is("arquivado_em", null)
       .order("data_orcamento", { ascending: false })
       .order("numero", { ascending: false }),
-    supabase.from("condominios").select("id", { count: "exact", head: true }),
+    supabase
+      .from("condominios")
+      .select("id", { count: "exact", head: true })
+      .is("arquivado_em", null),
   ]);
 
   const lista = orcamentos ?? [];

@@ -40,6 +40,10 @@ export default async function OrcamentosPage({
     ate: texto(sp.ate),
   };
 
+  const verArquivados = texto(sp.arquivados) === "1";
+  const sparams = new URLSearchParams(
+    Object.entries(filtros).filter(([, v]) => v) as [string, string][],
+  );
   const supabase = await createClient();
 
   const { data: usuarios } = await supabase
@@ -68,6 +72,10 @@ export default async function OrcamentosPage({
     .order("data_orcamento", { ascending: false })
     .order("numero", { ascending: false });
 
+  query = verArquivados
+    ? query.not("arquivado_em", "is", null)
+    : query.is("arquivado_em", null);
+
   if (filtros.status) query = query.eq("status", filtros.status);
   if (filtros.tipo) query = query.eq("tipo_proposta", filtros.tipo);
   if (filtros.responsavel) query = query.eq("criado_por", filtros.responsavel);
@@ -87,17 +95,34 @@ export default async function OrcamentosPage({
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        titulo="Orçamentos"
+        titulo={verArquivados ? "Orçamentos arquivados" : "Orçamentos"}
         descricao={`${lista.length} orçamento(s) encontrado(s).`}
         acoes={
-          <LinkButton href="/orcamentos/novo" variante="primary">
-            <IconPlus />
-            Novo orçamento
-          </LinkButton>
+          <>
+            <a
+              href={`/orcamentos/export?${sparams.toString()}`}
+              className="hj-btn hj-btn-secondary"
+            >
+              Exportar
+            </a>
+            <LinkButton href="/orcamentos/novo" variante="primary">
+              <IconPlus />
+              Novo orçamento
+            </LinkButton>
+          </>
         }
       />
 
-      <OrcamentosFiltros valores={filtros} usuarios={usuarios ?? []} />
+      {verArquivados ? (
+        <Link
+          href="/orcamentos"
+          className="w-fit text-sm font-medium text-brand-600 hover:text-brand-700"
+        >
+          ← voltar aos ativos
+        </Link>
+      ) : (
+        <OrcamentosFiltros valores={filtros} usuarios={usuarios ?? []} />
+      )}
 
       <Card plano>
         <TableWrap>
@@ -153,6 +178,15 @@ export default async function OrcamentosPage({
           </tbody>
         </TableWrap>
       </Card>
+
+      {!verArquivados ? (
+        <Link
+          href="/orcamentos?arquivados=1"
+          className="w-fit text-xs font-medium text-ink-500 hover:text-brand-600"
+        >
+          Ver orçamentos arquivados
+        </Link>
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { excluirCondominio } from "@/app/(app)/condominios/actions";
+import {
+  arquivarCondominio,
+  desarquivarCondominio,
+  excluirCondominio,
+} from "@/app/(app)/condominios/actions";
 import { CondominioForm } from "@/components/condominio-form";
 import { IconTrash } from "@/components/icons";
 import { Timeline, type LinhaTimeline } from "@/components/timeline";
@@ -37,7 +41,8 @@ export default async function CondominioPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ erro?: string; editar?: string }>;
 }) {
-  await requireUsuario();
+  const usuario = await requireUsuario();
+  const isAdmin = usuario.perfil === "admin";
   const { id } = await params;
   const { erro, editar } = await searchParams;
 
@@ -236,20 +241,37 @@ export default async function CondominioPage({
         />
       </section>
 
-      <section className="flex flex-col gap-2 border-t border-ink-200 pt-6">
-        <form action={excluirCondominio}>
-          <input type="hidden" name="id" value={condominio.id} />
-          <button type="submit" className="hj-btn hj-btn-danger">
-            <IconTrash />
-            Excluir condomínio
-          </button>
-        </form>
-        {orcamentos.length > 0 ? (
-          <span className="hj-hint">
-            Este condomínio tem {orcamentos.length} orçamento(s); a exclusão será
-            bloqueada pelo banco.
-          </span>
+      <section className="flex flex-wrap items-center gap-3 border-t border-ink-200 pt-6">
+        {condominio.arquivado_em ? (
+          <form action={desarquivarCondominio}>
+            <input type="hidden" name="id" value={condominio.id} />
+            <button type="submit" className="hj-btn hj-btn-secondary">
+              Desarquivar
+            </button>
+          </form>
+        ) : (
+          <form action={arquivarCondominio}>
+            <input type="hidden" name="id" value={condominio.id} />
+            <button type="submit" className="hj-btn hj-btn-secondary">
+              Arquivar condomínio
+            </button>
+          </form>
+        )}
+        {isAdmin ? (
+          <form action={excluirCondominio}>
+            <input type="hidden" name="id" value={condominio.id} />
+            <button type="submit" className="hj-btn hj-btn-danger">
+              <IconTrash />
+              Excluir definitivamente
+            </button>
+          </form>
         ) : null}
+        <span className="hj-hint">
+          Arquivar tira das listas sem apagar nada.
+          {isAdmin && orcamentos.length > 0
+            ? " Excluir é bloqueado pelo banco se houver orçamentos."
+            : ""}
+        </span>
       </section>
     </div>
   );
