@@ -136,14 +136,21 @@ export async function gerarPdfIndividualizacaoAguaSemTec(
     .filter(Boolean)
     .join(" - ");
 
-  const [header, footer, watermark, fotoMedidor, fotoDemonstrativo] =
-    await Promise.all([
-      assetDataUri("timbre-header.png"),
-      assetDataUri("timbre-footer.png"),
-      assetDataUri("timbre-watermark.png"),
-      assetDataUri("foto-medidor-visual.jpg"),
-      assetDataUri("foto-demonstrativo.jpg"),
-    ]);
+  const [
+    header,
+    footer,
+    watermark,
+    fotoMedidor,
+    logoInmetro,
+    fotoDemonstrativo,
+  ] = await Promise.all([
+    assetDataUri("timbre-header.png"),
+    assetDataUri("timbre-footer.png"),
+    assetDataUri("timbre-watermark.png"),
+    assetDataUri("foto-medidor-visual.jpg"),
+    assetDataUri("logo-inmetro.jpg"),
+    assetDataUri("foto-demonstrativo.jpg"),
+  ]);
 
   const buffer = await renderToBuffer(
     createElement(IndividualizacaoAguaSemTecPdf, {
@@ -162,7 +169,14 @@ export async function gerarPdfIndividualizacaoAguaSemTec(
       hidrometrosPorApartamento,
       valorGestaoMensal,
       opcoes,
-      assets: { header, footer, watermark, fotoMedidor, fotoDemonstrativo },
+      assets: {
+        header,
+        footer,
+        watermark,
+        fotoMedidor,
+        logoInmetro,
+        fotoDemonstrativo,
+      },
     }) as Parameters<typeof renderToBuffer>[0],
   );
 

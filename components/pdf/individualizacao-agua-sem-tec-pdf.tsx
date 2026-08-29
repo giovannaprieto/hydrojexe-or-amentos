@@ -64,6 +64,14 @@ const s = StyleSheet.create({
     textAlign: "center",
   },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
+  fotosLinha: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 28,
+    marginTop: 8,
+    marginBottom: 4,
+  },
   gerVermelho: { color: C_RED, fontFamily: "Times-Bold", marginTop: 8 },
   assinatura: {
     fontFamily: "Times-Bold",
@@ -82,6 +90,7 @@ export type IndividualizacaoAguaSemTecPdfAssets = {
   footer: string;
   watermark: string;
   fotoMedidor: string;
+  logoInmetro: string;
   fotoDemonstrativo: string;
 };
 
@@ -207,10 +216,10 @@ export function IndividualizacaoAguaSemTecPdf(
             />
             {sec.titulo.toUpperCase().includes("INTERVENÇÃO") ? (
               <>
-                <Image
-                  src={assets.fotoMedidor}
-                  style={[s.fotoSecao, { width: 130 }]}
-                />
+                <View style={s.fotosLinha} wrap={false}>
+                  <Image src={assets.fotoMedidor} style={{ width: 130 }} />
+                  <Image src={assets.logoInmetro} style={{ width: 70 }} />
+                </View>
                 <Text style={s.par}>
                   b) Execução de teste de estanqueidade em todo o sistema.
                 </Text>
