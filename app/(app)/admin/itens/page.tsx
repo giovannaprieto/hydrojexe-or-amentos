@@ -8,13 +8,14 @@ import {
   PageHeader,
   TableWrap,
 } from "@/components/ui-layout";
-import { requireAdmin } from "@/lib/auth";
+import { requireUsuario } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Serviços e itens · Hydrojexe" };
 
 export default async function ItensPage() {
-  await requireAdmin();
+  const usuario = await requireUsuario();
+  const isAdmin = usuario.perfil === "admin";
 
   const supabase = await createClient();
   const { data: itens } = await supabase
@@ -47,12 +48,16 @@ export default async function ItensPage() {
             {lista.map((i) => (
               <tr key={i.id}>
                 <td>
-                  <Link
-                    href={`/admin/itens/${i.id}`}
-                    className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
-                  >
-                    {i.nome}
-                  </Link>
+                  {isAdmin ? (
+                    <Link
+                      href={`/admin/itens/${i.id}`}
+                      className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
+                    >
+                      {i.nome}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-navy-900">{i.nome}</span>
+                  )}
                 </td>
                 <td className="hidden font-mono text-xs text-ink-500 md:table-cell">
                   {i.slug}
@@ -78,10 +83,12 @@ export default async function ItensPage() {
         </TableWrap>
       </Card>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="hj-section-title">Novo item</h2>
-        <ItemForm />
-      </section>
+      {isAdmin ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="hj-section-title">Novo item</h2>
+          <ItemForm />
+        </section>
+      ) : null}
     </div>
   );
 }

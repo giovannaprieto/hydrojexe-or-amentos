@@ -39,7 +39,8 @@ const PRINCIPAL: Item[] = [
   { href: "/relatorios", rotulo: "Relatórios", Icone: IconRelatorio },
 ];
 
-const ADMIN: Item[] = [
+// Visíveis para todos (só o admin consegue alterar).
+const CONFIG: Item[] = [
   { href: "/admin/itens", rotulo: "Serviços e itens", Icone: IconServicos, prefixo: true },
   { href: "/admin/precos", rotulo: "Tabela de preços", Icone: IconPrecos },
   {
@@ -48,6 +49,10 @@ const ADMIN: Item[] = [
     Icone: IconFormas,
     prefixo: true,
   },
+];
+
+// Só admin.
+const ADMIN: Item[] = [
   { href: "/admin/textos", rotulo: "Textos-modelo", Icone: IconTextos },
   { href: "/admin/usuarios", rotulo: "Usuários", Icone: IconUsuarios },
 ];
@@ -128,9 +133,12 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
         <nav className="flex-1 overflow-y-auto px-3 pb-4">
           <div className="flex flex-col gap-1">{PRINCIPAL.map(link)}</div>
 
+          <p className="hj-nav-section">Configurações</p>
+          <div className="flex flex-col gap-1">{CONFIG.map(link)}</div>
+
           {usuario.perfil === "admin" ? (
             <>
-              <p className="hj-nav-section">Configurações</p>
+              <p className="hj-nav-section">Administração</p>
               <div className="flex flex-col gap-1">{ADMIN.map(link)}</div>
             </>
           ) : null}

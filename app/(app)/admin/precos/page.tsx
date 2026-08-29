@@ -6,14 +6,15 @@ import {
   PageHeader,
   TableWrap,
 } from "@/components/ui-layout";
-import { requireAdmin } from "@/lib/auth";
+import { requireUsuario } from "@/lib/auth";
 import { formatBRL, formatDateBR, hojeISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Preços · Hydrojexe" };
 
 export default async function PrecosPage() {
-  await requireAdmin();
+  const usuario = await requireUsuario();
+  const isAdmin = usuario.perfil === "admin";
 
   const hoje = hojeISO();
   const supabase = await createClient();
@@ -128,21 +129,23 @@ export default async function PrecosPage() {
         </p>
       ) : null}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="hj-section-title">Nova tabela de preços</h2>
-        <p className="max-w-3xl hj-muted">
-          Informe a data de início e ajuste os valores (os campos vêm
-          preenchidos com a tabela vigente). Ao salvar, a vigência anterior é
-          encerrada nessa data e os novos valores passam a valer — orçamentos já
-          criados não são afetados.
-        </p>
-        <NovaTabelaPrecos
-          hoje={hoje}
-          itens={itensAtivos.map((i) => ({ id: i.id, nome: i.nome }))}
-          formas={formasProprias.map((f) => ({ id: f.id, nome: f.nome }))}
-          atuais={Object.fromEntries(vigentes)}
-        />
-      </section>
+      {isAdmin ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="hj-section-title">Nova tabela de preços</h2>
+          <p className="max-w-3xl hj-muted">
+            Informe a data de início e ajuste os valores (os campos vêm
+            preenchidos com a tabela vigente). Ao salvar, a vigência anterior é
+            encerrada nessa data e os novos valores passam a valer — orçamentos
+            já criados não são afetados.
+          </p>
+          <NovaTabelaPrecos
+            hoje={hoje}
+            itens={itensAtivos.map((i) => ({ id: i.id, nome: i.nome }))}
+            formas={formasProprias.map((f) => ({ id: f.id, nome: f.nome }))}
+            atuais={Object.fromEntries(vigentes)}
+          />
+        </section>
+      ) : null}
 
       <section className="flex flex-col gap-3">
         <h2 className="hj-section-title">Histórico de vigências</h2>

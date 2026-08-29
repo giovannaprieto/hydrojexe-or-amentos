@@ -8,13 +8,14 @@ import {
   PageHeader,
   TableWrap,
 } from "@/components/ui-layout";
-import { requireAdmin } from "@/lib/auth";
+import { requireUsuario } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Formas de pagamento · Hydrojexe" };
 
 export default async function FormasPagamentoPage() {
-  await requireAdmin();
+  const usuario = await requireUsuario();
+  const isAdmin = usuario.perfil === "admin";
 
   const supabase = await createClient();
   const { data: formas } = await supabase
@@ -49,12 +50,16 @@ export default async function FormasPagamentoPage() {
             {lista.map((f) => (
               <tr key={f.id}>
                 <td>
-                  <Link
-                    href={`/admin/formas-pagamento/${f.id}`}
-                    className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
-                  >
-                    {f.nome}
-                  </Link>
+                  {isAdmin ? (
+                    <Link
+                      href={`/admin/formas-pagamento/${f.id}`}
+                      className="font-medium text-navy-900 underline-offset-4 hover:text-brand-600 hover:underline"
+                    >
+                      {f.nome}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-navy-900">{f.nome}</span>
+                  )}
                 </td>
                 <td className="hidden font-mono text-xs text-ink-500 md:table-cell">
                   {f.slug}
@@ -82,12 +87,14 @@ export default async function FormasPagamentoPage() {
         </TableWrap>
       </Card>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="hj-section-title">Nova forma de pagamento</h2>
-        <FormaPagamentoForm
-          opcoes={lista.map((f) => ({ id: f.id, nome: f.nome }))}
-        />
-      </section>
+      {isAdmin ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="hj-section-title">Nova forma de pagamento</h2>
+          <FormaPagamentoForm
+            opcoes={lista.map((f) => ({ id: f.id, nome: f.nome }))}
+          />
+        </section>
+      ) : null}
     </div>
   );
 }
