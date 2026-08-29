@@ -40,6 +40,32 @@ export async function criarObra(formData: FormData): Promise<void> {
   redirect(`/obras/${data.id}`);
 }
 
+export async function excluirObra(formData: FormData): Promise<void> {
+  await requireUsuario();
+  const id = texto(formData, "id");
+  if (!id) redirect("/obras");
+  const supabase = await createClient();
+
+  // remove os PDFs das requisições do storage antes do cascade
+  const { data: reqs } = await supabase
+    .from("obra_requisicoes")
+    .select("anexo_path")
+    .eq("obra_id", id);
+  const paths = (reqs ?? [])
+    .map((r) => r.anexo_path)
+    .filter((p): p is string => !!p);
+  if (paths.length > 0) {
+    await supabase.storage.from("requisicoes").remove(paths);
+  }
+
+  const { error } = await supabase.from("obras").delete().eq("id", id);
+  if (error) {
+    redirect(`/obras/${id}?erro=${encodeURIComponent(mensagemErroBanco(error))}`);
+  }
+  revalidatePath("/obras");
+  redirect("/obras");
+}
+
 export async function salvarObra(
   _prev: FormState,
   formData: FormData,

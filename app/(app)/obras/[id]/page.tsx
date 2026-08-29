@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { excluirRequisicao } from "@/app/(app)/obras/actions";
+import { excluirObra, excluirRequisicao } from "@/app/(app)/obras/actions";
 import { IconTrash } from "@/components/icons";
 import { ObraApartamentos } from "@/components/obra-apartamentos";
 import { ObraDadosForm } from "@/components/obra-dados-form";
 import { RequisicaoForm } from "@/components/requisicao-form";
 import {
+  Alert,
   Badge,
   Card,
   DataList,
@@ -23,11 +24,14 @@ export const metadata = { title: "Obra · Hydrojexe" };
 
 export default async function ObraPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ erro?: string }>;
 }) {
   await requireUsuario();
   const { id } = await params;
+  const { erro } = await searchParams;
   const supabase = await createClient();
 
   const { data: obra } = await supabase
@@ -90,6 +94,8 @@ export default async function ObraPage({
           </>
         }
       />
+
+      {erro ? <Alert tom="error">{erro}</Alert> : null}
 
       <Card titulo="Resumo de custos">
         <DataList
@@ -220,6 +226,20 @@ export default async function ObraPage({
             <RequisicaoForm obraId={obra.id} />
           </div>
         </details>
+      </section>
+
+      <section className="flex flex-wrap items-center gap-3 border-t border-ink-200 pt-6">
+        <form action={excluirObra}>
+          <input type="hidden" name="id" value={obra.id} />
+          <button type="submit" className="hj-btn hj-btn-danger">
+            <IconTrash />
+            Excluir obra
+          </button>
+        </form>
+        <span className="hj-hint">
+          Apaga a obra, os apartamentos, as requisições e os PDFs anexados.
+          Para pausar sem apagar, use o status “Pausada” ou “Cancelada”.
+        </span>
       </section>
     </div>
   );
