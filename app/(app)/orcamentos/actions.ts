@@ -831,6 +831,143 @@ export async function salvarIndividualizacaoGas(
 }
 
 // ---------------------------------------------------------------------------
+// Individualização de água SEM TECNOLOGIA — instalação de hidrômetros visuais.
+// Mesmo fluxo do gás: qtd apartamentos × hidrômetros/apto; as 4 opções saem
+// da tabela do item "hidrometro_visual" e são congeladas em tss_opcoes.
+// ---------------------------------------------------------------------------
+export async function salvarIndividualizacaoAguaSemTec(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const usuario = await requireUsuario();
+  const supabase = await createClient();
+
+  const id = texto(formData, "id");
+  if (!id) return { ok: false, error: "Registro inválido." };
+
+  const { data: orc } = await supabase
+    .from("orcamentos")
+    .select("id, tipo_proposta, data_orcamento, valor_total")
+    .eq("id", id)
+    .single();
+  if (!orc) return { ok: false, error: "Orçamento não encontrado." };
+  if (orc.tipo_proposta !== "individualizacao_agua_sem_tecnologia") {
+    return {
+      ok: false,
+      error: "Este orçamento não é de individualização de água sem tecnologia.",
+    };
+  }
+
+  const qtdApartamentos = Math.trunc(numeroDecimal(formData, "qtd_apartamentos"));
+  const pontosPorApartamento =
+    Math.trunc(numeroDecimal(formData, "pontos_por_apartamento")) || 1;
+  const valorGestaoMensal = numeroDecimal(formData, "valor_gestao_mensal");
+
+  if (qtdApartamentos <= 0) {
+    return { ok: false, error: "Informe a quantidade de apartamentos." };
+  }
+  if (pontosPorApartamento <= 0) {
+    return { ok: false, error: "Hidrômetros por apartamento inválido." };
+  }
+
+  const [{ data: item }, { data: formasRaw }] = await Promise.all([
+    supabase
+      .from("itens_precificaveis")
+      .select("id")
+      .eq("slug", "hidrometro_visual")
+      .maybeSingle(),
+    supabase
+      .from("formas_pagamento")
+      .select("id, num_parcelas, ordem")
+      .eq("ativo", true)
+      .is("usa_preco_de_forma_id", null)
+      .order("ordem"),
+  ]);
+  if (!item) {
+    return {
+      ok: false,
+      error: 'Item "Hidrômetro Visual" não encontrado na tabela de preços.',
+    };
+  }
+  const formas = formasRaw ?? [];
+  const vig = await precosVigentesPorForma(
+    supabase,
+    formas.map((f) => f.id),
+    [item.id],
+    orc.data_orcamento,
+  );
+  const opcoes = formas.map((f) => {
+    const unit = vig.get(f.id)?.get(item.id)?.valor ?? 0;
+    return {
+      valor: Math.round(unit * pontosPorApartamento * 100) / 100,
+      parcelas: f.num_parcelas,
+    };
+  });
+  if (opcoes.every((o) => o.valor <= 0)) {
+    return {
+      ok: false,
+      error:
+        "Sem preço vigente para o Hidrômetro Visual na tabela. Cadastre os preços primeiro.",
+    };
+  }
+
+  const totalHidrometros = qtdApartamentos * pontosPorApartamento;
+  const aVista = opcoes.find((o) => o.parcelas <= 1);
+  const snapshot = aVista?.valor ?? opcoes[0]?.valor ?? 0;
+
+  const { error: gmErr } = await supabase
+    .from("gerenciamento_mensal")
+    .update({
+      valor_por_hidrometro: valorGestaoMensal,
+      qtd_apartamentos: qtdApartamentos,
+      pontos_por_apartamento: pontosPorApartamento,
+      qtd_hidrometros: totalHidrometros,
+      valor_total_mensal:
+        Math.round(qtdApartamentos * valorGestaoMensal * 100) / 100,
+    })
+    .eq("orcamento_id", id);
+  if (gmErr) return { ok: false, error: mensagemErroBanco(gmErr) };
+
+  const { error } = await supabase
+    .from("orcamentos")
+    .update({
+      qtd_equipamentos: totalHidrometros,
+      tss_opcoes: opcoes,
+      total_unidades: qtdApartamentos,
+      valor_tss: 0,
+      valor_total: snapshot,
+      atualizado_por: usuario.id,
+    })
+    .eq("id", id);
+  if (error) return { ok: false, error: mensagemErroBanco(error) };
+
+  await registrarHistorico(supabase, {
+    orcamento_id: id,
+    entidade: "orcamentos",
+    entidade_id: id,
+    acao: "atualizar",
+    campo: "individualizacao_agua_sem_tecnologia",
+    valor_antes: { valor_total: orc.valor_total },
+    valor_depois: {
+      qtd_apartamentos: qtdApartamentos,
+      pontos_por_apartamento: pontosPorApartamento,
+      valor_gestao_mensal: valorGestaoMensal,
+      opcoes,
+    },
+    descricao: `Individualização de água (sem tecnologia) salva — ${totalHidrometros} hidrômetro(s), ${opcoes.length} opção(ões)`,
+    alterado_por: usuario.id,
+  });
+
+  revalidatePath(`/orcamentos/${id}`);
+  revalidatePath("/orcamentos");
+  return {
+    ok: true,
+    error: null,
+    mensagem: "Individualização de água sem tecnologia salva.",
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Recongelar preços pela tabela atual
 // ---------------------------------------------------------------------------
 export async function atualizarPrecosPelaTabela(formData: FormData): Promise<void> {

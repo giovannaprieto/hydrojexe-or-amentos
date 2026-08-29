@@ -200,11 +200,69 @@ export const INDIVIDUALIZACAO_GAS = {
 };
 
 // ---------------------------------------------------------------------------
+// Individualização de água SEM TECNOLOGIA — instalação de hidrômetros visuais.
+// Fonte: modelos-orcamentos/Marine - Individualização de água ... sem tecnologia.pdf
+// ---------------------------------------------------------------------------
+export const INDIVIDUALIZACAO_AGUA_SEM_TEC = {
+  ref: "Instalação de hidrômetros sem tecnologia",
+  secoes: [
+    {
+      titulo: "INDIVIDUALIZAÇÃO DE ÁGUA",
+      corpo:
+        "Análise técnica: Prédio preparado para medição individualizada de consumo de água através de tubulações distribuídas em SHAFTS nos corredores.",
+    },
+    {
+      titulo: "OBJETIVO DA NOSSA PROPOSTA COMERCIAL",
+      corpo:
+        "1) Monitorar o consumo individual das unidades.\n" +
+        "2) Fazer justiça com os condôminos pagando sua conta de água apenas pelo seu próprio consumo;\n" +
+        "3) Possibilitar cada condômino controlar e monitorar seu consumo de acordo com sua expectativa.",
+    },
+    {
+      titulo: "PROCEDIMENTO TÉCNICO DA INDIVIDUALIZAÇÃO DOS APARTAMENTOS",
+      corpo:
+        "a) Análise preliminar do abastecimento e distribuição de água do condomínio e execução de mapeamento com plano de ação para a intervenção.\n" +
+        "b) Emissão de comunicado formal aos condôminos orientando quanto aos procedimentos executivos de intervenção em cada unidade residencial e disponibilizando o agendamento das vistorias internas.\n" +
+        "c) Emissão de relatório de constatação de cada unidade alvo de intervenção.\n" +
+        "d) Apresentação de cronograma detalhado da obra e agendamento individual de cada intervenção.",
+    },
+    {
+      titulo: "INTERVENÇÃO",
+      corpo:
+        "a) Instalação de {qtd_hidrometros} hidrômetros unijato de 1,5m³ sem tecnologia da fabricante Hidrometer. O Hidrômetro será provido de selo de inspeção do Inmetro. O local da instalação será o shaft localizado no hall de cada pavimento.",
+    },
+    {
+      titulo: "TRÂMITES ADMINISTRATIVOS FINAIS",
+      corpo:
+        "a) Após a montagem e instalação de todos os hidrômetros, emitiremos um relatório de conclusão liberando o condomínio a iniciar a medição e gerenciamento de consumo mensal.\n" +
+        "b) Decorridos 30 (trinta) dias a contar pelo vencimento da conta de água consecutiva à conclusão, apresentaremos um relatório de consumo de água individual do mês vigente em caráter de orientação. Com isso, os moradores tomarão conhecimento do consumo individual de cada unidade e a partir de então passarão a arcar individualmente com a conta de água em acordo com seu consumo real.",
+    },
+  ] as SecaoModelo[],
+  prazoPadrao: "a) A instalação será realizada em até 10 (dez) dias úteis.",
+  demonstrativos:
+    "Após as medições mensais, emitimos um demonstrativo individual para cada unidade do condomínio com todas as informações referente à medição, como por exemplo: a foto do medidor, consumo (m³), período de leitura, valor final para pagamento, histórico de consumo, data da próxima medição, conforme exemplo abaixo:",
+  demonstrativosNota:
+    "Estes demonstrativos individuais são encaminhados via e-mail através do nosso sistema diretamente aos condôminos para conferência mensal.",
+  garantia:
+    "a) Os serviços hidráulicos executados têm garantia de 01 (um) ano salvo danos ocasionados por terceiros;\n" +
+    "b) Os equipamentos possuem garantia de 01 (um) ano conforme orientação do fabricante;\n" +
+    "c) A validade deste orçamento é de 30 dias a partir da emissão do mesmo.",
+  /** linha em vermelho abaixo das opções de investimento */
+  gerenciamentoNota(valorPorApto: number): string {
+    return `Valor da gestão mensal por apartamento: ${brl(valorPorApto)}. As fotos tiradas serão enviadas à administração e ao síndico para disponibilização aos moradores.`;
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Overrides pela tabela public.modelos_proposta (editáveis na tela de admin)
 // ---------------------------------------------------------------------------
 export const MODELOS_PROPOSTA_TIPOS: { tipo: string; nome: string }[] = [
-  { tipo: "gestao_mensal_agua", nome: "Individualização de água — visual" },
-  { tipo: "gestao_mensal_gas", nome: "Individualização de gás — visual" },
+  {
+    tipo: "individualizacao_agua_sem_tecnologia",
+    nome: "Individualização de água — sem tecnologia",
+  },
+  { tipo: "gestao_mensal_agua", nome: "Gestão mensal — água" },
+  { tipo: "gestao_mensal_gas", nome: "Gestão mensal — gás" },
   { tipo: "tss_light", nome: "TSS Light" },
   { tipo: "individualizacao_gas", nome: "Individualização de gás" },
 ];
@@ -216,6 +274,9 @@ export function secoesDefault(tipo: string): SecaoModelo[] {
   }
   if (tipo === "tss_light") return TSS_LIGHT.secoes;
   if (tipo === "individualizacao_gas") return INDIVIDUALIZACAO_GAS.secoes;
+  if (tipo === "individualizacao_agua_sem_tecnologia") {
+    return INDIVIDUALIZACAO_AGUA_SEM_TEC.secoes;
+  }
   return [];
 }
 

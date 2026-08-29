@@ -1,7 +1,11 @@
 export const TIPOS_PROPOSTA = [
   { valor: "completa", rotulo: "Individualização de água" },
-  { valor: "gestao_mensal_agua", rotulo: "Individualização de água — visual" },
-  { valor: "gestao_mensal_gas", rotulo: "Individualização de gás — visual" },
+  {
+    valor: "individualizacao_agua_sem_tecnologia",
+    rotulo: "Individualização de água — sem tecnologia",
+  },
+  { valor: "gestao_mensal_agua", rotulo: "Gestão mensal — água" },
+  { valor: "gestao_mensal_gas", rotulo: "Gestão mensal — gás" },
   { valor: "tss_light", rotulo: "TSS Light" },
   { valor: "individualizacao_gas", rotulo: "Individualização de gás" },
 ] as const;

@@ -13,6 +13,7 @@ import {
 } from "@/app/(app)/orcamentos/[id]/pdf/gestao";
 import { gerarPdfTssLight } from "@/app/(app)/orcamentos/[id]/pdf/tss";
 import { gerarPdfIndividualizacaoGas } from "@/app/(app)/orcamentos/[id]/pdf/individualizacao-gas";
+import { gerarPdfIndividualizacaoAguaSemTec } from "@/app/(app)/orcamentos/[id]/pdf/individualizacao-agua-sem-tec";
 import { requireUsuario } from "@/lib/auth";
 import { dataPorExtenso } from "@/lib/data-extenso";
 import {
@@ -99,6 +100,17 @@ export async function GET(
       data_orcamento: orc.data_orcamento,
       prazo: orc.prazo,
       qtd_equipamentos: orc.qtd_equipamentos,
+      tss_opcoes: orc.tss_opcoes,
+      formas_pagamento_visiveis: orc.formas_pagamento_visiveis,
+      parcelas_custom: orc.parcelas_custom,
+      condominios: orc.condominios as OrcGestaoCondominio,
+    });
+  }
+  if (orc.tipo_proposta === "individualizacao_agua_sem_tecnologia") {
+    return gerarPdfIndividualizacaoAguaSemTec(supabase, id, {
+      numero: orc.numero,
+      data_orcamento: orc.data_orcamento,
+      prazo: orc.prazo,
       tss_opcoes: orc.tss_opcoes,
       formas_pagamento_visiveis: orc.formas_pagamento_visiveis,
       parcelas_custom: orc.parcelas_custom,

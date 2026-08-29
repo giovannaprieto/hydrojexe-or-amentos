@@ -6,6 +6,7 @@ import {
 } from "@/app/(app)/orcamentos/actions";
 import { GestaoMensalForm } from "@/components/gestao-mensal-form";
 import { IconPdf, IconRefresh, IconTrash } from "@/components/icons";
+import { IndividualizacaoAguaSemTecForm } from "@/components/individualizacao-agua-sem-tec-form";
 import { IndividualizacaoGasForm } from "@/components/individualizacao-gas-form";
 import { TssLightForm } from "@/components/tss-light-form";
 import { OrcamentoBuilder } from "@/components/orcamento-builder";
@@ -261,8 +262,27 @@ export default async function OrcamentoPage({
         )
       : {};
 
+  // preço vigente do "Hidrômetro Visual", por forma — p/ o preview do
+  // formulário de individualização de água sem tecnologia
+  const precoHidrometroVisualPorForma: PrecoForma[] =
+    orc.tipo_proposta === "individualizacao_agua_sem_tecnologia"
+      ? (() => {
+          const it = catalogo.find((i) => i.slug === "hidrometro_visual");
+          return it
+            ? aplicarEspecial(
+                formasProprias.map((f) => ({
+                  nome: f.nome,
+                  num_parcelas: f.num_parcelas,
+                  valorUnit: vigPorForma.get(f.id)?.get(it.id)?.valor ?? 0,
+                })),
+              )
+            : [];
+        })()
+      : [];
+
   const podeGerarPdf =
     orc.tipo_proposta === "completa" ||
+    orc.tipo_proposta === "individualizacao_agua_sem_tecnologia" ||
     isGestaoMensal(orc.tipo_proposta) ||
     orc.tipo_proposta === "tss_light" ||
     orc.tipo_proposta === "individualizacao_gas";
@@ -374,9 +394,24 @@ export default async function OrcamentoPage({
             </Card>
           </section>
         </>
+      ) : orc.tipo_proposta === "individualizacao_agua_sem_tecnologia" ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="hj-section-title">
+            Individualização de água — sem tecnologia
+          </h2>
+          <IndividualizacaoAguaSemTecForm
+            inicial={{
+              id: orc.id,
+              qtd_apartamentos: gm?.qtd_apartamentos ?? 0,
+              pontos_por_apartamento: gm?.pontos_por_apartamento ?? 1,
+              valor_gestao_mensal: gm?.valor_por_hidrometro ?? 0,
+            }}
+            precoPorForma={precoHidrometroVisualPorForma}
+          />
+        </section>
       ) : isGestaoMensal(orc.tipo_proposta) ? (
         <section className="flex flex-col gap-3">
-          <h2 className="hj-section-title">Individualização visual — leitura mensal</h2>
+          <h2 className="hj-section-title">Gestão mensal</h2>
           <GestaoMensalForm
             inicial={{
               id: orc.id,
