@@ -793,6 +793,25 @@ export type Database = {
         }
         ]
       }
+      schema_migrations: {
+        Row: {
+          version: string
+          descricao: string | null
+          aplicada_em: string
+        }
+        Insert: {
+          version: string
+          descricao?: string | null
+          aplicada_em?: string
+        }
+        Update: {
+          version?: string
+          descricao?: string | null
+          aplicada_em?: string
+        }
+        Relationships: [
+        ]
+      }
       templates_texto: {
         Row: {
           id: string
