@@ -31,9 +31,9 @@ export type Database = {
           administradora: string | null
           agua_preparado: boolean
           parcelamento_especial: boolean
-          parcelamento_especial_modo: string
           qtd_unidades: number | null
           arquivado_em: string | null
+          parcelamento_especial_modo: string
         }
         Insert: {
           id?: string
@@ -52,9 +52,9 @@ export type Database = {
           administradora?: string | null
           agua_preparado?: boolean
           parcelamento_especial?: boolean
-          parcelamento_especial_modo?: string
           qtd_unidades?: number | null
           arquivado_em?: string | null
+          parcelamento_especial_modo?: string
         }
         Update: {
           id?: string
@@ -73,9 +73,9 @@ export type Database = {
           administradora?: string | null
           agua_preparado?: boolean
           parcelamento_especial?: boolean
-          parcelamento_especial_modo?: string
           qtd_unidades?: number | null
           arquivado_em?: string | null
+          parcelamento_especial_modo?: string
         }
         Relationships: [
         ]
