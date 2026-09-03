@@ -50,7 +50,7 @@ const CAMPOS: {
   {
     nome: "sec_analise_agua_caixa_acoplada",
     rotulo: "1c. Análise técnica — caixa acoplada (sem hidra)",
-    hint: 'Usada quando o orçamento tem o cenário "Caixa acoplada, sem hidra". O escopo da Seção 4 e as fotos são os mesmos do "não preparado".',
+    hint: 'Usada quando o orçamento tem o cenário "Caixa acoplada, sem hidra" (modelo Ed. Queluz). O restante do escopo é igual ao do prédio preparado — Seção 4 usa a "Intervenção — prédio preparado", sem retrofit nem fotos.',
   },
   { nome: "sec_objetivo", rotulo: "2. Objetivo da proposta" },
   { nome: "sec_procedimento_tecnico", rotulo: "3. Procedimento técnico" },

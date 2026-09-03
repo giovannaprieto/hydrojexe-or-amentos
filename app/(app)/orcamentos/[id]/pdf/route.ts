@@ -325,8 +325,9 @@ export async function gerarPdfDoOrcamento(
   } | null;
   const tpl = orc.templates_texto as Record<string, string | null> | null;
 
-  // Cenário "caixa acoplada" (sem hidra): análise técnica própria + escopo de
-  // intervenção do "não preparado" (retrofit), com as mesmas fotos.
+  // Cenário "caixa acoplada" (sem hidra): escopo igual ao do prédio PREPARADO
+  // (intervenção curta, sem retrofit nem fotos — modelo Ed. Queluz); só a
+  // análise técnica da Seção 1 é própria.
   const caixaAcoplada = orc.cenario_agua === "caixa_acoplada";
 
   // {analise_tecnica} na seção 1 -> texto de "preparado", "não preparado" ou
@@ -362,15 +363,17 @@ export async function gerarPdfDoOrcamento(
     }
   }
   // Não preparado (retrofit) tem uma seção INTERVENÇÃO própria, com fotos
-  // interligadas por marcadores; preparado usa sec_intervencao ({hidrometros}).
+  // interligadas por marcadores. Preparado E "caixa acoplada" usam a
+  // sec_intervencao curta ({hidrometros}).
   const intervencaoNaoPrep = tpl?.sec_intervencao_agua_nao_preparado?.trim();
-  const intervencaoTexto =
-    (caixaAcoplada || !cond?.agua_preparado) && intervencaoNaoPrep
-      ? intervencaoNaoPrep
-      : (tpl?.sec_intervencao ?? "").replace(
-          /\{hidrometros\}/g,
-          fraseHidrometros(totalHidrometros, slugsNaComposicao),
-        );
+  const usarRetrofit =
+    !caixaAcoplada && !cond?.agua_preparado && !!intervencaoNaoPrep;
+  const intervencaoTexto = usarRetrofit
+    ? (intervencaoNaoPrep as string)
+    : (tpl?.sec_intervencao ?? "").replace(
+        /\{hidrometros\}/g,
+        fraseHidrometros(totalHidrometros, slugsNaComposicao),
+      );
 
   const enderecoLinha = [
     cond?.endereco,
