@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FORMAS_PAGAMENTO_BASE,
   filtrarPorFormasVisiveis,
+  modoParcelamento,
   parcelasOrigemPreco,
   parseFormasVisiveis,
   rotuloFormaBase,
@@ -38,24 +39,59 @@ describe("parseFormasVisiveis", () => {
 });
 
 describe("parcelasOrigemPreco (parcelamento especial)", () => {
-  it("sem especial: usa a própria coluna", () => {
-    for (const n of [1, 6, 9, 12]) {
-      expect(parcelasOrigemPreco(n, false)).toBe(n);
+  it("modo nenhum: usa a própria coluna", () => {
+    for (const n of [1, 6, 9, 12, 24, 36]) {
+      expect(parcelasOrigemPreco(n, "nenhum")).toBe(n);
     }
   });
 
-  it("com especial: 9x usa preço de 6x, 12x usa preço de 9x", () => {
-    expect(parcelasOrigemPreco(9, true)).toBe(6);
-    expect(parcelasOrigemPreco(12, true)).toBe(9);
+  it("modo padrão: 9x usa 6x, 12x usa 9x; à vista/6x/24x inalterados", () => {
+    expect(parcelasOrigemPreco(9, "padrao")).toBe(6);
+    expect(parcelasOrigemPreco(12, "padrao")).toBe(9);
+    expect(parcelasOrigemPreco(1, "padrao")).toBe(1);
+    expect(parcelasOrigemPreco(6, "padrao")).toBe(6);
+    expect(parcelasOrigemPreco(24, "padrao")).toBe(24);
   });
 
-  it("com especial: à vista e 6x não mudam", () => {
-    expect(parcelasOrigemPreco(1, true)).toBe(1);
-    expect(parcelasOrigemPreco(6, true)).toBe(6);
+  it("modo longo: 12x usa 6x, 24x usa 9x, 36x usa 12x; à vista/6x/9x inalterados", () => {
+    expect(parcelasOrigemPreco(12, "longo")).toBe(6);
+    expect(parcelasOrigemPreco(24, "longo")).toBe(9);
+    expect(parcelasOrigemPreco(36, "longo")).toBe(12);
+    expect(parcelasOrigemPreco(1, "longo")).toBe(1);
+    expect(parcelasOrigemPreco(6, "longo")).toBe(6);
+    expect(parcelasOrigemPreco(9, "longo")).toBe(9);
+  });
+});
+
+describe("modoParcelamento", () => {
+  it("sem parcelamento especial = nenhum", () => {
+    expect(modoParcelamento(null)).toBe("nenhum");
+    expect(modoParcelamento({ parcelamento_especial: false })).toBe("nenhum");
+    expect(
+      modoParcelamento({
+        parcelamento_especial: false,
+        parcelamento_especial_modo: "longo",
+      }),
+    ).toBe("nenhum");
   });
 
-  it("com especial: 24x não é deslocado aqui (resolvido via formas extras)", () => {
-    expect(parcelasOrigemPreco(24, true)).toBe(24);
+  it("ligado, sem modo ou modo desconhecido = padrão", () => {
+    expect(modoParcelamento({ parcelamento_especial: true })).toBe("padrao");
+    expect(
+      modoParcelamento({
+        parcelamento_especial: true,
+        parcelamento_especial_modo: "xpto",
+      }),
+    ).toBe("padrao");
+  });
+
+  it("ligado + modo longo = longo", () => {
+    expect(
+      modoParcelamento({
+        parcelamento_especial: true,
+        parcelamento_especial_modo: "longo",
+      }),
+    ).toBe("longo");
   });
 });
 

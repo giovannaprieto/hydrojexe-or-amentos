@@ -26,6 +26,10 @@ function inteiroPositivoOuNulo(
 
 function parse(formData: FormData) {
   const uf = textoOuNulo(formData, "uf");
+  const pModo = texto(formData, "parcelamento_especial_modo");
+  const modoParc = ["nenhum", "padrao", "longo"].includes(pModo)
+    ? pModo
+    : "nenhum";
   return {
     nome: texto(formData, "nome"),
     cnpj: textoOuNulo(formData, "cnpj"),
@@ -39,7 +43,8 @@ function parse(formData: FormData) {
     contato_telefone: textoOuNulo(formData, "contato_telefone"),
     observacoes: textoOuNulo(formData, "observacoes"),
     agua_preparado: booleano(formData, "agua_preparado"),
-    parcelamento_especial: booleano(formData, "parcelamento_especial"),
+    parcelamento_especial: modoParc !== "nenhum",
+    parcelamento_especial_modo: modoParc === "longo" ? "longo" : "padrao",
     qtd_unidades: inteiroPositivoOuNulo(formData, "qtd_unidades"),
   };
 }
@@ -78,7 +83,7 @@ export async function atualizarCondominio(
   const { data: antes } = await supabase
     .from("condominios")
     .select(
-      "nome, cnpj, endereco, cidade, uf, administradora, sindico_nome, contato_nome, contato_email, contato_telefone, observacoes, agua_preparado, parcelamento_especial, qtd_unidades",
+      "nome, cnpj, endereco, cidade, uf, administradora, sindico_nome, contato_nome, contato_email, contato_telefone, observacoes, agua_preparado, parcelamento_especial, parcelamento_especial_modo, qtd_unidades",
     )
     .eq("id", id)
     .single();

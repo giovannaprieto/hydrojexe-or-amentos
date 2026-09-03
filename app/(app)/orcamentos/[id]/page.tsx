@@ -27,6 +27,7 @@ import {
 } from "@/components/ui-layout";
 import { requireUsuario } from "@/lib/auth";
 import {
+  modoParcelamento,
   parcelasOrigemPreco,
   parseFormasVisiveis,
 } from "@/lib/formas-pagamento";
@@ -57,7 +58,7 @@ export default async function OrcamentoPage({
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial)",
+      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial, parcelamento_especial_modo)",
     )
     .eq("id", id)
     .single();
@@ -167,16 +168,19 @@ export default async function OrcamentoPage({
   const precoUnitPorFormaBuilder: Record<string, Record<string, number>> = {
     ...precoUnitPorForma,
   };
-  // parcelamento especial: cada faixa >= 9x usa a coluna de preço de uma abaixo
-  const parcelamentoEspecial = !!(
-    orc.condominios as { parcelamento_especial?: boolean | null } | null
-  )?.parcelamento_especial;
-  if (parcelamentoEspecial) {
-    const idPorParcelas = new Map(
-      formasProprias.map((f) => [f.num_parcelas, f.id]),
-    );
+  // parcelamento especial: cada faixa usa a coluna de preço de uma faixa abaixo
+  const modoParc = modoParcelamento(
+    orc.condominios as {
+      parcelamento_especial?: boolean | null;
+      parcelamento_especial_modo?: string | null;
+    } | null,
+  );
+  const idPorParcelas = new Map(
+    formasProprias.map((f) => [f.num_parcelas, f.id]),
+  );
+  if (modoParc !== "nenhum") {
     for (const f of formasProprias) {
-      const origem = parcelasOrigemPreco(f.num_parcelas, true);
+      const origem = parcelasOrigemPreco(f.num_parcelas, modoParc);
       if (origem !== f.num_parcelas) {
         const origemId = idPorParcelas.get(origem);
         if (origemId) {
@@ -186,9 +190,10 @@ export default async function OrcamentoPage({
     }
   }
   for (const n of orc.parcelas_custom ?? []) {
-    precoUnitPorFormaBuilder[`custom-${n}`] = forma12x
-      ? (precoUnitPorForma[forma12x.id] ?? {})
-      : {};
+    const origemId = idPorParcelas.get(parcelasOrigemPreco(n, modoParc));
+    precoUnitPorFormaBuilder[`custom-${n}`] =
+      (origemId && precoUnitPorForma[origemId]) ||
+      (forma12x ? (precoUnitPorForma[forma12x.id] ?? {}) : {});
   }
 
   const tiposIniciais = (tiposRaw ?? []).map((t) => ({
@@ -221,12 +226,12 @@ export default async function OrcamentoPage({
   // unitário da faixa uma abaixo (mesma regra do PDF).
   type PrecoForma = { nome: string; num_parcelas: number; valorUnit: number };
   const aplicarEspecial = (arr: PrecoForma[]): PrecoForma[] => {
-    if (!parcelamentoEspecial) return arr;
+    if (modoParc === "nenhum") return arr;
     const porParcelas = new Map(arr.map((x) => [x.num_parcelas, x.valorUnit]));
     return arr.map((x) => ({
       ...x,
       valorUnit:
-        porParcelas.get(parcelasOrigemPreco(x.num_parcelas, true)) ??
+        porParcelas.get(parcelasOrigemPreco(x.num_parcelas, modoParc)) ??
         x.valorUnit,
     }));
   };

@@ -12,10 +12,12 @@ import {
   Field,
   FormError,
   FormSuccess,
+  Select,
   SubmitButton,
   TextInput,
   Textarea,
 } from "@/components/ui";
+import { MODOS_PARCELAMENTO_ESPECIAL } from "@/lib/formas-pagamento";
 import { Card } from "@/components/ui-layout";
 import { emptyFormState } from "@/lib/forms";
 import type { Tables } from "@/types/database";
@@ -87,14 +89,26 @@ export function CondominioForm({ inicial }: { inicial?: Condominio }) {
             </span>
           </div>
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <Checkbox
-              name="parcelamento_especial"
-              label="Parcelamento especial"
-              defaultChecked={inicial?.parcelamento_especial ?? false}
-            />
+            <Field label="Parcelamento especial">
+              <Select
+                name="parcelamento_especial_modo"
+                defaultValue={
+                  inicial?.parcelamento_especial
+                    ? inicial.parcelamento_especial_modo === "longo"
+                      ? "longo"
+                      : "padrao"
+                    : "nenhum"
+                }
+              >
+                {MODOS_PARCELAMENTO_ESPECIAL.map((m) => (
+                  <option key={m.valor} value={m.valor}>
+                    {m.rotulo}
+                  </option>
+                ))}
+              </Select>
+            </Field>
             <span className="hj-hint">
-              No PDF deste condomínio: 9x usa o preço de 6x, 12x usa o de 9x e
-              24x usa o de 12x. À vista e 6x não mudam.
+              Vale para os PDFs deste condomínio. À vista e 6x nunca mudam.
             </span>
           </div>
         </div>

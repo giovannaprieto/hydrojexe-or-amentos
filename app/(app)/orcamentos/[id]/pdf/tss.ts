@@ -6,6 +6,7 @@ import { TssLightPdf } from "@/components/pdf/tss-light-pdf";
 import { dataPorExtenso } from "@/lib/data-extenso";
 import {
   filtrarPorFormasVisiveis,
+  modoParcelamento,
   parcelasOrigemPreco,
   parseFormasVisiveis,
 } from "@/lib/formas-pagamento";
@@ -69,18 +70,20 @@ export async function gerarPdfTssLight(
     );
   }
 
-  // parcelamento especial do condomínio: 9x mostra o valor de 6x, 12x o de 9x
+  // parcelamento especial do condomínio (padrão: 9x<-6x, 12x<-9x;
+  // longo: 12x<-6x, 24x<-9x, 36x<-12x)
   const valorPorParcelas = new Map(congeladas.map((o) => [o.parcelas, o.valor]));
-  const especial = !!orc.condominios?.parcelamento_especial;
-  const efetivas: TssOpcao[] = especial
-    ? congeladas.map((o) => ({
-        parcelas: o.parcelas,
-        valor:
-          valorPorParcelas.get(parcelasOrigemPreco(o.parcelas, true)) ?? o.valor,
-      }))
-    : congeladas;
+  const modoParc = modoParcelamento(orc.condominios);
+  const efetivas: TssOpcao[] =
+    modoParc !== "nenhum"
+      ? congeladas.map((o) => ({
+          parcelas: o.parcelas,
+          valor:
+            valorPorParcelas.get(parcelasOrigemPreco(o.parcelas, modoParc)) ??
+            o.valor,
+        }))
+      : congeladas;
 
-  // extras (parcelas_custom) usam SEMPRE o valor real de 12x (não deslocado)
   const base12 =
     valorPorParcelas.get(12) ??
     congeladas[congeladas.length - 1]?.valor ??
@@ -90,8 +93,9 @@ export async function gerarPdfTssLight(
       efetivas,
       parseFormasVisiveis(orc.formas_pagamento_visiveis),
     ),
+    // extras (24x, 36x…): no modo "longo" também deslocam o valor de referência
     ...parseParcelasCustom(orc.parcelas_custom).map((n) => ({
-      valor: base12,
+      valor: valorPorParcelas.get(parcelasOrigemPreco(n, modoParc)) ?? base12,
       parcelas: n,
     })),
   ];
