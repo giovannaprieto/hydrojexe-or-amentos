@@ -20,7 +20,7 @@ export default async function TextosPage() {
     supabase
       .from("templates_texto")
       .select(
-        "sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia",
+        "sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_analise_agua_caixa_acoplada, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia",
       )
       .eq("is_padrao", true)
       .maybeSingle(),
@@ -46,6 +46,8 @@ export default async function TextosPage() {
             sec_analise_agua_preparado: tpl?.sec_analise_agua_preparado ?? null,
             sec_analise_agua_nao_preparado:
               tpl?.sec_analise_agua_nao_preparado ?? null,
+            sec_analise_agua_caixa_acoplada:
+              tpl?.sec_analise_agua_caixa_acoplada ?? null,
             sec_objetivo: tpl?.sec_objetivo ?? null,
             sec_procedimento_tecnico: tpl?.sec_procedimento_tecnico ?? null,
             sec_intervencao: tpl?.sec_intervencao ?? null,

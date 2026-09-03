@@ -644,6 +644,7 @@ export type Database = {
           arquivado_em: string | null
           enviado_em: string | null
           token_publico: string | null
+          cenario_agua: string
         }
         Insert: {
           id?: string
@@ -672,6 +673,7 @@ export type Database = {
           arquivado_em?: string | null
           enviado_em?: string | null
           token_publico?: string | null
+          cenario_agua?: string
         }
         Update: {
           id?: string
@@ -700,6 +702,7 @@ export type Database = {
           arquivado_em?: string | null
           enviado_em?: string | null
           token_publico?: string | null
+          cenario_agua?: string
         }
         Relationships: [
         {
@@ -808,6 +811,7 @@ export type Database = {
           sec_analise_agua_preparado: string | null
           sec_analise_agua_nao_preparado: string | null
           sec_intervencao_agua_nao_preparado: string | null
+          sec_analise_agua_caixa_acoplada: string | null
         }
         Insert: {
           id?: string
@@ -826,6 +830,7 @@ export type Database = {
           sec_analise_agua_preparado?: string | null
           sec_analise_agua_nao_preparado?: string | null
           sec_intervencao_agua_nao_preparado?: string | null
+          sec_analise_agua_caixa_acoplada?: string | null
         }
         Update: {
           id?: string
@@ -844,6 +849,7 @@ export type Database = {
           sec_analise_agua_preparado?: string | null
           sec_analise_agua_nao_preparado?: string | null
           sec_intervencao_agua_nao_preparado?: string | null
+          sec_analise_agua_caixa_acoplada?: string | null
         }
         Relationships: [
         ]

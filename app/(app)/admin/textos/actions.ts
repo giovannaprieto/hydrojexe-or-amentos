@@ -45,6 +45,7 @@ export async function salvarTemplateTexto(
       sec_individualizacao_agua: val("sec_individualizacao_agua"),
       sec_analise_agua_preparado: val("sec_analise_agua_preparado"),
       sec_analise_agua_nao_preparado: val("sec_analise_agua_nao_preparado"),
+      sec_analise_agua_caixa_acoplada: val("sec_analise_agua_caixa_acoplada"),
       sec_objetivo: val("sec_objetivo"),
       sec_procedimento_tecnico: val("sec_procedimento_tecnico"),
       sec_intervencao: val("sec_intervencao"),

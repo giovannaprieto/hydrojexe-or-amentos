@@ -29,6 +29,7 @@ export type CabecalhoInicial = {
   condominio_id: string;
   status: string;
   tipo_proposta: string;
+  cenario_agua: string;
   incluir_tss: boolean;
   formas_pagamento_visiveis: number[];
   parcelas_custom: number[];
@@ -106,6 +107,20 @@ export function OrcamentoCabecalhoForm({
                     {c.nome}
                   </option>
                 ))}
+              </Select>
+            </Field>
+          </div>
+
+          <div className="sm:col-span-2">
+            <Field
+              label="Cenário da análise técnica (água)"
+              hint="Só se aplica à Individualização de água."
+            >
+              <Select name="cenario_agua" defaultValue={inicial.cenario_agua}>
+                <option value="auto">
+                  Automático (pelo cadastro do condomínio)
+                </option>
+                <option value="caixa_acoplada">Caixa acoplada, sem hidra</option>
               </Select>
             </Field>
           </div>

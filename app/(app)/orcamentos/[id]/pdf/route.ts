@@ -89,7 +89,7 @@ export async function gerarPdfDoOrcamento(
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado, parcelamento_especial), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
+      "id, numero, data_orcamento, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado, parcelamento_especial), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_analise_agua_caixa_acoplada, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
     )
     .eq("id", id)
     .single();
@@ -320,10 +320,17 @@ export async function gerarPdfDoOrcamento(
   } | null;
   const tpl = orc.templates_texto as Record<string, string | null> | null;
 
-  // {analise_tecnica} na seção 1 -> texto de "preparado" ou "não preparado"
-  const analiseAgua = cond?.agua_preparado
-    ? tpl?.sec_analise_agua_preparado
-    : tpl?.sec_analise_agua_nao_preparado;
+  // Cenário "caixa acoplada" (sem hidra): análise técnica própria + escopo de
+  // intervenção do "não preparado" (retrofit), com as mesmas fotos.
+  const caixaAcoplada = orc.cenario_agua === "caixa_acoplada";
+
+  // {analise_tecnica} na seção 1 -> texto de "preparado", "não preparado" ou
+  // "caixa acoplada"
+  const analiseAgua = caixaAcoplada
+    ? tpl?.sec_analise_agua_caixa_acoplada
+    : cond?.agua_preparado
+      ? tpl?.sec_analise_agua_preparado
+      : tpl?.sec_analise_agua_nao_preparado;
   let individualizacaoTexto = tpl?.sec_individualizacao_agua ?? "";
   if (individualizacaoTexto.includes("{analise_tecnica}")) {
     individualizacaoTexto = individualizacaoTexto.replace(
@@ -353,7 +360,7 @@ export async function gerarPdfDoOrcamento(
   // interligadas por marcadores; preparado usa sec_intervencao ({hidrometros}).
   const intervencaoNaoPrep = tpl?.sec_intervencao_agua_nao_preparado?.trim();
   const intervencaoTexto =
-    !cond?.agua_preparado && intervencaoNaoPrep
+    (caixaAcoplada || !cond?.agua_preparado) && intervencaoNaoPrep
       ? intervencaoNaoPrep
       : (tpl?.sec_intervencao ?? "").replace(
           /\{hidrometros\}/g,

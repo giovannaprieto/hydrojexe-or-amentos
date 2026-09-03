@@ -167,14 +167,14 @@ function Paragrafos({ texto }: { texto: string }) {
             </Text>
           );
         }
-        const rotulo = "Análise técnica:";
-        if (l.trimStart().startsWith(rotulo)) {
-          const i0 = l.indexOf(rotulo);
+        // "Análise técnica:" (qualquer caixa, ":" / "-" / "–") em negrito
+        const m = l.match(/^(\s*)(an[aá]lise\s+t[eé]cnica\s*[:–-])/i);
+        if (m) {
           return (
             <Text key={i} style={s.par}>
-              {l.slice(0, i0)}
-              <Text style={s.bold}>{rotulo}</Text>
-              {l.slice(i0 + rotulo.length)}
+              {m[1]}
+              <Text style={s.bold}>{m[2]}</Text>
+              {l.slice(m[0].length)}
             </Text>
           );
         }

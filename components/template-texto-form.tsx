@@ -17,6 +17,7 @@ export type TemplateTextoInicial = {
   sec_individualizacao_agua: string | null;
   sec_analise_agua_preparado: string | null;
   sec_analise_agua_nao_preparado: string | null;
+  sec_analise_agua_caixa_acoplada: string | null;
   sec_objetivo: string | null;
   sec_procedimento_tecnico: string | null;
   sec_intervencao: string | null;
@@ -44,6 +45,12 @@ const CAMPOS: {
   {
     nome: "sec_analise_agua_nao_preparado",
     rotulo: "1b. Análise técnica — prédio não preparado",
+    hint: "Substitui {analise_tecnica} quando o condomínio não está preparado (válvula hidra).",
+  },
+  {
+    nome: "sec_analise_agua_caixa_acoplada",
+    rotulo: "1c. Análise técnica — caixa acoplada (sem hidra)",
+    hint: 'Usada quando o orçamento tem o cenário "Caixa acoplada, sem hidra". O escopo da Seção 4 e as fotos são os mesmos do "não preparado".',
   },
   { nome: "sec_objetivo", rotulo: "2. Objetivo da proposta" },
   { nome: "sec_procedimento_tecnico", rotulo: "3. Procedimento técnico" },

@@ -66,6 +66,20 @@ export function OrcamentoNovoForm({
             </Field>
           </div>
 
+          <div className="sm:col-span-2">
+            <Field
+              label="Cenário da análise técnica (água)"
+              hint="Só se aplica à Individualização de água. Pode ajustar depois."
+            >
+              <Select name="cenario_agua" defaultValue="auto">
+                <option value="auto">
+                  Automático (pelo cadastro do condomínio)
+                </option>
+                <option value="caixa_acoplada">Caixa acoplada, sem hidra</option>
+              </Select>
+            </Field>
+          </div>
+
           <Field label="Número *" hint="Sugerido automaticamente; pode alterar.">
             <TextInput name="numero" required defaultValue={numeroSugerido} />
           </Field>

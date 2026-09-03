@@ -57,7 +57,7 @@ export default async function OrcamentoPage({
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial)",
+      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial)",
     )
     .eq("id", id)
     .single();
@@ -333,6 +333,7 @@ export default async function OrcamentoPage({
             condominio_id: orc.condominio_id,
             status: orc.status,
             tipo_proposta: orc.tipo_proposta,
+            cenario_agua: orc.cenario_agua ?? "auto",
             incluir_tss: orc.incluir_tss,
             formas_pagamento_visiveis: parseFormasVisiveis(
               orc.formas_pagamento_visiveis,

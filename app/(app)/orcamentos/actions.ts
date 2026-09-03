@@ -28,6 +28,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 
 const STATUS = ["rascunho", "enviado", "aprovado", "recusado", "cancelado"];
+const CENARIOS_AGUA = ["auto", "caixa_acoplada"];
 
 function anoDoNumero(numero: string): number {
   const m = numero.match(/(\d{4})\s*$/);
@@ -125,6 +126,7 @@ export async function criarOrcamento(
   const valor_por_hidrometro = numeroDecimal(formData, "valor_por_hidrometro");
 
   const tipo_proposta = texto(formData, "tipo_proposta") || "completa";
+  const cenario_agua = texto(formData, "cenario_agua") || "auto";
 
   if (!condominio_id) return { ok: false, error: "Escolha o condomínio." };
   if (!numero) return { ok: false, error: "Informe o número do orçamento." };
@@ -133,6 +135,9 @@ export async function criarOrcamento(
   }
   if (!VALORES_TIPO_PROPOSTA.includes(tipo_proposta)) {
     return { ok: false, error: "Tipo de proposta inválido." };
+  }
+  if (!CENARIOS_AGUA.includes(cenario_agua)) {
+    return { ok: false, error: "Cenário da análise técnica inválido." };
   }
 
   const { data: padrao } = await supabase
@@ -151,6 +156,7 @@ export async function criarOrcamento(
       template_texto_id: padrao?.id ?? null,
       status: "rascunho",
       tipo_proposta,
+      cenario_agua,
       incluir_tss: booleano(formData, "incluir_tss"),
       formas_pagamento_visiveis: formasVisiveisDoForm(formData),
       parcelas_custom: parseParcelasCustom(formData),
@@ -198,7 +204,7 @@ export async function atualizarCabecalho(
   const { data: atual } = await supabase
     .from("orcamentos")
     .select(
-      "numero, data_orcamento, condominio_id, status, tipo_proposta, incluir_tss, formas_pagamento_visiveis, parcelas_custom, prazo, observacoes",
+      "numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, prazo, observacoes",
     )
     .eq("id", id)
     .single();
@@ -223,6 +229,12 @@ export async function atualizarCabecalho(
     return { ok: false, error: "Tipo de proposta inválido." };
   }
 
+  const cenario_agua =
+    texto(formData, "cenario_agua") || atual.cenario_agua || "auto";
+  if (!CENARIOS_AGUA.includes(cenario_agua)) {
+    return { ok: false, error: "Cenário da análise técnica inválido." };
+  }
+
   const formas_pagamento_visiveis = formasVisiveisDoForm(formData);
   const parcelas_custom = parseParcelasCustom(formData);
 
@@ -232,6 +244,7 @@ export async function atualizarCabecalho(
     condominio_id: texto(formData, "condominio_id"),
     status,
     tipo_proposta,
+    cenario_agua,
     incluir_tss: booleano(formData, "incluir_tss"),
     formas_pagamento_visiveis,
     parcelas_custom,
