@@ -8,11 +8,13 @@ risco para produção.
 
 1. [supabase.com/dashboard](https://supabase.com/dashboard) → **New project** → nome
    `hydrojexe-staging` (plano grátis serve). Guarde a senha do banco.
-2. **SQL Editor** → cole e rode, **um de cada vez**, nesta ordem:
-   1. `supabase/staging-schema.sql` — todas as migrações 0001..0031 de uma vez.
-   2. `supabase/seed.sql` — formas de pagamento + catálogo de itens.
-   3. `supabase/seed_precos.sql` — tabela de preços.
-   4. `supabase/seed-staging.sql` — condomínios, orçamentos e obra fictícios.
+2. **SQL Editor** → *New query* → cole e rode, nesta ordem (um script por vez):
+   1. `supabase/staging-schema.sql` — schema + catálogo + textos-padrão (já
+      inclui tudo o que era `seed.sql`). Cole o arquivo inteiro e **Run**.
+   2. `supabase/seed-staging.sql` — condomínios, orçamentos e obra fictícios.
+
+   > Não é preciso rodar `seed.sql` nem `seed_precos.sql` — o `staging-schema.sql`
+   > já traz o catálogo, e o `seed-staging.sql` já cria preços fictícios.
 3. **Authentication → Users → Add user**:
    - Email: `design@exemplo.com`, senha à sua escolha.
    - *Auto Confirm User*: ligado.
