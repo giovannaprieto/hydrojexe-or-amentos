@@ -275,7 +275,7 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
               <Text style={s.notaVermelha}>
                 * Valor unitário: {brl(op.medidorUnit)} por medidor de gás
                 {incluirTss && op.tssUnit
-                  ? ` e ${brl(op.tssUnit)} por TSS Light`
+                  ? ` e ${brl(op.tssUnit)} de TSS Light por apartamento`
                   : ""}
                 . *
               </Text>

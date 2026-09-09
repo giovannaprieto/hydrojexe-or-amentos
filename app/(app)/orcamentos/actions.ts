@@ -899,7 +899,8 @@ export async function salvarIndividualizacaoGas(
         Math.round((unit * pontosPorApartamento + tssRateio) * 100) / 100,
       parcelas: f.num_parcelas,
       medidor_unit: Math.round(unit * 100) / 100,
-      tss_unit: Math.round(tssUnit * 100) / 100,
+      // valor do TSS Light rateado por apartamento (não o total do concentrador)
+      tss_unit: Math.round(tssRateio * 100) / 100,
     };
   });
   const semPrecoMedidor = formas.every(
