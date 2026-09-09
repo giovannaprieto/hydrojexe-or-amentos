@@ -203,6 +203,9 @@ export function IndividualizacaoGasForm({
             </p>
             <p className="text-lg font-semibold text-white tabular-nums">
               {totalMedidores || "—"}
+              {incluirTss && totalMedidores
+                ? ` + ${String(nTss).padStart(2, "0")} TSS Light`
+                : ""}
             </p>
           </div>
           <div>

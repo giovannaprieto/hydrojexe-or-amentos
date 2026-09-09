@@ -215,6 +215,7 @@ export async function gerarPdfIndividualizacaoGas(
       pontosPorApartamento,
       totalMedidores,
       incluirTss: orc.incluir_tss,
+      qtdTss,
       tssExecutivo: orc.incluir_tss
         ? INDIVIDUALIZACAO_GAS.tssExecutivoTexto.replace(
             /\{qtd_tss\}/g,

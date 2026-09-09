@@ -111,6 +111,8 @@ export type IndividualizacaoGasPdfProps = {
   pontosPorApartamento: number;
   totalMedidores: number;
   incluirTss?: boolean;
+  /** nº de concentradores TSS Light (só usado quando incluirTss) */
+  qtdTss?: number;
   /** item "c)" do Procedimento executivo (texto já resolvido) — null se sem TSS */
   tssExecutivo?: string | null;
   valorGerenciamento: number;
@@ -167,6 +169,7 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
     pontosPorApartamento,
     totalMedidores,
     incluirTss,
+    qtdTss = 1,
     tssExecutivo,
     valorGerenciamento,
     opcoes,
@@ -247,7 +250,8 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
               <View style={s.linha}>
                 <Text style={s.celRot}>Pontos a serem instalados</Text>
                 <Text style={s.celVal}>
-                  {totalMedidores} Medidores{incluirTss ? " + TSS" : ""}
+                  {totalMedidores} Medidores
+                  {incluirTss ? ` + ${doisDig(qtdTss)} TSS Light` : ""}
                 </Text>
               </View>
               <View style={s.linha}>
