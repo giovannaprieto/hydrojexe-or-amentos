@@ -249,6 +249,16 @@ export default async function OrcamentoPage({
         )
       : [];
 
+  // preço vigente do item "TSS", por forma — p/ o rateio no preview do gás
+  const precoTssPorFormaGas: PrecoForma[] =
+    orc.tipo_proposta === "individualizacao_gas" && tssItem
+      ? formasProprias.map((f) => ({
+          nome: f.nome,
+          num_parcelas: f.num_parcelas,
+          valorUnit: vigPorForma.get(f.id)?.get(tssItem.id)?.valor ?? 0,
+        }))
+      : [];
+
   // preços vigentes dos medidores de gás, por forma — p/ o preview automático
   // do formulário de individualização de gás
   const precoPorMedidorGas: Record<string, PrecoForma[]> =
@@ -459,6 +469,8 @@ export default async function OrcamentoPage({
               medidor_gas: orc.medidor_gas,
             }}
             precoPorMedidor={precoPorMedidorGas}
+            incluirTss={orc.incluir_tss}
+            tssPorForma={precoTssPorFormaGas}
           />
         </section>
       ) : (

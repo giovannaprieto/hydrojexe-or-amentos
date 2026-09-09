@@ -31,10 +31,16 @@ export type IndividualizacaoGasInicial = {
 export function IndividualizacaoGasForm({
   inicial,
   precoPorMedidor,
+  incluirTss = false,
+  tssPorForma = [],
 }: {
   inicial: IndividualizacaoGasInicial;
   /** preço unitário vigente do medidor, por forma de pagamento (à vista, 6x…) */
   precoPorMedidor: Record<string, PrecoForma[]>;
+  /** "Incluir TSS" marcado no cabeçalho — soma o rateio do TSS por apartamento */
+  incluirTss?: boolean;
+  /** preço unitário vigente do item TSS, por forma */
+  tssPorForma?: PrecoForma[];
 }) {
   const [state, formAction] = useActionState(
     salvarIndividualizacaoGas,
@@ -48,18 +54,29 @@ export function IndividualizacaoGasForm({
   const [ger, setGer] = useState(String(inicial.valor_gerenciamento || ""));
   const [medidor, setMedidor] = useState(inicial.medidor_gas ?? "gas_1_6");
 
+  const qtdApt = Math.trunc(Number(qtd.replace(",", ".")) || 0);
   const nPontos = Math.trunc(Number(pontos.replace(",", ".")) || 0);
-  const totalMedidores =
-    Math.trunc(Number(qtd.replace(",", ".")) || 0) * nPontos;
+  const totalMedidores = qtdApt * nPontos;
 
   // preview das 4 opções, calculado como no salvamento
   const formas = precoPorMedidor[medidor] ?? [];
+  const tssPorParcelas = new Map(
+    tssPorForma.map((t) => [t.num_parcelas, t.valorUnit]),
+  );
+  const rateioTss = (numParcelas: number) =>
+    incluirTss && qtdApt > 0
+      ? (tssPorParcelas.get(numParcelas) ?? 0) / qtdApt
+      : 0;
   const opcoes = formas.map((f) => ({
     nome: f.nome,
     parcelas: f.num_parcelas,
-    valor: Math.round(f.valorUnit * nPontos * 100) / 100,
+    valor:
+      Math.round(
+        (f.valorUnit * nPontos + rateioTss(f.num_parcelas)) * 100,
+      ) / 100,
   }));
-  const semPreco = opcoes.length === 0 || opcoes.every((o) => o.valor <= 0);
+  const semPreco =
+    formas.length === 0 || formas.every((f) => f.valorUnit <= 0);
   const snapshot =
     opcoes.find((o) => o.parcelas <= 1)?.valor ?? opcoes[0]?.valor ?? 0;
 
@@ -126,8 +143,18 @@ export function IndividualizacaoGasForm({
 
       <Card
         titulo="Opções de investimento"
-        descricao="Calculadas pela tabela de preços — preço do medidor por forma × medidores por apartamento. Ao salvar, os valores são congelados no orçamento."
+        descricao={
+          incluirTss
+            ? "Preço do medidor por forma × medidores por apartamento + rateio do TSS por apartamento (“Incluir TSS” marcado no cabeçalho). Congelado ao salvar."
+            : "Calculadas pela tabela de preços — preço do medidor por forma × medidores por apartamento. Ao salvar, os valores são congelados no orçamento."
+        }
       >
+        {incluirTss && qtdApt > 0 ? (
+          <p className="hj-hint mb-3">
+            Rateio do TSS por apartamento (à vista):{" "}
+            <strong>{formatBRL(rateioTss(1))}</strong>
+          </p>
+        ) : null}
         {semPreco ? (
           <p className="hj-alert hj-alert-warn">
             Sem preço vigente para este medidor na tabela de preços. Cadastre os

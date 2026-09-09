@@ -811,7 +811,7 @@ export async function salvarIndividualizacaoGas(
 
   const { data: orc } = await supabase
     .from("orcamentos")
-    .select("id, tipo_proposta, data_orcamento, valor_total")
+    .select("id, tipo_proposta, data_orcamento, valor_total, incluir_tss")
     .eq("id", id)
     .single();
   if (!orc) return { ok: false, error: "Orçamento não encontrado." };
@@ -836,38 +836,56 @@ export async function salvarIndividualizacaoGas(
     medidorGasRaw === "gas_2_5" ? "gas_2_5" : "gas_1_6";
 
   // opções de investimento = as 4 formas próprias, com o preço vigente do
-  // medidor de gás (por forma) × pontos por apartamento. Congela em tss_opcoes.
-  const [{ data: itemGas }, { data: formasGas }] = await Promise.all([
-    supabase
-      .from("itens_precificaveis")
-      .select("id")
-      .eq("slug", medidor_gas)
-      .maybeSingle(),
-    supabase
-      .from("formas_pagamento")
-      .select("id, num_parcelas, ordem")
-      .eq("ativo", true)
-      .is("usa_preco_de_forma_id", null)
-      .order("ordem"),
-  ]);
+  // medidor de gás (por forma) × pontos por apartamento, + rateio do TSS por
+  // apartamento quando "Incluir TSS" está marcado no cabeçalho (igual à água).
+  // Congela em tss_opcoes.
+  const [{ data: itemGas }, { data: itemTss }, { data: formasGas }] =
+    await Promise.all([
+      supabase
+        .from("itens_precificaveis")
+        .select("id")
+        .eq("slug", medidor_gas)
+        .maybeSingle(),
+      supabase
+        .from("itens_precificaveis")
+        .select("id")
+        .eq("slug", "tss")
+        .maybeSingle(),
+      supabase
+        .from("formas_pagamento")
+        .select("id, num_parcelas, ordem")
+        .eq("ativo", true)
+        .is("usa_preco_de_forma_id", null)
+        .order("ordem"),
+    ]);
   if (!itemGas) {
     return { ok: false, error: "Item do medidor de gás não encontrado." };
   }
   const formas = formasGas ?? [];
+  const comTss = orc.incluir_tss && !!itemTss;
+  const itemIds = comTss ? [itemGas.id, itemTss!.id] : [itemGas.id];
   const vigGas = await precosVigentesPorForma(
     supabase,
     formas.map((f) => f.id),
-    [itemGas.id],
+    itemIds,
     orc.data_orcamento,
   );
   const opcoes = formas.map((f) => {
     const unit = vigGas.get(f.id)?.get(itemGas.id)?.valor ?? 0;
+    const tssRateio =
+      comTss && qtdApartamentos > 0
+        ? (vigGas.get(f.id)?.get(itemTss!.id)?.valor ?? 0) / qtdApartamentos
+        : 0;
     return {
-      valor: Math.round(unit * pontosPorApartamento * 100) / 100,
+      valor:
+        Math.round((unit * pontosPorApartamento + tssRateio) * 100) / 100,
       parcelas: f.num_parcelas,
     };
   });
-  if (opcoes.every((o) => o.valor <= 0)) {
+  const semPrecoMedidor = formas.every(
+    (f) => (vigGas.get(f.id)?.get(itemGas.id)?.valor ?? 0) <= 0,
+  );
+  if (semPrecoMedidor) {
     return {
       ok: false,
       error:

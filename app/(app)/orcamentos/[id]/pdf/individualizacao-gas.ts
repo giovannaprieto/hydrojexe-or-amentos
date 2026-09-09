@@ -53,6 +53,7 @@ type OrcIndivGas = {
   prazo: string | null;
   tss_opcoes: unknown;
   medidor_gas: string | null;
+  incluir_tss: boolean;
   formas_pagamento_visiveis: unknown;
   parcelas_custom: unknown;
   condominios: OrcGestaoCondominio;
@@ -170,6 +171,7 @@ export async function gerarPdfIndividualizacaoGas(
       prazo: orc.prazo?.trim() || INDIVIDUALIZACAO_GAS.prazoPadrao,
       pontosPorApartamento,
       totalMedidores,
+      incluirTss: orc.incluir_tss,
       valorGerenciamento,
       opcoes,
       assets: { header, footer, watermark, fotoMedidor },

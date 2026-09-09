@@ -104,6 +104,7 @@ export type IndividualizacaoGasPdfProps = {
   prazo: string;
   pontosPorApartamento: number;
   totalMedidores: number;
+  incluirTss?: boolean;
   valorGerenciamento: number;
   opcoes: TssOpcao[];
   assets: IndividualizacaoGasPdfAssets;
@@ -155,6 +156,7 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
     prazo,
     pontosPorApartamento,
     totalMedidores,
+    incluirTss,
     valorGerenciamento,
     opcoes,
     assets,
@@ -230,7 +232,9 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
             <View style={s.tabela}>
               <View style={s.linha}>
                 <Text style={s.celRot}>Pontos a serem instalados</Text>
-                <Text style={s.celVal}>{totalMedidores} Medidores</Text>
+                <Text style={s.celVal}>
+                  {totalMedidores} Medidores{incluirTss ? " + TSS" : ""}
+                </Text>
               </View>
               <View style={s.linha}>
                 <Text style={s.celRot}>
