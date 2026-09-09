@@ -31,6 +31,7 @@ export type CabecalhoInicial = {
   tipo_proposta: string;
   cenario_agua: string;
   incluir_tss: boolean;
+  qtd_tss: number;
   formas_pagamento_visiveis: number[];
   parcelas_custom: number[];
   prazo: string | null;
@@ -132,11 +133,25 @@ export function OrcamentoCabecalhoForm({
         descricao="Formas exibidas no PDF e condições fora do padrão."
       >
         <div className="flex flex-col gap-5">
-          <Checkbox
-            name="incluir_tss"
-            label="Incluir TSS (rateio por unidade)"
-            defaultChecked={inicial.incluir_tss}
-          />
+          <div className="flex flex-wrap items-end gap-6">
+            <Checkbox
+              name="incluir_tss"
+              label="Incluir TSS (rateio por unidade)"
+              defaultChecked={inicial.incluir_tss}
+            />
+            <label className="flex flex-col gap-1">
+              <span className="hj-field-label">Quantidade de TSS</span>
+              <TextInput
+                type="number"
+                min="1"
+                max="20"
+                step="1"
+                name="qtd_tss"
+                defaultValue={String(inicial.qtd_tss || 1)}
+                className="w-24"
+              />
+            </label>
+          </div>
 
           <FormasPagamentoVisiveis
             inicial={inicial.formas_pagamento_visiveis}

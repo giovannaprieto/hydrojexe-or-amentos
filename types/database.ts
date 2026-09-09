@@ -648,6 +648,7 @@ export type Database = {
           enviado_em: string | null
           token_publico: string | null
           cenario_agua: string
+          qtd_tss: number
         }
         Insert: {
           id?: string
@@ -677,6 +678,7 @@ export type Database = {
           enviado_em?: string | null
           token_publico?: string | null
           cenario_agua?: string
+          qtd_tss?: number
         }
         Update: {
           id?: string
@@ -706,6 +708,7 @@ export type Database = {
           enviado_em?: string | null
           token_publico?: string | null
           cenario_agua?: string
+          qtd_tss?: number
         }
         Relationships: [
         {

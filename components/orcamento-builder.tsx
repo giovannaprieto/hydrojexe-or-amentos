@@ -23,6 +23,7 @@ type Tipo = { nome: string; unidades: string; itens: LinhaItem[] };
 export function OrcamentoBuilder({
   orcamentoId,
   incluirTss,
+  qtdTss = 1,
   itens,
   formas,
   formaBaseId,
@@ -35,6 +36,7 @@ export function OrcamentoBuilder({
 }: {
   orcamentoId: string;
   incluirTss: boolean;
+  qtdTss?: number;
   itens: ItemCat[];
   formas: Forma[];
   formaBaseId: string;
@@ -96,6 +98,7 @@ export function OrcamentoBuilder({
           incluirTss,
           tssValor:
             incluirTss && tssItemId ? (precoUnit[tssItemId] ?? 0) : 0,
+          qtdTss,
           itensPonto,
           itensTss,
           valorPorHidrometro,
@@ -110,6 +113,7 @@ export function OrcamentoBuilder({
     formas,
     precoUnitPorForma,
     incluirTss,
+    qtdTss,
     tssItemId,
     itensPonto,
     itensTss,

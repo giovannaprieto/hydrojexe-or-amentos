@@ -28,6 +28,8 @@ export type CalcInput = {
   incluirTss: boolean;
   /** preço unitário do item TSS, já na forma de pagamento do orçamento */
   tssValor: number;
+  /** nº de concentradores TSS (padrão 1); multiplica o valor rateado */
+  qtdTss?: number;
   /** item_ids cuja unidade é "ponto" (contam como hidrômetro) */
   itensPonto: string[];
   /** item_ids marcados is_tss (ignorados na composição) */
@@ -120,7 +122,8 @@ export function calcularOrcamento(input: CalcInput): CalcResultado {
 
   const tssPorUnidade =
     input.incluirTss && totalUnidades > 0
-      ? (input.tssValor || 0) / totalUnidades
+      ? ((input.tssValor || 0) * Math.max(1, Math.trunc(input.qtdTss || 1))) /
+        totalUnidades
       : 0;
 
   const tipos: TipoResultado[] = input.tipos.map((t) => {

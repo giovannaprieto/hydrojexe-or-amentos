@@ -32,6 +32,7 @@ export function IndividualizacaoGasForm({
   inicial,
   precoPorMedidor,
   incluirTss = false,
+  qtdTss = 1,
   tssPorForma = [],
 }: {
   inicial: IndividualizacaoGasInicial;
@@ -39,6 +40,8 @@ export function IndividualizacaoGasForm({
   precoPorMedidor: Record<string, PrecoForma[]>;
   /** "Incluir TSS" marcado no cabeçalho — soma o rateio do TSS por apartamento */
   incluirTss?: boolean;
+  /** nº de concentradores TSS (padrão 1) */
+  qtdTss?: number;
   /** preço unitário vigente do item TSS, por forma */
   tssPorForma?: PrecoForma[];
 }) {
@@ -63,9 +66,10 @@ export function IndividualizacaoGasForm({
   const tssPorParcelas = new Map(
     tssPorForma.map((t) => [t.num_parcelas, t.valorUnit]),
   );
+  const nTss = Math.max(1, Math.trunc(qtdTss || 1));
   const rateioTss = (numParcelas: number) =>
     incluirTss && qtdApt > 0
-      ? (tssPorParcelas.get(numParcelas) ?? 0) / qtdApt
+      ? ((tssPorParcelas.get(numParcelas) ?? 0) * nTss) / qtdApt
       : 0;
   const opcoes = formas.map((f) => ({
     nome: f.nome,
@@ -153,6 +157,7 @@ export function IndividualizacaoGasForm({
           <p className="hj-hint mb-3">
             Rateio do TSS por apartamento (à vista):{" "}
             <strong>{formatBRL(rateioTss(1))}</strong>
+            {nTss > 1 ? ` (${nTss} TSS)` : ""}
           </p>
         ) : null}
         {semPreco ? (

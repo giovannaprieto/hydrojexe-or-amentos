@@ -30,6 +30,12 @@ import { createClient } from "@/lib/supabase/server";
 const STATUS = ["rascunho", "enviado", "aprovado", "recusado", "cancelado"];
 const CENARIOS_AGUA = ["auto", "caixa_acoplada"];
 
+/** qtd_tss do formulário: inteiro entre 1 e 20 (padrão 1). */
+function parseQtdTss(formData: FormData): number {
+  const n = Math.trunc(Number(texto(formData, "qtd_tss")));
+  return Number.isFinite(n) && n >= 1 ? Math.min(20, n) : 1;
+}
+
 function anoDoNumero(numero: string): number {
   const m = numero.match(/(\d{4})\s*$/);
   return m ? Number(m[1]) : new Date().getFullYear();
@@ -158,6 +164,7 @@ export async function criarOrcamento(
       tipo_proposta,
       cenario_agua,
       incluir_tss: booleano(formData, "incluir_tss"),
+      qtd_tss: parseQtdTss(formData),
       formas_pagamento_visiveis: formasVisiveisDoForm(formData),
       parcelas_custom: parseParcelasCustom(formData),
       tss_opcoes: [],
@@ -204,7 +211,7 @@ export async function atualizarCabecalho(
   const { data: atual } = await supabase
     .from("orcamentos")
     .select(
-      "numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, prazo, observacoes",
+      "numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, qtd_tss, formas_pagamento_visiveis, parcelas_custom, prazo, observacoes",
     )
     .eq("id", id)
     .single();
@@ -246,6 +253,7 @@ export async function atualizarCabecalho(
     tipo_proposta,
     cenario_agua,
     incluir_tss: booleano(formData, "incluir_tss"),
+    qtd_tss: parseQtdTss(formData),
     formas_pagamento_visiveis,
     parcelas_custom,
     prazo: textoOuNulo(formData, "prazo"),
@@ -437,10 +445,13 @@ export async function salvarOrcamento(
 
   const { data: orc } = await supabase
     .from("orcamentos")
-    .select("id, data_orcamento, incluir_tss, total_unidades, valor_total")
+    .select(
+      "id, data_orcamento, incluir_tss, qtd_tss, total_unidades, valor_total",
+    )
     .eq("id", id)
     .single();
   if (!orc) return { ok: false, error: "Orçamento não encontrado." };
+  const qtdTss = Math.max(1, Math.trunc(orc.qtd_tss ?? 1));
 
   const { data: gmAtual } = await supabase
     .from("gerenciamento_mensal")
@@ -524,6 +535,7 @@ export async function salvarOrcamento(
     incluirTss: orc.incluir_tss,
     tssValor:
       orc.incluir_tss && tssItem ? (precoBase[tssItem.id] ?? 0) : 0,
+    qtdTss,
     itensPonto,
     itensTss,
     valorPorHidrometro,
@@ -545,7 +557,9 @@ export async function salvarOrcamento(
   }));
 
   const valorTssSnapshot =
-    orc.incluir_tss && tssItem ? (precoBase[tssItem.id] ?? 0) : 0;
+    orc.incluir_tss && tssItem
+      ? (precoBase[tssItem.id] ?? 0) * qtdTss
+      : 0;
 
   const { error: rpcErr } = await supabase.rpc("salvar_montagem_orcamento", {
     p_id: id,
@@ -811,7 +825,9 @@ export async function salvarIndividualizacaoGas(
 
   const { data: orc } = await supabase
     .from("orcamentos")
-    .select("id, tipo_proposta, data_orcamento, valor_total, incluir_tss")
+    .select(
+      "id, tipo_proposta, data_orcamento, valor_total, incluir_tss, qtd_tss",
+    )
     .eq("id", id)
     .single();
   if (!orc) return { ok: false, error: "Orçamento não encontrado." };
@@ -863,6 +879,7 @@ export async function salvarIndividualizacaoGas(
   }
   const formas = formasGas ?? [];
   const comTss = orc.incluir_tss && !!itemTss;
+  const qtdTss = Math.max(1, Math.trunc(orc.qtd_tss ?? 1));
   const itemIds = comTss ? [itemGas.id, itemTss!.id] : [itemGas.id];
   const vigGas = await precosVigentesPorForma(
     supabase,
@@ -874,7 +891,8 @@ export async function salvarIndividualizacaoGas(
     const unit = vigGas.get(f.id)?.get(itemGas.id)?.valor ?? 0;
     const tssRateio =
       comTss && qtdApartamentos > 0
-        ? (vigGas.get(f.id)?.get(itemTss!.id)?.valor ?? 0) / qtdApartamentos
+        ? ((vigGas.get(f.id)?.get(itemTss!.id)?.valor ?? 0) * qtdTss) /
+          qtdApartamentos
         : 0;
     return {
       valor:

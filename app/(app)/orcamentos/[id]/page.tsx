@@ -58,7 +58,7 @@ export default async function OrcamentoPage({
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial, parcelamento_especial_modo)",
+      "id, numero, data_orcamento, condominio_id, status, tipo_proposta, cenario_agua, incluir_tss, qtd_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, observacoes, total_unidades, valor_tss, valor_total, arquivado_em, token_publico, condominios(nome, parcelamento_especial, parcelamento_especial_modo)",
     )
     .eq("id", id)
     .single();
@@ -350,6 +350,7 @@ export default async function OrcamentoPage({
             tipo_proposta: orc.tipo_proposta,
             cenario_agua: orc.cenario_agua ?? "auto",
             incluir_tss: orc.incluir_tss,
+            qtd_tss: orc.qtd_tss ?? 1,
             formas_pagamento_visiveis: parseFormasVisiveis(
               orc.formas_pagamento_visiveis,
             ),
@@ -369,6 +370,7 @@ export default async function OrcamentoPage({
             <OrcamentoBuilder
               orcamentoId={orc.id}
               incluirTss={orc.incluir_tss}
+              qtdTss={orc.qtd_tss}
               itens={catalogo.map((i) => ({
                 id: i.id,
                 nome: i.nome,
@@ -470,6 +472,7 @@ export default async function OrcamentoPage({
             }}
             precoPorMedidor={precoPorMedidorGas}
             incluirTss={orc.incluir_tss}
+            qtdTss={orc.qtd_tss}
             tssPorForma={precoTssPorFormaGas}
           />
         </section>

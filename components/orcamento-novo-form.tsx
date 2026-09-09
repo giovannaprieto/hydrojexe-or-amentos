@@ -114,11 +114,25 @@ export function OrcamentoNovoForm({
             </Field>
           </div>
 
-          <Checkbox
-            name="incluir_tss"
-            label="Incluir TSS (rateio por unidade)"
-            defaultChecked
-          />
+          <div className="flex flex-wrap items-end gap-6">
+            <Checkbox
+              name="incluir_tss"
+              label="Incluir TSS (rateio por unidade)"
+              defaultChecked
+            />
+            <label className="flex flex-col gap-1">
+              <span className="hj-field-label">Quantidade de TSS</span>
+              <TextInput
+                type="number"
+                min="1"
+                max="20"
+                step="1"
+                name="qtd_tss"
+                defaultValue="1"
+                className="w-24"
+              />
+            </label>
+          </div>
 
           <FormasPagamentoVisiveis inicial={[1, 6, 9, 12]} />
 

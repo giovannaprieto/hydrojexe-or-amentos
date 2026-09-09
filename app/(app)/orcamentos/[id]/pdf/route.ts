@@ -90,11 +90,12 @@ export async function gerarPdfDoOrcamento(
   const { data: orc } = await supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, tipo_proposta, cenario_agua, incluir_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado, parcelamento_especial, parcelamento_especial_modo), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_analise_agua_caixa_acoplada, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
+      "id, numero, data_orcamento, tipo_proposta, cenario_agua, incluir_tss, qtd_tss, formas_pagamento_visiveis, parcelas_custom, qtd_equipamentos, tss_opcoes, medidor_gas, prazo, condominios(nome, endereco, cidade, uf, administradora, agua_preparado, parcelamento_especial, parcelamento_especial_modo), templates_texto(sec_individualizacao_agua, sec_analise_agua_preparado, sec_analise_agua_nao_preparado, sec_analise_agua_caixa_acoplada, sec_objetivo, sec_procedimento_tecnico, sec_intervencao, sec_intervencao_agua_nao_preparado, sec_tramites_administrativos, sec_gerenciamento_mensal, sec_garantia)",
     )
     .eq("id", id)
     .single();
   if (!orc) return new Response("Orçamento não encontrado.", { status: 404 });
+  const qtdTss = Math.max(1, Math.trunc(orc.qtd_tss ?? 1));
 
   if (isGestaoMensal(orc.tipo_proposta)) {
     return gerarPdfGestao(supabase, id, {
@@ -289,7 +290,8 @@ export async function gerarPdfDoOrcamento(
       }, 0);
       const tssVal =
         orc.incluir_tss && tssItem ? (f.precos.get(tssItem.id) ?? 0) : 0;
-      const rateio = totalUnidades > 0 ? tssVal / totalUnidades : 0;
+      const rateio =
+        totalUnidades > 0 ? (tssVal * qtdTss) / totalUnidades : 0;
       const valorPorApartamento = round2(somaItens + rateio);
 
       const nota =

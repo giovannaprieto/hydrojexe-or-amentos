@@ -102,6 +102,35 @@ describe("calcularOrcamento — rateio de TSS", () => {
     expect(r.valorTotal).toBe(2000);
   });
 
+  it("qtdTss multiplica o valor rateado", () => {
+    const r = calcularOrcamento(
+      baseInput({
+        incluirTss: true,
+        tssValor: 1000,
+        qtdTss: 3,
+        tipos: [
+          { nome: "A", unidades: 10, itens: [{ item_id: "medidor", quantidade: 1 }] },
+        ],
+      }),
+    );
+    // 1000 * 3 / 10 = 300 por unidade + 100 do medidor
+    expect(r.tssPorUnidade).toBeCloseTo(300, 6);
+    expect(r.tipos[0].valorPorApartamento).toBe(400);
+  });
+
+  it("qtdTss ausente = 1", () => {
+    const r = calcularOrcamento(
+      baseInput({
+        incluirTss: true,
+        tssValor: 1000,
+        tipos: [
+          { nome: "A", unidades: 10, itens: [{ item_id: "medidor", quantidade: 1 }] },
+        ],
+      }),
+    );
+    expect(r.tssPorUnidade).toBeCloseTo(100, 6);
+  });
+
   it("sem incluirTss não há rateio mesmo com tssValor", () => {
     const r = calcularOrcamento(baseInput({ incluirTss: false, tssValor: 5000 }));
     expect(r.tssPorUnidade).toBe(0);
