@@ -94,9 +94,7 @@ export function CondominioForm({ inicial }: { inicial?: Condominio }) {
                 name="parcelamento_especial_modo"
                 defaultValue={
                   inicial?.parcelamento_especial
-                    ? inicial.parcelamento_especial_modo === "longo"
-                      ? "longo"
-                      : "padrao"
+                    ? (inicial.parcelamento_especial_modo ?? "padrao")
                     : "nenhum"
                 }
               >

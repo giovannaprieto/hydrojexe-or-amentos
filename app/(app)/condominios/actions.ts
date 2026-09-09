@@ -27,7 +27,7 @@ function inteiroPositivoOuNulo(
 function parse(formData: FormData) {
   const uf = textoOuNulo(formData, "uf");
   const pModo = texto(formData, "parcelamento_especial_modo");
-  const modoParc = ["nenhum", "padrao", "longo"].includes(pModo)
+  const modoParc = ["nenhum", "padrao", "medio", "longo"].includes(pModo)
     ? pModo
     : "nenhum";
   return {
@@ -44,7 +44,7 @@ function parse(formData: FormData) {
     observacoes: textoOuNulo(formData, "observacoes"),
     agua_preparado: booleano(formData, "agua_preparado"),
     parcelamento_especial: modoParc !== "nenhum",
-    parcelamento_especial_modo: modoParc === "longo" ? "longo" : "padrao",
+    parcelamento_especial_modo: modoParc === "nenhum" ? "padrao" : modoParc,
     qtd_unidades: inteiroPositivoOuNulo(formData, "qtd_unidades"),
   };
 }

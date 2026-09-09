@@ -53,6 +53,15 @@ describe("parcelasOrigemPreco (parcelamento especial)", () => {
     expect(parcelasOrigemPreco(24, "padrao")).toBe(24);
   });
 
+  it("modo médio: 12x usa 9x, 18x usa 12x; à vista/6x/9x inalterados", () => {
+    expect(parcelasOrigemPreco(12, "medio")).toBe(9);
+    expect(parcelasOrigemPreco(18, "medio")).toBe(12);
+    expect(parcelasOrigemPreco(1, "medio")).toBe(1);
+    expect(parcelasOrigemPreco(6, "medio")).toBe(6);
+    expect(parcelasOrigemPreco(9, "medio")).toBe(9);
+    expect(parcelasOrigemPreco(24, "medio")).toBe(24);
+  });
+
   it("modo longo: 12x usa 6x, 24x usa 9x, 36x usa 12x; à vista/6x/9x inalterados", () => {
     expect(parcelasOrigemPreco(12, "longo")).toBe(6);
     expect(parcelasOrigemPreco(24, "longo")).toBe(9);
@@ -92,6 +101,15 @@ describe("modoParcelamento", () => {
         parcelamento_especial_modo: "longo",
       }),
     ).toBe("longo");
+  });
+
+  it("ligado + modo medio = medio", () => {
+    expect(
+      modoParcelamento({
+        parcelamento_especial: true,
+        parcelamento_especial_modo: "medio",
+      }),
+    ).toBe("medio");
   });
 });
 

@@ -29,9 +29,12 @@ export function parseFormasVisiveis(raw: unknown): number[] {
  * abaixo. À vista e 6x nunca mudam.
  *
  *   padrao : 9x  -> preço de 6x,  12x -> preço de 9x   (24x já usa 12x)
+ *   medio  : 12x -> preço de 9x,  18x -> preço de 12x
  *   longo  : 12x -> preço de 6x,  24x -> preço de 9x,   36x -> preço de 12x
  */
-export type ModoParcelamentoEspecial = "nenhum" | "padrao" | "longo";
+export type ModoParcelamentoEspecial = "nenhum" | "padrao" | "medio" | "longo";
+
+const MODOS_VALIDOS: ModoParcelamentoEspecial[] = ["padrao", "medio", "longo"];
 
 const SHIFT_PARCELAMENTO: Record<
   ModoParcelamentoEspecial,
@@ -39,6 +42,7 @@ const SHIFT_PARCELAMENTO: Record<
 > = {
   nenhum: {},
   padrao: { 9: 6, 12: 9 },
+  medio: { 12: 9, 18: 12 },
   longo: { 12: 6, 24: 9, 36: 12 },
 };
 
@@ -61,7 +65,8 @@ export function modoParcelamento(
     | undefined,
 ): ModoParcelamentoEspecial {
   if (!cond?.parcelamento_especial) return "nenhum";
-  return cond.parcelamento_especial_modo === "longo" ? "longo" : "padrao";
+  const m = cond.parcelamento_especial_modo as ModoParcelamentoEspecial;
+  return MODOS_VALIDOS.includes(m) ? m : "padrao";
 }
 
 export const MODOS_PARCELAMENTO_ESPECIAL = [
@@ -72,6 +77,10 @@ export const MODOS_PARCELAMENTO_ESPECIAL = [
   {
     valor: "padrao",
     rotulo: "Padrão — 9x usa o preço de 6x, 12x usa o de 9x",
+  },
+  {
+    valor: "medio",
+    rotulo: "Médio — 12x usa o preço de 9x, 18x usa o de 12x",
   },
   {
     valor: "longo",
