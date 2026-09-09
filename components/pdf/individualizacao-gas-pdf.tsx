@@ -58,6 +58,12 @@ const s = StyleSheet.create({
     textAlign: "center",
   },
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
+  notaVermelha: {
+    color: C_RED,
+    fontSize: 8.5,
+    marginTop: 2,
+    marginBottom: 2,
+  },
   gerVermelho: { color: C_RED, fontFamily: "Plex", fontWeight: 700, marginTop: 8 },
   assinatura: {
     fontFamily: "Plex", fontWeight: 700,
@@ -105,10 +111,14 @@ export type IndividualizacaoGasPdfProps = {
   pontosPorApartamento: number;
   totalMedidores: number;
   incluirTss?: boolean;
+  /** item "c)" do Procedimento executivo (texto já resolvido) — null se sem TSS */
+  tssExecutivo?: string | null;
   valorGerenciamento: number;
-  opcoes: TssOpcao[];
+  opcoes: OpcaoGasPdf[];
   assets: IndividualizacaoGasPdfAssets;
 };
+
+type OpcaoGasPdf = TssOpcao & { medidorUnit?: number; tssUnit?: number };
 
 function Paragrafos({ texto }: { texto: string }) {
   return (
@@ -157,6 +167,7 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
     pontosPorApartamento,
     totalMedidores,
     incluirTss,
+    tssExecutivo,
     valorGerenciamento,
     opcoes,
     assets,
@@ -212,6 +223,9 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
                 <Text style={s.par}>
                   b) Execução de teste de estanqueidade em todo o sistema.
                 </Text>
+                {tssExecutivo ? (
+                  <Text style={s.par}>c) {tssExecutivo}</Text>
+                ) : null}
               </>
             ) : null}
           </Secao>
@@ -251,6 +265,15 @@ export function IndividualizacaoGasPdf(props: IndividualizacaoGasPdfProps) {
                 <Text style={s.celVal}>{textoFormaParcelas(op)}</Text>
               </View>
             </View>
+            {op.medidorUnit ? (
+              <Text style={s.notaVermelha}>
+                * Valor unitário: {brl(op.medidorUnit)} por medidor de gás
+                {incluirTss && op.tssUnit
+                  ? ` e ${brl(op.tssUnit)} por TSS Light`
+                  : ""}
+                . *
+              </Text>
+            ) : null}
           </View>
         ))}
         <Text style={s.gerVermelho}>

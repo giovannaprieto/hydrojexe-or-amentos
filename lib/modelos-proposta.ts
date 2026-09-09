@@ -164,11 +164,15 @@ export function isIndividualizacaoGas(tipo: string): boolean {
 export const INDIVIDUALIZACAO_GAS = {
   ref: "Instalação de gasômetros individualizados para medição de gás pelo sistema de telemetria",
   analiseTecnicaPadrao:
-    "Análise técnica: Trata-se de um edifício com toda a infraestrutura individualizada de gás, viabilizando a instalação de um equipamento por unidade sem haver necessidade de qualquer intervenção de retrofit.",
+    "Análise técnica: Trata-se de um edifício contemporâneo com toda a infraestrutura individualizada de gás, viabilizando a instalação de um equipamento por unidade sem haver necessidade de qualquer intervenção de retrofit.",
+  /** trecho acrescido ao Procedimento técnico quando o orçamento inclui TSS.
+   *  {qtd_tss} é resolvido no gerador (ex.: "04 (quatro)"). */
+  tssInstalacaoFrag:
+    " e instalação de {qtd_tss} equipamentos de TSS Light para leitura diária de consumo de água",
   secoes: [
     {
       titulo: "PROCEDIMENTO TÉCNICO DE INSTALAÇÃO DO MEDIDOR DE GÁS",
-      corpo: "• Instalação de 01 (um) medidor de gás por unidade.",
+      corpo: "Instalação de 1 (um) medidor de gás por unidade{tss_instalacao}.",
     },
     {
       titulo: "TRÂMITES ADMINISTRATIVOS INICIAIS",
@@ -191,8 +195,12 @@ export const INDIVIDUALIZACAO_GAS = {
   prazoPadrao:
     "a) O sistema será implantado em 30 (trinta) dias úteis, de acordo com cronograma a ser desenvolvido de forma conjunta com o condomínio. Este prazo está associado à liberação das unidades privadas para os nossos funcionários, uma vez que o medidor fica dentro de cada apartamento.",
   garantia:
-    "a) Os equipamentos possuem garantia de 02 (dois) anos conforme orientação do fabricante;\n" +
-    "b) Os valores dos gasômetros possuem validade de até 30 dias após sua execução.",
+    "a) Os serviços de instalação executados possuem garantia de 01 (um) ano salvo danos ocasionados por terceiros.\n" +
+    "b) Os equipamentos possuem garantia de 02 (dois) anos conforme orientação do fabricante.\n" +
+    "c) Este orçamento tem validade de 30 dias a partir da data da emissão do mesmo.",
+  /** item "c)" do Procedimento executivo, quando há TSS. {qtd_tss} resolvido no gerador. */
+  tssExecutivoTexto:
+    "A quantidade de TSS Light será de {qtd_tss} unidades. O TSS Light é um concentrador de dados que recebe os sinais de rádio dos medidores e os envia, via rede de dados móveis (3G/4G), para nossos servidores, que disponibilizam a informação de consumo diário no Portal do Cliente.",
   /** linha em vermelho abaixo das opções de investimento */
   gerenciamentoNota(valorPorGasometro: number): string {
     return `O valor para o gerenciamento mensal de leitura e monitoramento completo do sistema de gás é de ${brl(valorPorGasometro)} por gasômetro.`;

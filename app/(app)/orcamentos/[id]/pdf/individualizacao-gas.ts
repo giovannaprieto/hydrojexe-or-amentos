@@ -22,18 +22,44 @@ import type { createClient } from "@/lib/supabase/server";
 
 type DbClient = Awaited<ReturnType<typeof createClient>>;
 
-function parseOpcoes(raw: unknown): TssOpcao[] {
+type OpcaoGas = TssOpcao & { medidorUnit: number; tssUnit: number };
+
+function parseOpcoes(raw: unknown): OpcaoGas[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((x) => {
-      const o = x as { valor?: unknown; parcelas?: unknown };
+      const o = x as {
+        valor?: unknown;
+        parcelas?: unknown;
+        medidor_unit?: unknown;
+        tss_unit?: unknown;
+      };
       return {
         valor: Number(o.valor) || 0,
         parcelas: Math.trunc(Number(o.parcelas) || 0),
+        medidorUnit: Number(o.medidor_unit) || 0,
+        tssUnit: Number(o.tss_unit) || 0,
       };
     })
     .filter((o) => o.valor > 0)
     .slice(0, 4);
+}
+
+/** "04 (quatro)" — número com dois dígitos + extenso (feminino, p/ "unidades"). */
+const EXT_TSS: Record<number, string> = {
+  1: "uma",
+  2: "duas",
+  3: "três",
+  4: "quatro",
+  5: "cinco",
+  6: "seis",
+  7: "sete",
+  8: "oito",
+  9: "nove",
+  10: "dez",
+};
+function qtdTssExtenso(n: number): string {
+  return `${String(n).padStart(2, "0")}${EXT_TSS[n] ? ` (${EXT_TSS[n]})` : ""}`;
 }
 
 function parseParcelasCustom(raw: unknown): number[] {
@@ -54,6 +80,7 @@ type OrcIndivGas = {
   tss_opcoes: unknown;
   medidor_gas: string | null;
   incluir_tss: boolean;
+  qtd_tss: number;
   formas_pagamento_visiveis: unknown;
   parcelas_custom: unknown;
   condominios: OrcGestaoCondominio;
@@ -74,32 +101,39 @@ export async function gerarPdfIndividualizacaoGas(
 
   // parcelamento especial do condomínio (padrão: 9x<-6x, 12x<-9x;
   // longo: 12x<-6x, 24x<-9x, 36x<-12x)
-  const valorPorParcelas = new Map(congeladas.map((o) => [o.parcelas, o.valor]));
+  const porParcelas = new Map(congeladas.map((o) => [o.parcelas, o]));
   const modoParc = modoParcelamento(orc.condominios);
-  const efetivas: TssOpcao[] =
-    modoParc !== "nenhum"
-      ? congeladas.map((o) => ({
+  const desloca = (o: OpcaoGas): OpcaoGas => {
+    if (modoParc === "nenhum") return o;
+    const origem = porParcelas.get(parcelasOrigemPreco(o.parcelas, modoParc));
+    return origem
+      ? {
           parcelas: o.parcelas,
-          valor:
-            valorPorParcelas.get(parcelasOrigemPreco(o.parcelas, modoParc)) ??
-            o.valor,
-        }))
-      : congeladas;
+          valor: origem.valor,
+          medidorUnit: origem.medidorUnit,
+          tssUnit: origem.tssUnit,
+        }
+      : o;
+  };
+  const efetivas = congeladas.map(desloca);
 
-  const base12 =
-    valorPorParcelas.get(12) ??
-    congeladas[congeladas.length - 1]?.valor ??
-    0;
-  const opcoes = [
+  const base12 = porParcelas.get(12) ?? congeladas[congeladas.length - 1];
+  const opcoes: OpcaoGas[] = [
     ...filtrarPorFormasVisiveis(
       efetivas,
       parseFormasVisiveis(orc.formas_pagamento_visiveis),
     ),
     // extras (24x, 36x…): no modo "longo" também deslocam o valor de referência
-    ...parseParcelasCustom(orc.parcelas_custom).map((n) => ({
-      valor: valorPorParcelas.get(parcelasOrigemPreco(n, modoParc)) ?? base12,
-      parcelas: n,
-    })),
+    ...parseParcelasCustom(orc.parcelas_custom).map((n) => {
+      const origem =
+        porParcelas.get(parcelasOrigemPreco(n, modoParc)) ?? base12;
+      return {
+        parcelas: n,
+        valor: origem?.valor ?? 0,
+        medidorUnit: origem?.medidorUnit ?? 0,
+        tssUnit: origem?.tssUnit ?? 0,
+      };
+    }),
   ];
   if (opcoes.length === 0) {
     return new Response(
@@ -152,6 +186,12 @@ export async function gerarPdfIndividualizacaoGas(
     assetDataUri("foto-medidor-gas.png"),
   ]);
 
+  const qtdTss = Math.max(1, Math.trunc(orc.qtd_tss ?? 1));
+  const qtdTssTxt = qtdTssExtenso(qtdTss);
+  const tssInstalacao = orc.incluir_tss
+    ? INDIVIDUALIZACAO_GAS.tssInstalacaoFrag.replace(/\{qtd_tss\}/g, qtdTssTxt)
+    : "";
+
   const buffer = await renderToBuffer(
     createElement(IndividualizacaoGasPdf, {
       numero: orc.numero,
@@ -165,13 +205,22 @@ export async function gerarPdfIndividualizacaoGas(
       secoes: secoesEfetivas("individualizacao_gas", override?.secoes).map(
         (s) => ({
           ...s,
-          corpo: s.corpo.replace(/\{vazao_gas\}/g, vazaoGas(orc.medidor_gas)),
+          corpo: s.corpo
+            .replace(/\{vazao_gas\}/g, vazaoGas(orc.medidor_gas))
+            .replace(/\{tss_instalacao\}/g, tssInstalacao)
+            .replace(/\{qtd_tss\}/g, qtdTssTxt),
         }),
       ),
       prazo: orc.prazo?.trim() || INDIVIDUALIZACAO_GAS.prazoPadrao,
       pontosPorApartamento,
       totalMedidores,
       incluirTss: orc.incluir_tss,
+      tssExecutivo: orc.incluir_tss
+        ? INDIVIDUALIZACAO_GAS.tssExecutivoTexto.replace(
+            /\{qtd_tss\}/g,
+            qtdTssTxt,
+          )
+        : null,
       valorGerenciamento,
       opcoes,
       assets: { header, footer, watermark, fotoMedidor },

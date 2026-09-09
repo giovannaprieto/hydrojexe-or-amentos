@@ -889,15 +889,17 @@ export async function salvarIndividualizacaoGas(
   );
   const opcoes = formas.map((f) => {
     const unit = vigGas.get(f.id)?.get(itemGas.id)?.valor ?? 0;
+    const tssUnit = comTss
+      ? (vigGas.get(f.id)?.get(itemTss!.id)?.valor ?? 0)
+      : 0;
     const tssRateio =
-      comTss && qtdApartamentos > 0
-        ? ((vigGas.get(f.id)?.get(itemTss!.id)?.valor ?? 0) * qtdTss) /
-          qtdApartamentos
-        : 0;
+      comTss && qtdApartamentos > 0 ? (tssUnit * qtdTss) / qtdApartamentos : 0;
     return {
       valor:
         Math.round((unit * pontosPorApartamento + tssRateio) * 100) / 100,
       parcelas: f.num_parcelas,
+      medidor_unit: Math.round(unit * 100) / 100,
+      tss_unit: Math.round(tssUnit * 100) / 100,
     };
   });
   const semPrecoMedidor = formas.every(

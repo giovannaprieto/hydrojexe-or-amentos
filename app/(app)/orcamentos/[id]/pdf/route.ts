@@ -136,6 +136,7 @@ export async function gerarPdfDoOrcamento(
       tss_opcoes: orc.tss_opcoes,
       medidor_gas: orc.medidor_gas,
       incluir_tss: orc.incluir_tss,
+      qtd_tss: orc.qtd_tss,
       formas_pagamento_visiveis: orc.formas_pagamento_visiveis,
       parcelas_custom: orc.parcelas_custom,
       condominios: orc.condominios as OrcGestaoCondominio,
