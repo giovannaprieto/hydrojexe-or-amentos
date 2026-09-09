@@ -168,7 +168,7 @@ export const INDIVIDUALIZACAO_GAS = {
   /** trecho acrescido ao Procedimento técnico quando o orçamento inclui TSS.
    *  {qtd_tss} é resolvido no gerador (ex.: "04 (quatro)"). */
   tssInstalacaoFrag:
-    " e instalação de {qtd_tss} equipamentos de TSS Light para leitura diária de consumo de água",
+    " e instalação de {qtd_tss} equipamentos de TSS Light para leitura diária de consumo de gás",
   secoes: [
     {
       titulo: "PROCEDIMENTO TÉCNICO DE INSTALAÇÃO DO MEDIDOR DE GÁS",

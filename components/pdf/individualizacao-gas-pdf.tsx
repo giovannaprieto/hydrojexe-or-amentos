@@ -60,6 +60,8 @@ const s = StyleSheet.create({
   fotoSecao: { marginTop: 8, marginBottom: 4, alignSelf: "center" },
   notaVermelha: {
     color: C_RED,
+    fontFamily: "Plex",
+    fontWeight: 700,
     fontSize: 8.5,
     marginTop: 2,
     marginBottom: 2,

@@ -80,6 +80,7 @@ const s = StyleSheet.create({
   },
   notaVermelha: {
     color: C_RED,
+    fontFamily: "Plex", fontWeight: 700,
     fontSize: 8.5,
     marginTop: 2,
     marginBottom: 2,
