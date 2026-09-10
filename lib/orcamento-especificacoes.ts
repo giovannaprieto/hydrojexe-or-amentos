@@ -33,12 +33,12 @@ export function fraseHidrometros(
 /** Vazão nominal que substitui {vazao_gas} no PROCEDIMENTO EXECUTIVO. */
 const VAZAO_GAS: Record<string, string> = {
   gas_1_6: "G 1.6 m³/h",
-  gas_2_5: "G 2.6 m³/h",
+  gas_2_5: "G 2.5 m³/h",
 };
 
 export const MEDIDORES_GAS = [
   { valor: "gas_1_6", rotulo: "Gás 1.6 — vazão G 1.6 m³/h" },
-  { valor: "gas_2_5", rotulo: "Gás 2.5 — vazão G 2.6 m³/h" },
+  { valor: "gas_2_5", rotulo: "Gás 2.5 — vazão G 2.5 m³/h" },
 ] as const;
 
 export function vazaoGas(slug: string | null | undefined): string {
