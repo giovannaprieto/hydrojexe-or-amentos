@@ -118,7 +118,7 @@ export function EmptyRow({
 
 /* --- Etiquetas ------------------------------------------------------------ */
 
-export type TomBadge = "neutral" | "info" | "success" | "warn" | "danger";
+export type TomBadge = "neutral" | "info" | "success" | "warn" | "danger" | "coral";
 
 export function Badge({
   tom = "neutral",
