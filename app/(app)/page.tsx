@@ -64,6 +64,31 @@ function filtrarRascunhosParados<T extends { data_orcamento: string | null }>(
   );
 }
 
+type Periodo = "mes" | "trimestre" | "ano";
+const PERIODOS: { valor: Periodo; rotulo: string }[] = [
+  { valor: "mes", rotulo: "Mês" },
+  { valor: "trimestre", rotulo: "Trimestre" },
+  { valor: "ano", rotulo: "Ano" },
+];
+
+/** início (inclusive) do período selecionado, no formato YYYY-MM-DD */
+function inicioPeriodo(periodo: Periodo): string {
+  const hoje = new Date();
+  const d =
+    periodo === "ano"
+      ? new Date(hoje.getFullYear(), 0, 1)
+      : periodo === "trimestre"
+        ? new Date(hoje.getFullYear(), hoje.getMonth() - 2, 1)
+        : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function rotuloPeriodo(periodo: Periodo, mesAtual: string): string {
+  if (periodo === "ano") return String(new Date().getFullYear());
+  if (periodo === "trimestre") return "últimos 3 meses";
+  return mesAtual;
+}
+
 /** rótulos dos últimos 6 meses (YYYY-MM) até o mês atual */
 function ultimosSeisMeses(): { chave: string; rotulo: string }[] {
   const out: { chave: string; rotulo: string }[] = [];
@@ -79,8 +104,16 @@ function ultimosSeisMeses(): { chave: string; rotulo: string }[] {
   return out;
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ periodo?: string }>;
+}) {
   const usuario = await requireUsuario();
+  const { periodo: periodoParam } = await searchParams;
+  const periodo: Periodo = PERIODOS.some((p) => p.valor === periodoParam)
+    ? (periodoParam as Periodo)
+    : "mes";
   const supabase = await createClient();
 
   const [{ data: orcamentos }, { count: totalCondominios }, { data: obras }] =
@@ -111,17 +144,33 @@ export default async function DashboardPage() {
   const rascunhos = porStatus("rascunho");
   const enviados = porStatus("enviado");
   const aprovados = porStatus("aprovado");
-  const somaAprovados = aprovados.reduce((a, o) => a + (o.valor_total ?? 0), 0);
-  const somaEnviados = enviados.reduce((a, o) => a + (o.valor_total ?? 0), 0);
   const recentes = lista.slice(0, 6);
   const semResposta = aguardandoResposta(enviados);
 
   const rascunhosParados = filtrarRascunhosParados(rascunhos);
 
+  // Recortadas pelo período selecionado (Mês / Trimestre / Ano) -------------
+  const inicio = inicioPeriodo(periodo);
+  const noPeriodo = (o: { data_orcamento: string | null }) =>
+    (o.data_orcamento ?? "") >= inicio;
+  const criadosPeriodo = lista.filter(noPeriodo);
+  const aprovadosPeriodo = aprovados.filter(noPeriodo);
+  const enviadosPeriodo = enviados.filter(noPeriodo);
+  const somaAprovados = aprovadosPeriodo.reduce(
+    (a, o) => a + (o.valor_total ?? 0),
+    0,
+  );
+  const somaEnviados = enviadosPeriodo.reduce(
+    (a, o) => a + (o.valor_total ?? 0),
+    0,
+  );
+
   const conversao =
-    enviados.length + aprovados.length > 0
+    enviadosPeriodo.length + aprovadosPeriodo.length > 0
       ? Math.round(
-          (aprovados.length / (enviados.length + aprovados.length)) * 100,
+          (aprovadosPeriodo.length /
+            (enviadosPeriodo.length + aprovadosPeriodo.length)) *
+            100,
         )
       : null;
 
@@ -135,10 +184,10 @@ export default async function DashboardPage() {
             filtro(o.status),
         ).length,
     );
-  const criadosMes = contaPorMes(() => true);
   const aprovadosMes = contaPorMes((s) => s === "aprovado");
 
   const mesAtual = MESES[new Date().getMonth()];
+  const rotuloAtual = rotuloPeriodo(periodo, mesAtual);
 
   // Materiais das obras em andamento (para o custo acumulado) ---------------
   const obrasLista = obras ?? [];
@@ -169,12 +218,29 @@ export default async function DashboardPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="hj-page-title">Olá, {primeiroNome(usuario.nome)}</h1>
-          <p className="hj-muted mt-1">Panorama comercial — referência de {mesAtual}.</p>
+          <p className="hj-muted mt-1">Panorama comercial — referência de {rotuloAtual}.</p>
         </div>
-        <LinkButton href="/orcamentos/novo" variante="primary">
-          <IconPlus />
-          Novo orçamento
-        </LinkButton>
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-xl border border-ink-200 bg-white p-0.5 shadow-[0_1px_2px_rgba(16,24,38,0.04)]">
+            {PERIODOS.map((p) => (
+              <Link
+                key={p.valor}
+                href={p.valor === "mes" ? "/" : `/?periodo=${p.valor}`}
+                className={`rounded-[0.6rem] px-3 py-1.5 text-xs font-medium transition-colors ${
+                  periodo === p.valor
+                    ? "bg-navy-900 text-white"
+                    : "text-ink-500 hover:text-navy-900"
+                }`}
+              >
+                {p.rotulo}
+              </Link>
+            ))}
+          </div>
+          <LinkButton href="/orcamentos/novo" variante="primary">
+            <IconPlus />
+            Novo orçamento
+          </LinkButton>
+        </div>
       </div>
 
       {/* Hero — valor aprovado ------------------------------------------------ */}
@@ -194,7 +260,7 @@ export default async function DashboardPage() {
         <div className="relative grid gap-8 p-7 sm:grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_220px_190px] lg:items-center">
           <div>
             <p className="text-[0.7rem] font-semibold tracking-[0.14em] text-brand-300 uppercase">
-              Valor aprovado · {mesAtual}
+              Valor aprovado · {rotuloAtual}
             </p>
             <div className="mt-3 flex items-center gap-3">
               <IconGota className="!size-6 text-[#38d7f2]" />
@@ -203,7 +269,7 @@ export default async function DashboardPage() {
               </span>
             </div>
             <p className="mt-3 text-sm text-white/50">
-              Soma dos {aprovados.length} orçamento(s) aprovado(s), no valor à vista.
+              Soma dos {aprovadosPeriodo.length} orçamento(s) aprovado(s), no valor à vista.
             </p>
           </div>
           <div className="hidden w-56 lg:block">
@@ -211,9 +277,9 @@ export default async function DashboardPage() {
           </div>
           <div className="flex flex-col gap-4 border-white/10 pt-4 lg:border-l lg:pt-0 lg:pl-6">
             <div>
-              <p className="text-xs text-white/50">Criados no mês</p>
+              <p className="text-xs text-white/50">Criados no período</p>
               <p className="mt-1 text-lg font-semibold text-white tabular-nums">
-                {criadosMes[criadosMes.length - 1]}
+                {criadosPeriodo.length}
               </p>
             </div>
             <div>
