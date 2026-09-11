@@ -69,6 +69,19 @@ export function CondominioForm({ inicial }: { inicial?: Condominio }) {
               defaultValue={inicial?.sindico_nome ?? ""}
             />
           </Field>
+          <div className="flex flex-col gap-1.5">
+            <Field label="Próxima assembleia">
+              <TextInput
+                type="date"
+                name="data_assembleia"
+                defaultValue={inicial?.data_assembleia ?? ""}
+              />
+            </Field>
+            <span className="hj-hint">
+              Se não houver orçamento aprovado, o condomínio aparece em
+              &quot;Precisa de ação&quot; conforme a data se aproxima.
+            </span>
+          </div>
           <div className="sm:col-span-2">
             <Field label="Administradora">
               <TextInput

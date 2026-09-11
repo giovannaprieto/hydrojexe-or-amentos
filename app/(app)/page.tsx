@@ -36,6 +36,7 @@ const MESES = [
 
 const DIAS_SEM_RESPOSTA = 7;
 const DIAS_RASCUNHO_PARADO = 10;
+const DIAS_AVISO_ASSEMBLEIA = 20;
 
 /** orçamentos enviados parados há >= 7 dias, do mais parado ao menos */
 function aguardandoResposta<
@@ -49,6 +50,25 @@ function aguardandoResposta<
     })
     .filter((o) => o.dias >= DIAS_SEM_RESPOSTA)
     .sort((a, b) => b.dias - a.dias);
+}
+
+/** condomínios com assembleia nos próximos N dias e sem orçamento aprovado */
+function assembleiasSemAprovacao<
+  T extends { id: string; nome: string; data_assembleia: string | null },
+>(condominios: T[], idsComAprovado: Set<string>): (T & { dias: number })[] {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  return condominios
+    .filter((c) => c.data_assembleia && !idsComAprovado.has(c.id))
+    .map((c) => ({
+      ...c,
+      dias: Math.round(
+        (new Date(`${c.data_assembleia}T00:00:00`).getTime() - hoje.getTime()) /
+          86_400_000,
+      ),
+    }))
+    .filter((c) => c.dias >= 0 && c.dias <= DIAS_AVISO_ASSEMBLEIA)
+    .sort((a, b) => a.dias - b.dias);
 }
 
 /** rascunhos sem movimento há mais de N dias */
@@ -116,28 +136,37 @@ export default async function DashboardPage({
     : "mes";
   const supabase = await createClient();
 
-  const [{ data: orcamentos }, { count: totalCondominios }, { data: obras }] =
-    await Promise.all([
-      supabase
-        .from("orcamentos")
-        .select(
-          "id, numero, data_orcamento, status, tipo_proposta, valor_total, enviado_em, condominios(nome)",
-        )
-        .is("arquivado_em", null)
-        .order("data_orcamento", { ascending: false })
-        .order("numero", { ascending: false }),
-      supabase
-        .from("condominios")
-        .select("id", { count: "exact", head: true })
-        .is("arquivado_em", null),
-      supabase
-        .from("obras")
-        .select(
-          "id, status, outros_custos, condominios(nome), orcamentos(valor_total)",
-        )
-        .not("status", "in", "(cancelada,concluida)")
-        .order("created_at", { ascending: false }),
-    ]);
+  const [
+    { data: orcamentos },
+    { count: totalCondominios },
+    { data: obras },
+    { data: condominiosComAssembleia },
+  ] = await Promise.all([
+    supabase
+      .from("orcamentos")
+      .select(
+        "id, numero, data_orcamento, status, tipo_proposta, valor_total, enviado_em, condominio_id, condominios(nome)",
+      )
+      .is("arquivado_em", null)
+      .order("data_orcamento", { ascending: false })
+      .order("numero", { ascending: false }),
+    supabase
+      .from("condominios")
+      .select("id", { count: "exact", head: true })
+      .is("arquivado_em", null),
+    supabase
+      .from("obras")
+      .select(
+        "id, status, outros_custos, condominios(nome), orcamentos(valor_total)",
+      )
+      .not("status", "in", "(cancelada,concluida)")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("condominios")
+      .select("id, nome, data_assembleia")
+      .is("arquivado_em", null)
+      .not("data_assembleia", "is", null),
+  ]);
 
   const lista = orcamentos ?? [];
   const porStatus = (s: string) => lista.filter((o) => o.status === s);
@@ -148,6 +177,16 @@ export default async function DashboardPage({
   const semResposta = aguardandoResposta(enviados);
 
   const rascunhosParados = filtrarRascunhosParados(rascunhos);
+
+  const idsComAprovado = new Set(
+    aprovados
+      .map((o) => o.condominio_id)
+      .filter((v): v is string => Boolean(v)),
+  );
+  const assembleiasProximas = assembleiasSemAprovacao(
+    condominiosComAssembleia ?? [],
+    idsComAprovado,
+  );
 
   // Recortadas pelo período selecionado (Mês / Trimestre / Ano) -------------
   const inicio = inicioPeriodo(periodo);
@@ -315,9 +354,14 @@ export default async function DashboardPage({
               </svg>
             </span>
             <span className="hj-section-title">Precisa de ação</span>
-            {semResposta.length + (rascunhosParados.length > 0 ? 1 : 0) > 0 ? (
+            {semResposta.length +
+              assembleiasProximas.length +
+              (rascunhosParados.length > 0 ? 1 : 0) >
+            0 ? (
               <Badge tom="coral">
-                {semResposta.length + (rascunhosParados.length > 0 ? 1 : 0)}
+                {semResposta.length +
+                  assembleiasProximas.length +
+                  (rascunhosParados.length > 0 ? 1 : 0)}
               </Badge>
             ) : null}
           </div>
@@ -349,6 +393,31 @@ export default async function DashboardPage({
                 </div>
               );
             })}
+            {assembleiasProximas.slice(0, 3).map((c) => (
+              <div
+                key={c.id}
+                className="grid grid-cols-[1fr_auto_auto] items-center gap-x-3 gap-y-0.5 border-b border-ink-100 py-3 last:border-b-0"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-navy-900">
+                    {c.nome}
+                  </p>
+                  <p className="truncate text-xs text-ink-400">
+                    assembleia {formatDateBR(c.data_assembleia)} · sem
+                    orçamento aprovado
+                  </p>
+                </div>
+                <span className="text-sm font-semibold text-coral-600 tabular-nums">
+                  {c.dias === 0 ? "hoje" : `${c.dias} d`}
+                </span>
+                <Link
+                  href={`/condominios/${c.id}`}
+                  className="text-xs font-medium text-brand-600 hover:text-brand-700"
+                >
+                  Abrir
+                </Link>
+              </div>
+            ))}
             {rascunhosParados.length > 0 ? (
               <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-3 gap-y-0.5 border-b border-ink-100 py-3 last:border-b-0">
                 <div className="min-w-0">
@@ -372,7 +441,9 @@ export default async function DashboardPage({
                 </Link>
               </div>
             ) : null}
-            {semResposta.length === 0 && rascunhosParados.length === 0 ? (
+            {semResposta.length === 0 &&
+            assembleiasProximas.length === 0 &&
+            rascunhosParados.length === 0 ? (
               <p className="hj-muted py-6 text-center">Tudo em dia por aqui.</p>
             ) : null}
           </div>

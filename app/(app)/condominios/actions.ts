@@ -46,6 +46,7 @@ function parse(formData: FormData) {
     parcelamento_especial: modoParc !== "nenhum",
     parcelamento_especial_modo: modoParc === "nenhum" ? "padrao" : modoParc,
     qtd_unidades: inteiroPositivoOuNulo(formData, "qtd_unidades"),
+    data_assembleia: textoOuNulo(formData, "data_assembleia"),
   };
 }
 
@@ -83,7 +84,7 @@ export async function atualizarCondominio(
   const { data: antes } = await supabase
     .from("condominios")
     .select(
-      "nome, cnpj, endereco, cidade, uf, administradora, sindico_nome, contato_nome, contato_email, contato_telefone, observacoes, agua_preparado, parcelamento_especial, parcelamento_especial_modo, qtd_unidades",
+      "nome, cnpj, endereco, cidade, uf, administradora, sindico_nome, contato_nome, contato_email, contato_telefone, observacoes, agua_preparado, parcelamento_especial, parcelamento_especial_modo, qtd_unidades, data_assembleia",
     )
     .eq("id", id)
     .single();

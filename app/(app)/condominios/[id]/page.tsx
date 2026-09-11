@@ -173,6 +173,17 @@ export default async function CondominioPage({
             { rotulo: "Endereço", valor: endereco || "—" },
             { rotulo: "Administradora", valor: condominio.administradora ?? "—" },
             { rotulo: "Síndico", valor: condominio.sindico_nome ?? "—" },
+            {
+              rotulo: "Próxima assembleia",
+              valor: condominio.data_assembleia ? (
+                <span className={orcAprovado ? undefined : "text-coral-700"}>
+                  {formatDateBR(condominio.data_assembleia)}
+                  {!orcAprovado ? " · sem orçamento aprovado" : ""}
+                </span>
+              ) : (
+                "—"
+              ),
+            },
             { rotulo: "Contato", valor: condominio.contato_nome ?? "—" },
             { rotulo: "E-mail", valor: condominio.contato_email ?? "—" },
             { rotulo: "Telefone", valor: condominio.contato_telefone ?? "—" },

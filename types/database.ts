@@ -34,6 +34,7 @@ export type Database = {
           qtd_unidades: number | null
           arquivado_em: string | null
           parcelamento_especial_modo: string
+          data_assembleia: string | null
         }
         Insert: {
           id?: string
@@ -55,6 +56,7 @@ export type Database = {
           qtd_unidades?: number | null
           arquivado_em?: string | null
           parcelamento_especial_modo?: string
+          data_assembleia?: string | null
         }
         Update: {
           id?: string
@@ -76,6 +78,7 @@ export type Database = {
           qtd_unidades?: number | null
           arquivado_em?: string | null
           parcelamento_especial_modo?: string
+          data_assembleia?: string | null
         }
         Relationships: [
         ]
