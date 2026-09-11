@@ -169,12 +169,12 @@ export default async function OrcamentosPage({
                     {resp?.nome ?? "—"}
                   </td>
                   <td>
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex flex-col items-start gap-1">
                       <StatusBadge status={o.status} />
                       {(() => {
                         const dias = diasSemResposta(o.status, o.enviado_em);
                         return dias != null ? (
-                          <Badge tom="coral">Sem resposta +{dias}d</Badge>
+                          <Badge tom="coral">+{dias}d sem resposta</Badge>
                         ) : null;
                       })()}
                     </div>
