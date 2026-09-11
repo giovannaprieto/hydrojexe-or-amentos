@@ -294,14 +294,28 @@ body {
 
   /* --- Navegação lateral (clara no modo claro, navy no escuro) -------------- */
   .hj-nav-link {
-    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
+    @apply relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
       text-ink-600 transition-colors duration-150
-      hover:bg-ink-100 hover:text-navy-900
-      dark:text-navy-100/80 dark:hover:bg-white/10 dark:hover:text-white;
+      hover:bg-white/70 hover:text-navy-900
+      dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white;
   }
   .hj-nav-link-active {
-    @apply bg-brand-50 text-brand-700
-      dark:bg-white/12 dark:text-white dark:shadow-[inset_2px_0_0_var(--color-brand-300)];
+    @apply bg-white pl-[15px] text-brand-700 shadow-[0_1px_2px_rgba(16,24,38,0.05)]
+      hover:bg-white
+      dark:bg-white/12 dark:pl-3 dark:text-white dark:shadow-[inset_2px_0_0_var(--color-brand-300)];
+  }
+  .hj-nav-link-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--color-brand-500);
+  }
+  .dark .hj-nav-link-active::before {
+    display: none;
   }
   .hj-nav-section {
     @apply px-3 pt-5 pb-1.5 text-[0.68rem] font-semibold tracking-widest

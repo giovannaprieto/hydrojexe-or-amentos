@@ -92,7 +92,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
   return (
     <>
       {/* Barra superior — só em telas pequenas -------------------------------- */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-200 bg-white px-4 py-3 text-navy-900 dark:border-navy-800 dark:bg-navy-900 dark:text-white lg:hidden">
+      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-200 bg-ink-50 px-4 py-3 text-navy-900 dark:border-navy-800 dark:bg-navy-900 dark:text-white lg:hidden">
         <button
           type="button"
           onClick={() => setAberto(true)}
@@ -116,7 +116,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
 
       {/* Navegação lateral ----------------------------------------------------- */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-ink-200 bg-white transition-transform duration-200 dark:border-transparent dark:bg-navy-900 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-ink-200/70 bg-ink-50 transition-transform duration-200 dark:border-transparent dark:bg-navy-900 lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
