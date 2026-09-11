@@ -1,5 +1,6 @@
 import { FunilComercial } from "@/components/funil-comercial";
 import { GraficoMeses } from "@/components/grafico-meses";
+import { IconGota } from "@/components/icons";
 import {
   RelatoriosFiltros,
   type FiltrosRelatorio,
@@ -162,6 +163,9 @@ export default async function RelatoriosPage({
           maximumFractionDigits: 1,
         })}%`
       : "—";
+  const valorAprovado = linhas
+    .filter((o) => o.status === "aprovado")
+    .reduce((a, o) => a + (Number(o.valor_total) || 0), 0);
 
   return (
     <div className="flex flex-col gap-8">
@@ -169,6 +173,49 @@ export default async function RelatoriosPage({
         titulo="Relatório comercial"
         descricao="Calculado a partir dos orçamentos reais. Filtre por período, responsável, administradora, tipo ou status."
       />
+
+      {r.total > 0 ? (
+        <div className="relative overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-[#12293c] to-[#0d1a29] shadow-[0_18px_40px_rgba(13,26,41,0.28)]">
+          <IconGota
+            aria-hidden
+            className="pointer-events-none absolute -right-5 -bottom-16 !size-64 text-white/[0.06]"
+          />
+          <div className="relative grid gap-8 p-7 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto] lg:items-center">
+            <div>
+              <p className="text-[0.7rem] font-semibold tracking-[0.14em] text-brand-300 uppercase">
+                Valor aprovado no período
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <IconGota className="!size-6 text-[#38d7f2]" />
+                <span className="text-[2.6rem] leading-none font-semibold tracking-[-0.02em] text-white tabular-nums">
+                  {formatBRL(valorAprovado)}
+                </span>
+              </div>
+              <p className="mt-3 text-sm text-white/50">
+                {r.aprovados} orçamento(s) aprovado(s) de {r.total} no período.
+              </p>
+            </div>
+            <div className="border-white/10 pt-4 lg:border-l lg:pt-0 lg:pl-6">
+              <p className="text-xs text-white/50">Orçamentos</p>
+              <p className="mt-1 text-lg font-semibold text-white tabular-nums">
+                {r.total}
+              </p>
+            </div>
+            <div className="border-white/10 pt-4 lg:border-l lg:pt-0 lg:pl-6">
+              <p className="text-xs text-white/50">Conversão</p>
+              <p className="mt-1 text-lg font-semibold text-white tabular-nums">
+                {conversao}
+              </p>
+            </div>
+            <div className="border-white/10 pt-4 lg:border-l lg:pt-0 lg:pl-6">
+              <p className="text-xs text-white/50">Valor médio</p>
+              <p className="mt-1 text-lg font-semibold text-white tabular-nums">
+                {formatBRL(r.valorMedio)}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <RelatoriosFiltros
         valores={filtros}

@@ -21,7 +21,7 @@ export function FunilComercial({
               </span>
               <div className="h-9 flex-1 overflow-hidden rounded-lg bg-ink-100">
                 <div
-                  className="flex h-full items-center rounded-lg bg-gradient-to-r from-navy-800 to-navy-600 px-3"
+                  className="flex h-full items-center rounded-lg bg-gradient-to-r from-navy-700 to-brand-400 px-3"
                   style={{ width: `${Math.max(pct, 6)}%` }}
                 >
                   <span className="text-xs font-semibold text-white tabular-nums">
