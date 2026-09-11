@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Hanken_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const plexSans = IBM_Plex_Sans({
+const hanken = Hanken_Grotesk({
   variable: "--font-geist-sans",
   weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${hanken.variable} ${plexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

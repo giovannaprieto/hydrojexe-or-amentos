@@ -44,6 +44,13 @@
   --color-ink-800: #262d38;
   --color-ink-900: #171c24;
 
+  /* Coral — sinal de urgência/atenção, separado do azul (que é neutro/positivo) */
+  --color-coral-50: #fdf1ec;
+  --color-coral-100: #fbddce;
+  --color-coral-200: #f7d3c2;
+  --color-coral-600: #c2410c;
+  --color-coral-700: #9a3412;
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
@@ -271,16 +278,19 @@ body {
     @apply border-brand-200 bg-brand-50 text-brand-800;
   }
 
-  /* --- Navegação lateral --------------------------------------------------- */
+  /* --- Navegação lateral (clara no modo claro, navy no escuro) -------------- */
   .hj-nav-link {
     @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium
-      text-navy-100/80 transition-colors duration-150 hover:bg-white/10 hover:text-white;
+      text-ink-600 transition-colors duration-150
+      hover:bg-ink-100 hover:text-navy-900
+      dark:text-navy-100/80 dark:hover:bg-white/10 dark:hover:text-white;
   }
   .hj-nav-link-active {
-    @apply bg-white/12 text-white shadow-[inset_2px_0_0_var(--color-brand-300)];
+    @apply bg-brand-50 text-brand-700
+      dark:bg-white/12 dark:text-white dark:shadow-[inset_2px_0_0_var(--color-brand-300)];
   }
   .hj-nav-section {
     @apply px-3 pt-5 pb-1.5 text-[0.68rem] font-semibold tracking-widest
-      text-navy-300/70 uppercase;
+      text-ink-400 uppercase dark:text-navy-300/70;
   }
 }

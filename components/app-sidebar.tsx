@@ -92,11 +92,11 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
   return (
     <>
       {/* Barra superior — só em telas pequenas -------------------------------- */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-navy-800 bg-navy-900 px-4 py-3 text-white lg:hidden">
+      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-200 bg-white px-4 py-3 text-navy-900 dark:border-navy-800 dark:bg-navy-900 dark:text-white lg:hidden">
         <button
           type="button"
           onClick={() => setAberto(true)}
-          className="rounded-lg p-1.5 text-navy-100 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-lg p-1.5 text-ink-500 transition-colors hover:bg-ink-100 hover:text-navy-900 dark:text-navy-100 dark:hover:bg-white/10 dark:hover:text-white"
           aria-label="Abrir menu"
         >
           <IconMenu className="size-6" />
@@ -116,7 +116,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
 
       {/* Navegação lateral ----------------------------------------------------- */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-navy-900 transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-ink-200 bg-white transition-transform duration-200 dark:border-transparent dark:bg-navy-900 lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -125,7 +125,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
           <button
             type="button"
             onClick={() => setAberto(false)}
-            className="rounded-lg p-1.5 text-navy-200 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+            className="rounded-lg p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-navy-900 dark:text-navy-200 dark:hover:bg-white/10 dark:hover:text-white lg:hidden"
             aria-label="Fechar menu"
           >
             <IconClose className="size-5" />
@@ -147,21 +147,21 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
         </nav>
 
         {/* Perfil ------------------------------------------------------------- */}
-        <div className="border-t border-white/10 p-3">
+        <div className="border-t border-ink-200 p-3 dark:border-white/10">
           <div className="flex items-center gap-3 rounded-lg px-2 py-2">
             <Link
               href="/perfil"
               onClick={() => setAberto(false)}
               className="flex min-w-0 flex-1 items-center gap-3 rounded-lg transition-colors hover:opacity-90"
             >
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-500/25 text-sm font-semibold text-brand-200">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 dark:bg-brand-500/25 dark:text-brand-200">
                 {iniciais(usuario.nome)}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-white">
+                <span className="block truncate text-sm font-medium text-navy-900 dark:text-white">
                   {usuario.nome}
                 </span>
-                <span className="block truncate text-xs text-navy-300 capitalize">
+                <span className="block truncate text-xs text-ink-500 capitalize dark:text-navy-300">
                   {usuario.perfil}
                 </span>
               </span>
@@ -172,7 +172,7 @@ export function AppSidebar({ usuario }: { usuario: UsuarioAtual }) {
                 type="submit"
                 title="Sair"
                 aria-label="Sair"
-                className="rounded-lg p-2 text-navy-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="rounded-lg p-2 text-ink-400 transition-colors hover:bg-ink-100 hover:text-navy-900 dark:text-navy-300 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 <IconLogout className="size-5" />
               </button>
@@ -218,7 +218,7 @@ function Marca({ compacta }: { compacta?: boolean }) {
           className="h-20 w-auto"
         />
       </span>
-      <span className="text-center text-[0.68rem] font-medium tracking-[0.2em] text-navy-300 uppercase">
+      <span className="text-center text-[0.68rem] font-medium tracking-[0.2em] text-ink-400 uppercase dark:text-navy-300">
         Orçamentos
       </span>
     </Link>

@@ -46,7 +46,7 @@ export function ThemeToggle() {
       title={escuro ? "Usar fundo claro" : "Usar fundo escuro"}
       aria-label={escuro ? "Usar fundo claro" : "Usar fundo escuro"}
       aria-pressed={escuro}
-      className="rounded-lg p-2 text-navy-300 transition-colors hover:bg-white/10 hover:text-white"
+      className="rounded-lg p-2 text-ink-400 transition-colors hover:bg-ink-100 hover:text-navy-900 dark:text-navy-300 dark:hover:bg-white/10 dark:hover:text-white"
     >
       {escuro ? <IconSun className="size-5" /> : <IconMoon className="size-5" />}
     </button>
