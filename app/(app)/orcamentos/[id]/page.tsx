@@ -8,7 +8,7 @@ import {
   revogarLinkPublico,
 } from "@/app/(app)/orcamentos/actions";
 import { GestaoMensalForm } from "@/components/gestao-mensal-form";
-import { IconPdf, IconRefresh, IconTrash } from "@/components/icons";
+import { IconGota, IconPdf, IconRefresh, IconTrash } from "@/components/icons";
 import { EnviarWhatsapp } from "@/components/enviar-whatsapp";
 import { IndividualizacaoAguaSemTecForm } from "@/components/individualizacao-agua-sem-tec-form";
 import { IndividualizacaoGasForm } from "@/components/individualizacao-gas-form";
@@ -329,6 +329,45 @@ export default async function OrcamentoPage({
           ) : null
         }
       />
+
+      <div className="flex flex-wrap items-center gap-8 rounded-2xl bg-gradient-to-br from-brand-50/80 to-white px-6 py-5 shadow-[0_1px_2px_rgba(16,36,60,0.04)] ring-1 ring-brand-100">
+        <div className="flex items-center gap-3">
+          <IconGota className="!size-7 text-brand-400" />
+          <div>
+            <p className="hj-label">Total à vista</p>
+            <p className="text-3xl font-semibold tracking-[-0.02em] text-navy-900 tabular-nums">
+              {formatBRL(orc.valor_total)}
+            </p>
+          </div>
+        </div>
+        <div className="hidden h-10 w-px bg-brand-100 sm:block" />
+        <div className="flex flex-1 flex-wrap gap-x-10 gap-y-3">
+          <div>
+            <p className="hj-label">Unidades</p>
+            <p className="mt-1 text-sm font-medium text-navy-900 tabular-nums">
+              {orc.total_unidades ?? "—"}
+            </p>
+          </div>
+          <div>
+            <p className="hj-label">Prazo</p>
+            <p className="mt-1 text-sm font-medium text-navy-900">
+              {orc.prazo || "—"}
+            </p>
+          </div>
+          <div>
+            <p className="hj-label">TSS</p>
+            <p className="mt-1 text-sm font-medium text-navy-900">
+              {orc.incluir_tss ? `Incluída · ${orc.qtd_tss}` : "Não incluída"}
+            </p>
+          </div>
+          <div>
+            <p className="hj-label">TSS congelado (à vista)</p>
+            <p className="mt-1 text-sm font-medium text-navy-900 tabular-nums">
+              {formatBRL(orc.valor_tss)}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {erro ? <Alert tom="error">{erro}</Alert> : null}
       {recongelar ? (
