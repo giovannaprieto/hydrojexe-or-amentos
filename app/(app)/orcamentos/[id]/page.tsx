@@ -317,16 +317,40 @@ export default async function OrcamentoPage({
         etiqueta={<StatusBadge status={orc.status} />}
         descricao={`${rotuloTipoProposta(orc.tipo_proposta)} · ${formatDateBR(orc.data_orcamento)}`}
         acoes={
-          podeGerarPdf ? (
-            <LinkButton
-              href={`/orcamentos/${orc.id}/pdf`}
-              variante="primary"
-              externo
-            >
-              <IconPdf />
-              Gerar PDF
-            </LinkButton>
-          ) : null
+          <>
+            {podeGerarPdf ? (
+              <LinkButton
+                href={`/orcamentos/${orc.id}/pdf`}
+                variante="primary"
+                externo
+              >
+                <IconPdf />
+                Gerar PDF
+              </LinkButton>
+            ) : null}
+            {podeGerarPdf ? (
+              <EnviarWhatsapp
+                id={orc.id}
+                numero={orc.numero}
+                condominio={condominioNome ?? "condomínio"}
+              />
+            ) : null}
+            {orc.arquivado_em ? (
+              <form action={desarquivarOrcamento}>
+                <input type="hidden" name="id" value={orc.id} />
+                <button type="submit" className="hj-btn hj-btn-secondary">
+                  Desarquivar
+                </button>
+              </form>
+            ) : (
+              <form action={arquivarOrcamento}>
+                <input type="hidden" name="id" value={orc.id} />
+                <button type="submit" className="hj-btn hj-btn-secondary">
+                  Arquivar
+                </button>
+              </form>
+            )}
+          </>
         }
       />
 
@@ -587,23 +611,6 @@ export default async function OrcamentoPage({
 
       <section className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-200 pt-6">
         <div className="flex flex-wrap gap-2">
-          {podeGerarPdf ? (
-            <LinkButton
-              href={`/orcamentos/${orc.id}/pdf`}
-              variante="primary"
-              externo
-            >
-              <IconPdf />
-              Gerar PDF
-            </LinkButton>
-          ) : null}
-          {podeGerarPdf ? (
-            <EnviarWhatsapp
-              id={orc.id}
-              numero={orc.numero}
-              condominio={condominioNome ?? "condomínio"}
-            />
-          ) : null}
           {orc.tipo_proposta === "completa" ? (
             <form action={atualizarPrecosPelaTabela}>
               <input type="hidden" name="id" value={orc.id} />
@@ -627,21 +634,6 @@ export default async function OrcamentoPage({
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
-          {orc.arquivado_em ? (
-            <form action={desarquivarOrcamento}>
-              <input type="hidden" name="id" value={orc.id} />
-              <button type="submit" className="hj-btn hj-btn-secondary">
-                Desarquivar
-              </button>
-            </form>
-          ) : (
-            <form action={arquivarOrcamento}>
-              <input type="hidden" name="id" value={orc.id} />
-              <button type="submit" className="hj-btn hj-btn-secondary">
-                Arquivar
-              </button>
-            </form>
-          )}
           {isAdmin ? (
             <form action={excluirOrcamento}>
               <input type="hidden" name="id" value={orc.id} />
