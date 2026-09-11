@@ -6,6 +6,7 @@ import {
   type FiltrosOrcamento,
 } from "@/components/orcamentos-filtros";
 import {
+  Badge,
   Card,
   EmptyRow,
   LinkButton,
@@ -19,6 +20,15 @@ import { rotuloTipoProposta } from "@/lib/orcamento-tipos";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Orçamentos · Hydrojexe" };
+
+const DIAS_SEM_RESPOSTA = 7;
+
+/** dias sem resposta de um orçamento enviado, ou null se não se aplica */
+function diasSemResposta(status: string, enviadoEm: string | null): number | null {
+  if (status !== "enviado" || !enviadoEm) return null;
+  const dias = Math.floor((Date.now() - new Date(enviadoEm).getTime()) / 86_400_000);
+  return dias >= DIAS_SEM_RESPOSTA ? dias : null;
+}
 
 function texto(v: string | string[] | undefined): string {
   return (Array.isArray(v) ? v[0] : (v ?? "")).trim();
@@ -67,7 +77,7 @@ export default async function OrcamentosPage({
   let query = supabase
     .from("orcamentos")
     .select(
-      "id, numero, data_orcamento, status, tipo_proposta, valor_total, criado_por, condominios(nome), usuarios!criado_por(nome)",
+      "id, numero, data_orcamento, status, tipo_proposta, valor_total, criado_por, enviado_em, condominios(nome), usuarios!criado_por(nome)",
     )
     .order("data_orcamento", { ascending: false })
     .order("numero", { ascending: false });
@@ -159,7 +169,15 @@ export default async function OrcamentosPage({
                     {resp?.nome ?? "—"}
                   </td>
                   <td>
-                    <StatusBadge status={o.status} />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <StatusBadge status={o.status} />
+                      {(() => {
+                        const dias = diasSemResposta(o.status, o.enviado_em);
+                        return dias != null ? (
+                          <Badge tom="coral">Sem resposta +{dias}d</Badge>
+                        ) : null;
+                      })()}
+                    </div>
                   </td>
                   <td className="text-right font-medium tabular-nums">
                     {formatBRL(o.valor_total)}
